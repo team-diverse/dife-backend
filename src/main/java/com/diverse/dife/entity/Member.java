@@ -28,6 +28,7 @@ public class Member {
     @Column(nullable = false)
     private Integer nation;
 
+    // 프로필 이미지 url 필요
 
     // 이름, 학번, 학과는 받아올 수 있는 정보이기를,,,
     // 이름
