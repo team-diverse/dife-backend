@@ -44,4 +44,5 @@ public class Member {
 
     // 닉네임
     private String nickname;
+
 }
