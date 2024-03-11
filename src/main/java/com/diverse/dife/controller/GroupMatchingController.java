@@ -15,4 +15,5 @@ public class GroupMatchingController {
 
     private final GroupMatchingService groupMatchingService;
     private final MemberService memberService;
+
 }
