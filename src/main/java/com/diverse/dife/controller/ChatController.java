@@ -1,7 +1,8 @@
 package com.diverse.dife.controller;
 
 
-import com.diverse.dife.service.ChatService;
+import com.diverse.dife.service.chat.ChatClipedService;
+import com.diverse.dife.service.chat.ChatService;
 import com.diverse.dife.service.TranslationService;
 import com.diverse.dife.service.community.ClipedHistoryService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatController {
 
     private final ChatService chatService;
-    private final ClipedHistoryService clipedHistoryService;
+    private final ChatClipedService chatClipedService;
     private final TranslationService translationService;
 
 }

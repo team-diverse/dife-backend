@@ -1,4 +1,4 @@
-package com.diverse.dife.controller;
+package com.diverse.dife.controller.matching;
 
 import com.diverse.dife.service.MemberService;
 import com.diverse.dife.service.matching.OneToOneMatchingService;

@@ -1,6 +1,6 @@
-package com.diverse.dife.repository;
+package com.diverse.dife.repository.chat;
 
-import com.diverse.dife.entity.Chat;
+import com.diverse.dife.entity.chat.Chat;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ChatRepository extends JpaRepository<Chat, Long> {

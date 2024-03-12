@@ -1,4 +1,4 @@
-package com.diverse.dife.entity;
+package com.diverse.dife.entity.chat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
