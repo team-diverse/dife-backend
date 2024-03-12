@@ -78,4 +78,5 @@ public class SecurityConfig {
         private final HttpStatus status;
         private final String message;
     }
+
 }
