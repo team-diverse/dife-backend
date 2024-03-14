@@ -1,4 +1,4 @@
-package com.diverse.dife.chat;
+package com.diverse.dife.config;
 
 public class SecurityConfig {
 }
