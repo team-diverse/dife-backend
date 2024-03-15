@@ -1,0 +1,13 @@
+spring:
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/dife_test?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+        username: root
+        password: 'gusuyon04'
+
+    jpa:
+        database-platform: org.hibernate.dialect.MySQLDialect
+        open-in-view: false
+        show-sql: true
+        hibernate:
+            ddl-auto: create
