@@ -15,7 +15,6 @@ public class Connect {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "connect_id")
     private Long id;
 
     @Enumerated(EnumType.STRING)

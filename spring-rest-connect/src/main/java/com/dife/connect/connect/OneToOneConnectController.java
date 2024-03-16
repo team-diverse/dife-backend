@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("onetooneconnect")
+@RequestMapping("/onetooneconnect")
 @Slf4j
 public class OneToOneConnectController {
 

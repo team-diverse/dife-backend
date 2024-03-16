@@ -1,6 +1,6 @@
 package com.dife.connect.model;
 
 public enum Category {
-    ONETOONE,
+    SINGLE,
     GROUP
 }
