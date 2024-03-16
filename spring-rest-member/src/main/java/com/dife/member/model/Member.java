@@ -12,7 +12,6 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id")
     private Long id;
 
     @Column(nullable = false)
@@ -34,6 +33,15 @@ public class Member {
     @Column(nullable = false)
     private String major;
 
+    private String introduction;
+
+    private String profile_img;
+
+    @Enumerated(EnumType.STRING)
+    private Category mbti;
+
+    @Column(nullable = false)
+    private Boolean blind;
 
     private String nickname;
 }
