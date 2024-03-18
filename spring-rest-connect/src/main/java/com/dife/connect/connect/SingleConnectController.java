@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/onetooneconnect")
 @Slf4j
-public class OneToOneConnectController {
+public class SingleConnectController {
 
-    private final OneToOneConnectService oneToOneConnectService;
+    private final SingleConnectService singleConnectService;
 }
