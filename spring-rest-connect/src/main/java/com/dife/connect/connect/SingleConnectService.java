@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class OneToOneConnectService {
+public class SingleConnectService {
 
     private final ConnectRepository connectRepository;
 }
