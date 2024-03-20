@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Entity
@@ -21,7 +23,7 @@ public class Member {
     private String password;
 
     @Column(nullable = false)
-    private Integer nation;
+    private Boolean is_korean;
 
 
     @Column(nullable = false)
@@ -33,15 +35,19 @@ public class Member {
     @Column(nullable = false)
     private String major;
 
-    private String introduction;
+    private String bio;
 
-    private String profile_img;
+    private String file_id;
 
     @Enumerated(EnumType.STRING)
     private Category mbti;
 
     @Column(nullable = false)
-    private Boolean blind;
+    private Boolean is_public;
 
     private String nickname;
+
+    private LocalDateTime created_at;
+
+    private LocalDateTime last_online;
 }
