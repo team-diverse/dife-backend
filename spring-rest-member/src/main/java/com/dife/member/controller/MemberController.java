@@ -30,7 +30,6 @@ public class MemberController {
     {
         this.memberService.login(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body("유저가 로그인했습니다.");
-
     }
 
 }
