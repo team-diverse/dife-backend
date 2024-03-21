@@ -1,7 +1,9 @@
 package com.dife.member.service;
 
+
 import com.dife.member.jwt.TokenProvider;
 import com.dife.member.model.Member;
+import com.dife.member.model.dto.MemberUpdateDto;
 import com.dife.member.repository.MemberRepository;
 import com.dife.member.model.dto.TokenDto;
 import com.dife.member.model.dto.LoginDto;
@@ -14,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,4 +76,29 @@ public class MemberService {
 //        return tokenDto;
 //
 //    }
+
+
+    @Transactional
+    public Member updateMember(MemberUpdateDto memberUpdateDto)
+    {
+        Optional<Member> optionalMember = memberRepository.findByEmail(memberUpdateDto.getEmail());
+
+        if (optionalMember.isEmpty())
+        {
+            throw new IllegalStateException("존재하지 않는 회원입니다.");
+        }
+
+        Member member = optionalMember.get();
+        member.setEmail(memberUpdateDto.getEmail());
+        member.setPassword(memberUpdateDto.getPassword());
+        member.setIs_korean(memberUpdateDto.getIs_korean());
+        member.setBio(memberUpdateDto.getBio());
+        member.setMbti(memberUpdateDto.getMbti());
+        member.setIs_public(memberUpdateDto.getIs_public());
+        member.setFile_id(memberUpdateDto.getFile_id());
+        member.setNickname(memberUpdateDto.getNickname());
+        memberRepository.save(member);
+
+        return member;
+    }
 }
