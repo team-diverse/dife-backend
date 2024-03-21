@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 
@@ -53,4 +54,33 @@ public class Member {
     private LocalDateTime created_at;
 
     private LocalDateTime last_online;
+
+    public void editPassword(String password)
+    {
+        this.password = password;
+    }
+
+    public void editUsername(String username)
+    {
+        this.username = username;
+    }
+
+    public void editBio(String bio)
+    {
+        this.bio = bio;
+    }
+
+    public void editFile_id(String file_id)
+    {
+        this.file_id = file_id;
+    }
+
+    public void editMbti(String mbti)
+    {
+        this.mbti = MBTI_category.valueOf(mbti);
+    }
+    public void editIs_public(Boolean is_public)
+    {
+        this.is_public = is_public;
+    }
 }
