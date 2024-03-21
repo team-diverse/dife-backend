@@ -2,6 +2,8 @@ package com.dife.member.model.dto;
 
 import com.dife.member.model.MBTI_category;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -31,6 +33,7 @@ public class MemberUpdateDto {
 
     private String file_id;
 
+    @Enumerated(EnumType.STRING)
     private MBTI_category mbti;
 
     @NotNull
