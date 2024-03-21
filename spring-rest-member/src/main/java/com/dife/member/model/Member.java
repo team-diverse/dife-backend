@@ -40,7 +40,7 @@ public class Member {
     private String file_id;
 
     @Enumerated(EnumType.STRING)
-    private Category mbti;
+    private MBTI_category mbti;
 
     @Column(nullable = false)
     private Boolean is_public;
