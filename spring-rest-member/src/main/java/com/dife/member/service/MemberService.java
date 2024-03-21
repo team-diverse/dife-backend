@@ -27,7 +27,6 @@ public class MemberService {
     private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-
     public void register(RegisterRequestDto dto) {
         Member member = modelMapper.map(dto, Member.class);
 
