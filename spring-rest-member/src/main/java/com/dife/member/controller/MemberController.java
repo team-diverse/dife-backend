@@ -1,6 +1,7 @@
-package com.dife.member.member;
+package com.dife.member.controller;
 
 
+import com.dife.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
