@@ -1,7 +1,8 @@
-package com.dife.member.member;
+package com.dife.member.service;
 
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.MemberUpdateDto;
+import com.dife.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

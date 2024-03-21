@@ -1,9 +1,10 @@
-package com.dife.member.member;
+package com.dife.member.controller;
 
 
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.EditProfileDto;
 import com.dife.member.model.dto.MemberUpdateDto;
+import com.dife.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
