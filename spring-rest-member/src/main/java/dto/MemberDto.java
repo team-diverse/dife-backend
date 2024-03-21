@@ -16,6 +16,7 @@ import lombok.*;
 @NoArgsConstructor
 public class MemberDto {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @NotNull
     private String email;
 
