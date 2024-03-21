@@ -1,5 +1,6 @@
 package com.dife.member.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,6 +25,7 @@ import static lombok.AccessLevel.PROTECTED;
 @AllArgsConstructor
 public class Member implements UserDetails {
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +33,7 @@ public class Member implements UserDetails {
     @Column(nullable = false)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
