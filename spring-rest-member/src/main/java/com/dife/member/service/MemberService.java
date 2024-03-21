@@ -3,7 +3,9 @@ package com.dife.member.service;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.MemberUpdateDto;
 import com.dife.member.repository.MemberRepository;
+import com.dife.member.model.RegisterRequestDto;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +17,13 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ModelMapper modelMapper;
 
+    public void register(RegisterRequestDto dto) {
+        Member member = modelMapper.map(dto, Member.class);
+
+        memberRepository.save(member);
+    }
 
     @Transactional
     public Member updateMember(MemberUpdateDto memberUpdateDto)
