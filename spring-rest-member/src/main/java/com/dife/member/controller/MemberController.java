@@ -2,16 +2,14 @@ package com.dife.member.controller;
 
 
 import com.dife.member.service.MemberService;
-import dto.RegisterRequestDto;
+import com.dife.member.model.dto.LoginDto;
+import com.dife.member.model.dto.RegisterRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,4 +24,13 @@ public class MemberController {
         this.memberService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("유저가 생성되었습니다.");
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDto dto)
+    {
+        this.memberService.login(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("유저가 로그인했습니다.");
+
+    }
+
 }

@@ -1,16 +1,28 @@
 package com.dife.member.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static lombok.AccessLevel.PRIVATE;
+import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "member")
-public class Member {
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+public class Member implements UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,32 +63,35 @@ public class Member {
 
     private LocalDateTime last_online;
 
-    public void editPassword(String password)
-    {
-        this.password = password;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<String> roles = new ArrayList<>();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
-    public void editUsername(String username)
-    {
-        this.username = username;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public void editBio(String bio)
-    {
-        this.bio = bio;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void editFile_id(String file_id)
-    {
-        this.file_id = file_id;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public void editMbti(String mbti)
-    {
-        this.mbti = MBTI_category.valueOf(mbti);
-    }
-    public void editIs_public(Boolean is_public)
-    {
-        this.is_public = is_public;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
