@@ -1,8 +1,8 @@
-package com.dife.member.model;
+package com.dife.member.model.dto;
 
+import com.dife.member.model.MBTI_category;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 
@@ -11,8 +11,11 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberDto {
+public class MemberUpdateDto {
 
+    private Long id;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @NotNull
     private String email;
 
