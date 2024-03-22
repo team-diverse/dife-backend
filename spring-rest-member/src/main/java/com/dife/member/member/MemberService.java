@@ -1,12 +1,8 @@
 package com.dife.member.member;
 
-import com.dife.member.model.MBTI_category;
 import com.dife.member.model.Member;
-import com.dife.member.model.dto.MemberDto;
+import com.dife.member.model.dto.MemberUpdateDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +17,9 @@ public class MemberService {
 
 
     @Transactional
-    public Long editMemberProfile(MemberDto memberDto)
+    public Member updateMember(MemberUpdateDto memberUpdateDto)
     {
-        Optional<Member> optionalMember = memberRepository.findByEmail(memberDto.getEmail());
+        Optional<Member> optionalMember = memberRepository.findByEmail(memberUpdateDto.getEmail());
 
         if (optionalMember.isEmpty())
         {
@@ -32,17 +28,17 @@ public class MemberService {
 
         Member member = optionalMember.get();
 
+        member.setEmail(memberUpdateDto.getEmail());
+        member.setPassword(memberUpdateDto.getPassword());
+        member.setIs_korean(memberUpdateDto.getIs_korean());
+        member.setBio(memberUpdateDto.getBio());
+        member.setMbti(memberUpdateDto.getMbti());
+        member.setIs_public(memberUpdateDto.getIs_public());
+        member.setFile_id(memberUpdateDto.getFile_id());
+        member.setNickname(memberUpdateDto.getNickname());
 
-        member.editUsername(member.getUsername());
-        member.editBio(member.getBio());
-        member.editFile_id(member.getFile_id());
-        member.editMbti(String.valueOf(member.getMbti()));
-        member.editIs_public(member.getIs_public());
-
-
-        member.editPassword(member.getPassword());
         memberRepository.save(member);
 
-        return member.getId();
+        return member;
     }
 }

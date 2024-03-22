@@ -65,7 +65,6 @@ public class Member implements UserDetails {
     private LocalDateTime created_at;
 
     private LocalDateTime last_online;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();

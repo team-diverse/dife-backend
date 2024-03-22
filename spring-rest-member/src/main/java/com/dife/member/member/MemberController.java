@@ -2,23 +2,18 @@ package com.dife.member.member;
 
 
 import com.dife.member.model.Member;
-import com.dife.member.model.dto.MemberDto;
-import jakarta.validation.Valid;
+import com.dife.member.model.dto.EditProfileDto;
+import com.dife.member.model.dto.MemberUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/members")
+@RequestMapping("/api/members")
 @Slf4j
 public class MemberController {
 
@@ -26,20 +21,20 @@ public class MemberController {
     private MemberRepository memberRepository;
     private final MemberService memberService;
 
-    @PostMapping("/login")
-    public String profile(Principal principal, ModelMap modelMap)
+    @GetMapping("/{id}")
+    public String profile(@PathVariable Long id)
     {
-        String loginId = principal.getName();
-        Optional<Member> optionalMember = memberRepository.findByEmail(loginId);
+        Optional<Member> optionalMember = memberRepository.findById(id);
         Member member = optionalMember.get();
-        modelMap.addAttribute("member", member);
-        return "/profile";
+        return "사용자 정보 조회";
     }
-    @PostMapping("/profile/edit")
-    public String editProfile(@Valid MemberDto memberDto, Model model)
+    @PutMapping("/{id}")
+    public String editProfile(@PathVariable Long id, MemberUpdateDto memberUpdateDto)
     {
-        model.addAttribute("member", memberDto);
-        memberService.editMemberProfile(memberDto);
-        return "redirect:/member/profile";
+        Optional<Member> optionalMember = memberRepository.findById(id);
+        Member member = optionalMember.get();
+        member = memberService.updateMember(memberUpdateDto);
+        return "사용자 정보 수정";
+
     }
 }
