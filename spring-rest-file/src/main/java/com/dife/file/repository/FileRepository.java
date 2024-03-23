@@ -1,4 +1,4 @@
-package com.dife.file.file;
+package com.dife.file.repository;
 
 import com.dife.file.model.File;
 import org.springframework.data.jpa.repository.JpaRepository;
