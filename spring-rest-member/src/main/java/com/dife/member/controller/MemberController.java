@@ -2,9 +2,9 @@ package com.dife.member.controller;
 
 
 import com.dife.member.model.Member;
-import com.dife.member.model.dto.EditProfileDto;
 import com.dife.member.model.dto.MemberUpdateDto;
 import com.dife.member.model.RegisterRequestDto;
+import com.dife.member.repository.MemberRepository;
 import com.dife.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
