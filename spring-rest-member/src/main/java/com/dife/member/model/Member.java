@@ -23,7 +23,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Member implements UserDetails{
+public class Member implements UserDetails {
 
     @JsonIgnore
     @Id
@@ -95,4 +95,5 @@ public class Member implements UserDetails{
     @Override
     public boolean isEnabled() {
         return true;
+    }
 }
