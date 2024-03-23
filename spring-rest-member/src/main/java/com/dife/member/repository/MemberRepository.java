@@ -1,4 +1,4 @@
-package com.dife.member.member;
+package com.dife.member.repository;
 
 import com.dife.member.model.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
