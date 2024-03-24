@@ -3,22 +3,32 @@ package com.dife.file.service;
 import com.dife.file.model.File;
 import com.dife.file.model.Format;
 import com.dife.file.repository.FileRepository;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class FileService {
 
     private final FileRepository fileRepository;
+    private final S3Client s3Client;
+    private final String bucketName;
+
+    public FileService(FileRepository fileRepository, S3Client s3Client, @Value("${spring.aws.bucket-name}") String bucketName) {
+        this.fileRepository = fileRepository;
+                this.s3Client = s3Client;
+        this.bucketName = bucketName;
+    }
 
     public void upload(MultipartFile file) {
 
@@ -34,13 +44,14 @@ public class FileService {
             throw new RuntimeException("File size exceeds limit of 5MB");
         }
 
-        Path rootLocation = Paths.get("uploads");
-        Path fileDestination = rootLocation.resolve(Paths.get(originalFilename)).normalize().toAbsolutePath();
         try {
-            Files.createDirectories(rootLocation);
-            file.transferTo(fileDestination);
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(originalFilename)
+                    .build();
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to store file locally.");
+            throw new RuntimeException("Failed to upload file to Server:", e);
         }
 
         File fileInfo = new File();
