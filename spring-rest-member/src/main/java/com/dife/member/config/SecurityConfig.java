@@ -35,22 +35,27 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-         return httpSecurity
+        httpSecurity
+                .csrf((auth) -> auth.disable());
+        httpSecurity
+                .formLogin((auth) -> auth.disable());
+        httpSecurity
+                .httpBasic((auth) -> auth.disable());
+        httpSecurity
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/api/members/register", "/api/members/login",
+                                "/api/members/**",
+                                "/api/**").permitAll()
+                        .anyRequest().authenticated()
+                );
+        httpSecurity
+                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+        httpSecurity
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity
+                .sessionManagement((sessionManagement) ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
-                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(
-                        sessionManagement ->
-                                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers("/api/members/register").permitAll();
-                    requests.requestMatchers("/api/members/login").permitAll();
-                    requests.requestMatchers("/api/members/**").permitAll();
-                    requests.requestMatchers("/api/**").authenticated();
-                })
-                .build();
+         return httpSecurity.build();
     }
 }
