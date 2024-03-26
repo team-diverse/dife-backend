@@ -55,4 +55,6 @@ public class Member {
 
     private LocalDateTime last_online;
 
+    private String role;
+
 }

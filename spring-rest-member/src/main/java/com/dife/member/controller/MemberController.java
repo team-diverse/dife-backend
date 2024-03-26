@@ -2,6 +2,7 @@ package com.dife.member.controller;
 
 
 import com.dife.member.model.Member;
+import com.dife.member.model.dto.LoginDto;
 import com.dife.member.model.dto.MemberUpdateDto;
 import com.dife.member.model.RegisterRequestDto;
 import com.dife.member.repository.MemberRepository;
@@ -29,25 +30,37 @@ public class MemberController {
     private MemberRepository memberRepository;
     private final MemberService memberService;
 
-    @GetMapping("/{id}")
-    public String profile(@PathVariable Long id)
-    {
-        Optional<Member> optionalMember = memberRepository.findById(id);
-        Member member = optionalMember.get();
-        return "사용자 정보 조회";
-    }
-    @PutMapping("/{id}")
-    public String editProfile(@PathVariable Long id, MemberUpdateDto memberUpdateDto)
-    {
-        Optional<Member> optionalMember = memberRepository.findById(id);
-        Member member = optionalMember.get();
-        member = memberService.updateMember(memberUpdateDto);
-        return "사용자 정보 수정";
-    }
-
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto request) {
         this.memberService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("유저가 생성되었습니다.");
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDto request) {
+        String tokenId = memberService.login(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body("토큰ID : " + tokenId);
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<String> test(@RequestBody LoginDto request) {
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("인증된 유저입니다.");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<String> profile(@PathVariable Long id)
+    {
+        Optional<Member> optionalMember = memberRepository.findById(id);
+        Member member = optionalMember.get();
+        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 마이페이지입니다.\n유저 소개말 : " + member.getBio());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> editProfile(@PathVariable Long id, @RequestBody MemberUpdateDto memberUpdateDto)
+    {
+        Member member = memberService.updateMember(id, memberUpdateDto);
+        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 업데이트된 마이페이지입니다.\n유저 소개말 : " + member.getBio());
+    }
+
 }

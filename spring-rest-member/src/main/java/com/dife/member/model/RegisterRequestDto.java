@@ -37,4 +37,6 @@ public class RegisterRequestDto {
 
     @NotNull()
     private String password;
+
+    private String role;
 }
