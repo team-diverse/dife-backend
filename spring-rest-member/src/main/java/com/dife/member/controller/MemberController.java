@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,9 @@ public class MemberController {
     {
         Optional<Member> optionalMember = memberRepository.findById(id);
         Member member = optionalMember.get();
-        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 마이페이지입니다.\n유저 소개말 : " + member.getBio());
+        String confirm = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 마이페이지입니다.\n유저 소개말 : " + member.getBio()
+                                                            + "\n현재 세션 아이디 : " + confirm);
     }
 
     @PutMapping("/{id}")
