@@ -27,10 +27,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         if (optionalMember.isEmpty())
         {
-            Member member = optionalMember.get();
-            return new CustomUserDetails(member);
+            return null;
         }
 
-        return null;
+        Member member = optionalMember.get();
+        return new CustomUserDetails(member);
     }
 }
