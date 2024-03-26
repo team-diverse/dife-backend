@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  db:
+    container_name: dife-mysql
+    image: mysql:8.0.33
+    restart: always
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    ports:
+      - 3307:${DB_PORT}
+
+  member:
+    build:
+      context: ./spring-rest-member
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - ${MEMBER_PORT}:${MEMBER_PORT}
+    container_name: dife-spring-rest-member
+    env_file: .env
+    depends_on:
+      - db
+
+networks:
+  default:
+    name: dife
