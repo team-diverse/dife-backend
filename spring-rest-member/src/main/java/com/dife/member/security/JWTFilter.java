@@ -1,14 +1,12 @@
-package com.dife.member.jwt;
+package com.dife.member.security;
 
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.CustomUserDetails;
-import com.dife.member.model.dto.LoginDto;
-import com.dife.member.repository.MemberRepository;
-import com.dife.member.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 
+@Slf4j
 public class JWTFilter  extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
@@ -28,19 +27,17 @@ public class JWTFilter  extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         String authorization= request.getHeader("Authorization");
 
-        if (authorization == null || !authorization.startsWith("Bearer "))
-        {
-
-            System.out.println("토큰 없음");
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            // ERROR 던져야함!
+            log.error("토큰 없음");
             filterChain.doFilter(request, response);
 
             return;
         }
 
-        System.out.println("인증됨");
+        log.info("인증됨");
 
         String token = authorization.split(" ")[1];
 
@@ -48,7 +45,7 @@ public class JWTFilter  extends OncePerRequestFilter {
         if (jwtUtil.isExpired(token))
         {
 
-            System.out.println("토큰 만료됨");
+            log.info("토큰 만료됨");
             filterChain.doFilter(request, response);
 
             return;

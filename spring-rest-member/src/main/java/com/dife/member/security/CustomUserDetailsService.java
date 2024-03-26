@@ -1,4 +1,4 @@
-package com.dife.member.service;
+package com.dife.member.security;
 
 import com.dife.member.model.dto.CustomUserDetails;
 import com.dife.member.model.Member;
@@ -25,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
 
-        if (optionalMember.isEmpty())
+        if (!optionalMember.isEmpty())
         {
             Member member = optionalMember.get();
             return new CustomUserDetails(member);

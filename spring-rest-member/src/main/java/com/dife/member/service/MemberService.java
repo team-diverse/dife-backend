@@ -1,6 +1,6 @@
 package com.dife.member.service;
 
-import com.dife.member.jwt.JWTUtil;
+import com.dife.member.security.JWTUtil;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.LoginDto;
 import com.dife.member.model.dto.MemberUpdateDto;
@@ -43,7 +43,7 @@ public class MemberService {
         }
 
         Member member = optionalMember.get();
-        return jwtUtil.createJwt(member.getEmail(), member.getRole(), 3000L);
+        return jwtUtil.createJwt(member.getEmail(), member.getRole(), 3000000L);
     }
 
     @Transactional

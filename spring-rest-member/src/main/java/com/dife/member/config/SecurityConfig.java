@@ -1,8 +1,8 @@
 package com.dife.member.config;
 
-import com.dife.member.jwt.JWTFilter;
-import com.dife.member.jwt.JWTUtil;
-import com.dife.member.jwt.LoginFilter;
+import com.dife.member.security.JWTFilter;
+import com.dife.member.security.JWTUtil;
+import com.dife.member.security.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity()
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
@@ -46,9 +46,8 @@ public class SecurityConfig {
                                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers("/api/members/register").permitAll();
-                    requests.requestMatchers("/api/members/login").permitAll();
-                    requests.requestMatchers("/api/members/**").permitAll();
+                    requests.requestMatchers("/api/members/register", "/api/members/login").permitAll();
+                    requests.requestMatchers("/api/members/**").authenticated();
                     requests.requestMatchers("/api/**").authenticated();
                 })
                 .build();

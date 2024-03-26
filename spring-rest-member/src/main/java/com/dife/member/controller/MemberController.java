@@ -42,6 +42,12 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.CREATED).body("토큰ID : " + tokenId);
     }
 
+    @PostMapping("/test")
+    public ResponseEntity<String> test(@RequestBody LoginDto request) {
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("인증된 유저입니다.");
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<String> profile(@PathVariable Long id)
     {

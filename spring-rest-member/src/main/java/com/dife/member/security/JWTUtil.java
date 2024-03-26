@@ -1,4 +1,4 @@
-package com.dife.member.jwt;
+package com.dife.member.security;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
