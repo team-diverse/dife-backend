@@ -2,6 +2,7 @@ package com.dife.member.controller;
 
 
 import com.dife.member.model.Member;
+import com.dife.member.model.dto.LoginDto;
 import com.dife.member.model.dto.MemberUpdateDto;
 import com.dife.member.model.RegisterRequestDto;
 import com.dife.member.repository.MemberRepository;
@@ -50,4 +51,11 @@ public class MemberController {
         this.memberService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("유저가 생성되었습니다.");
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDto request) {
+        Member member = memberService.login(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(member.getEmail() + "유저가 로그인했습니다.");
+    }
+
 }

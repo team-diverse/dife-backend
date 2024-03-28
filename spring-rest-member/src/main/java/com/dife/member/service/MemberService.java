@@ -1,6 +1,7 @@
 package com.dife.member.service;
 
 import com.dife.member.model.Member;
+import com.dife.member.model.dto.LoginDto;
 import com.dife.member.model.dto.MemberUpdateDto;
 import com.dife.member.repository.MemberRepository;
 import com.dife.member.model.RegisterRequestDto;
@@ -28,6 +29,19 @@ public class MemberService {
         member.setPassword(encodedPassword);
 
         memberRepository.save(member);
+    }
+
+    public Member login(LoginDto dto)
+    {
+        Optional<Member> optionalMember = memberRepository.findByEmail(dto.getEmail());
+
+        if (optionalMember.isEmpty())
+        {
+            throw new IllegalStateException("존재하지 않는 회원입니다.");
+        }
+
+        Member member = optionalMember.get();
+        return member;
     }
 
     @Transactional
