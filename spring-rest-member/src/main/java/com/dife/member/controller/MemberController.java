@@ -4,7 +4,7 @@ package com.dife.member.controller;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.LoginDto;
 import com.dife.member.model.dto.MemberUpdateDto;
-import com.dife.member.model.RegisterRequestDto;
+import com.dife.member.model.dto.RegisterRequestDto;
 import com.dife.member.repository.MemberRepository;
 import com.dife.member.service.MemberService;
 import jakarta.validation.Valid;
@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,11 +45,8 @@ public class MemberController {
     @GetMapping("/{id}")
     public ResponseEntity<String> profile(@PathVariable Long id)
     {
-        Optional<Member> optionalMember = memberRepository.findById(id);
-        Member member = optionalMember.get();
-        String confirm = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 마이페이지입니다.\n유저 소개말 : " + member.getBio()
-                                                            + "\n현재 세션 아이디 : " + confirm);
+        Member member = memberService.viewMember(id);
+        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 마이페이지입니다.\n유저 소개말 : " + member.getBio());
     }
 
     @PutMapping("/{id}")

@@ -5,7 +5,7 @@ import com.dife.member.model.Member;
 import com.dife.member.model.dto.LoginDto;
 import com.dife.member.model.dto.MemberUpdateDto;
 import com.dife.member.repository.MemberRepository;
-import com.dife.member.model.RegisterRequestDto;
+import com.dife.member.model.dto.RegisterRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -46,7 +46,20 @@ public class MemberService {
         return jwtUtil.createJwt(member.getEmail(), member.getRole(), 3000L);
     }
 
-    @Transactional
+    public Member viewMember(Long id)
+    {
+        Optional<Member> optionalMember = memberRepository.findById(id);
+
+        if (optionalMember.isEmpty())
+        {
+            throw new IllegalStateException("존재하지 않는 회원입니다.");
+        }
+
+        Member member = optionalMember.get();
+
+        return member;
+    }
+
     public Member updateMember(Long id, MemberUpdateDto memberUpdateDto)
     {
         Optional<Member> optionalMember = memberRepository.findById(id);
