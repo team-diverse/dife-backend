@@ -30,22 +30,6 @@ public class MemberController {
     private MemberRepository memberRepository;
     private final MemberService memberService;
 
-    @GetMapping("/{id}")
-    public String profile(@PathVariable Long id)
-    {
-        Optional<Member> optionalMember = memberRepository.findById(id);
-        Member member = optionalMember.get();
-        return "사용자 정보 조회";
-    }
-    @PutMapping("/{id}")
-    public String editProfile(@PathVariable Long id, MemberUpdateDto memberUpdateDto)
-    {
-        Optional<Member> optionalMember = memberRepository.findById(id);
-        Member member = optionalMember.get();
-        member = memberService.updateMember(memberUpdateDto);
-        return "사용자 정보 수정";
-    }
-
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto request) {
         this.memberService.register(request);
@@ -56,6 +40,21 @@ public class MemberController {
     public ResponseEntity<String> login(@RequestBody LoginDto request) {
         Member member = memberService.login(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(member.getEmail() + "유저가 로그인했습니다.");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<String> profile(@PathVariable Long id)
+    {
+        Optional<Member> optionalMember = memberRepository.findById(id);
+        Member member = optionalMember.get();
+        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 마이페이지입니다.\n유저 소개말 : " + member.getBio());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> editProfile(@PathVariable Long id, @RequestBody MemberUpdateDto memberUpdateDto)
+    {
+        Member member = memberService.updateMember(id, memberUpdateDto);
+        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 업데이트된 마이페이지입니다.\n유저 소개말 : " + member.getBio());
     }
 
 }
