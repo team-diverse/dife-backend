@@ -8,6 +8,7 @@ import com.dife.member.repository.MemberRepository;
 import com.dife.member.model.dto.RegisterRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +34,9 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    public String login(LoginDto dto)
+    public Member getMember(String email)
     {
-        Optional<Member> optionalMember = memberRepository.findByEmail(dto.getEmail());
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
 
         if (optionalMember.isEmpty())
         {
@@ -43,26 +44,13 @@ public class MemberService {
         }
 
         Member member = optionalMember.get();
-        return jwtUtil.createJwt(member.getEmail(), member.getRole(), 3000L);
-    }
-
-    public Member viewMember(Long id)
-    {
-        Optional<Member> optionalMember = memberRepository.findById(id);
-
-        if (optionalMember.isEmpty())
-        {
-            throw new IllegalStateException("존재하지 않는 회원입니다.");
-        }
-
-        Member member = optionalMember.get();
-
         return member;
     }
 
-    public Member updateMember(Long id, MemberUpdateDto memberUpdateDto)
+    public Member updateMember(MemberUpdateDto memberUpdateDto)
     {
-        Optional<Member> optionalMember = memberRepository.findById(id);
+        String email = memberUpdateDto.getEmail();
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
 
         if (optionalMember.isEmpty())
         {
