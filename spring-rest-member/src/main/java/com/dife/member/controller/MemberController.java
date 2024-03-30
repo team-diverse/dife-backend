@@ -1,8 +1,8 @@
 package com.dife.member.controller;
 
 
+import com.dife.member.jwt.JWTUtil;
 import com.dife.member.model.Member;
-import com.dife.member.model.dto.LoginDto;
 import com.dife.member.model.dto.MemberUpdateDto;
 import com.dife.member.model.dto.RegisterRequestDto;
 import com.dife.member.repository.MemberRepository;
@@ -29,6 +29,7 @@ public class MemberController {
     @Autowired
     private MemberRepository memberRepository;
     private final MemberService memberService;
+    private final JWTUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto request) {
@@ -36,23 +37,18 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.CREATED).body("유저가 생성되었습니다.");
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDto request) {
-        String tokenId = memberService.login(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("토큰ID : " + tokenId);
+    @GetMapping("/mypage")
+    public ResponseEntity<String> profile()
+    {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberService.getMember(memberEmail);
+        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저의 마이페이지 입니다.\n유저 소개말 : " + member.getBio());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<String> profile(@PathVariable Long id)
+    @PutMapping("/mypage")
+    public ResponseEntity<String> editProfile(@RequestBody MemberUpdateDto memberUpdateDto)
     {
-        Member member = memberService.viewMember(id);
-        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 마이페이지입니다.\n유저 소개말 : " + member.getBio());
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<String> editProfile(@PathVariable Long id, @RequestBody MemberUpdateDto memberUpdateDto)
-    {
-        Member member = memberService.updateMember(id, memberUpdateDto);
+        Member member = memberService.updateMember(memberUpdateDto);
         return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 업데이트된 마이페이지입니다.\n유저 소개말 : " + member.getBio());
     }
 

@@ -13,6 +13,8 @@ import lombok.*;
 @NoArgsConstructor
 public class MemberUpdateDto {
 
+    private String email;
+
     @NotNull
     private String password;
 

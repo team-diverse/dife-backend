@@ -2,9 +2,7 @@ package com.dife.member.jwt;
 
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.CustomUserDetails;
-import com.dife.member.model.dto.LoginDto;
 import com.dife.member.repository.MemberRepository;
-import com.dife.member.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,63 +13,40 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 
 public class JWTFilter  extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final MemberRepository memberRepository;
 
-    public JWTFilter(JWTUtil jwtUtil) {
-
+    public JWTFilter(JWTUtil jwtUtil, MemberRepository memberRepository)
+    {
         this.jwtUtil = jwtUtil;
+        this.memberRepository = memberRepository;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterchain) throws ServletException, IOException
+    {
+        String token = jwtUtil.resolveToken(request);
 
-        String authorization= request.getHeader("Authorization");
-
-        if (authorization == null || !authorization.startsWith("Bearer "))
+        if (token == null)
         {
-
-            System.out.println("토큰 없음");
-            filterChain.doFilter(request, response);
-
-            return;
-        }
-
-        System.out.println("인증됨");
-
-        String token = authorization.split(" ")[1];
-
-
-        if (jwtUtil.isExpired(token))
-        {
-
-            System.out.println("토큰 만료됨");
-            filterChain.doFilter(request, response);
-
+            filterchain.doFilter(request,response);
             return;
         }
 
         String email = jwtUtil.getEmail(token);
-        String role = jwtUtil.getRole(token);
-
-
-        Member member = new Member();
-        member.setEmail(email);
-        member.setPassword("password");
-        member.setIs_public(true);
-        member.setIs_korean(true);
-        member.setRole(role);
-        member.setUsername("username");
-        member.setMajor("major");
-
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        Member member = optionalMember.get();
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-        filterChain.doFilter(request, response);
-    }
+        Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        filterchain.doFilter(request, response);
+
+    }
 
 }

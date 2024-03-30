@@ -1,6 +1,8 @@
 package com.dife.member.model.dto;
 
 import com.dife.member.model.Member;
+import lombok.*;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -43,9 +45,6 @@ public class CustomUserDetails implements UserDetails {
 
         return member.getPassword();
     }
-
-
-
     @Override
     public boolean isAccountNonExpired() {
 
