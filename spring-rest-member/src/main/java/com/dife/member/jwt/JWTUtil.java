@@ -1,5 +1,11 @@
 package com.dife.member.jwt;
 
+<<<<<<< HEAD
+=======
+import com.dife.member.exception.UnAuthorizationException;
+import com.dife.member.repository.MemberRepository;
+import com.dife.member.service.CustomUserDetailsService;
+>>>>>>> c3768c7 (에러 헨들링 코드 작성)
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -7,6 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
 import java.util.Date;
 
 @Component
@@ -31,7 +38,6 @@ public class JWTUtil {
     }
 
     public Boolean isExpired(String token) {
-
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
@@ -45,4 +51,18 @@ public class JWTUtil {
                 .signWith(secretKey)
                 .compact();
     }
+<<<<<<< HEAD
+=======
+
+    public String resolveToken(HttpServletRequest request) {
+        String authorization= request.getHeader("Authorization");
+        if (authorization == null || !authorization.startsWith("Bearer "))
+        {
+            throw new UnAuthorizationException("인증되지 않은 회원입니다!");
+        }
+        return authorization.split(" ")[1];
+    }
+
+
+>>>>>>> c3768c7 (에러 헨들링 코드 작성)
 }
