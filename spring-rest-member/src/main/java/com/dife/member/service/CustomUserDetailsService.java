@@ -1,5 +1,6 @@
 package com.dife.member.service;
 
+import com.dife.member.exception.MemberNotFoundException;
 import com.dife.member.model.dto.CustomUserDetails;
 import com.dife.member.model.Member;
 import com.dife.member.repository.MemberRepository;
@@ -27,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         if (optionalMember.isEmpty())
         {
-            throw new UsernameNotFoundException(email + " 유저 못찾음!");
+            throw new MemberNotFoundException(email + " 유저 못찾음!");
         }
 
         Member member = optionalMember.get();

@@ -1,6 +1,7 @@
 package com.dife.member.controller;
 
 
+import com.dife.member.exception.MemberNotFoundException;
 import com.dife.member.jwt.JWTUtil;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.MemberUpdateDto;
@@ -36,13 +37,20 @@ public class MemberController {
         this.memberService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("유저가 생성되었습니다.");
     }
-
     @GetMapping("/mypage")
     public ResponseEntity<String> profile()
     {
-        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberService.getMember(memberEmail);
-        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저의 마이페이지 입니다.\n유저 소개말 : " + member.getBio());
+        try
+        {
+            String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+            Member member = memberService.getMember(memberEmail);
+            return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저의 마이페이지 입니다.\n유저 소개말 :" + member.getBio());
+        }
+        catch (MemberNotFoundException e)
+        {
+            throw new MemberNotFoundException("유저를 찾을 수 없습니다!");
+        }
+
     }
 
     @PutMapping("/mypage")
