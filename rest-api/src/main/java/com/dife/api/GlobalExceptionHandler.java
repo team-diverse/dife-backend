@@ -1,6 +1,8 @@
 package com.dife.api;
 
-import com.dife.api.exception.*;
+import com.dife.api.exception.DuplicateException;
+import com.dife.api.exception.MemberException;
+import com.dife.api.exception.RegisterException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
