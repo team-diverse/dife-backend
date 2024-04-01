@@ -65,7 +65,7 @@ public class JWTFilter  extends OncePerRequestFilter {
             String email = e.getClaims().get("email", String.class);
             String role = e.getClaims().get("role", String.class);
 
-            String newToken = jwtUtil.createAccessJwt(email, role, 14 * 24 * 60 * 60 * 1000L);
+            String refreshToken = jwtUtil.createAccessJwt(email, role, 14 * 24 * 60 * 60 * 1000L);
 
             Optional<Member> optionalMember = memberRepository.findByEmail(email);
 
@@ -73,12 +73,12 @@ public class JWTFilter  extends OncePerRequestFilter {
                 throw new MemberNotFoundException("유저를 찾을 수 없습니다!");
             }
             Member member = optionalMember.get();
-            member.setTokenId(newToken);
+            member.setTokenId(refreshToken);
             memberRepository.save(member);
 
-            log.info("New Token : " + member.getTokenId());
+            log.info("Refresh Token : " + member.getTokenId());
 
-            response.setHeader("Authorization", "Bearer " + newToken);
+            response.setHeader("Authorization", "Bearer " + refreshToken);
             filterChain.doFilter(request, response);
         } catch (Exception e)
         {
