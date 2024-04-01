@@ -1,4 +1,4 @@
-package com.dife.file.model;
+package com.dife.member.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 
 @Getter
