@@ -39,4 +39,17 @@ public class RegisterRequestDto {
     private String password;
 
     private String role;
+
+
+    public RegisterRequestDto(RegisterRequestDto request) {
+        this.email = request.getEmail();
+        this.password = request.getPassword();
+        this.student_id = request.getStudent_id();
+        this.username = request.getUsername();
+        this.bio = request.getBio();
+        this.is_korean = request.getIs_korean();
+        this.is_public = request.getIs_public();
+        this.major = request.getMajor();
+        this.role = request.getRole();
+    }
 }

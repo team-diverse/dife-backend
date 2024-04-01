@@ -16,18 +16,18 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity()
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final MemberRepository memberRepository;
 
     private final JWTUtil jwtUtil;
-    private final MemberRepository memberRepository;
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, MemberRepository memberRepository) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, MemberRepository memberRepository, JWTUtil jwtUtil) {
 
         this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtil = jwtUtil;
         this.memberRepository = memberRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @Bean
