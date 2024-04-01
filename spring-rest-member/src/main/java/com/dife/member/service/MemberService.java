@@ -1,16 +1,17 @@
 package com.dife.member.service;
 
 import com.dife.member.exception.DuplicateMemberException;
-import com.dife.member.exception.MemberNotFoundException;
+import com.dife.member.exception.UnAuthorizationException;
 import com.dife.member.jwt.JWTUtil;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.LoginDto;
-import com.dife.member.model.dto.MemberUpdateDto;
+import com.dife.member.model.dto.MemberDto;
 import com.dife.member.repository.MemberRepository;
 import com.dife.member.model.dto.RegisterRequestDto;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -44,23 +46,18 @@ public class MemberService {
     public Member getMember(String email) {
 
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        if (optionalMember.isEmpty())
+        {
+            throw new UnAuthorizationException("인증되지 않은 회원입니다!");
+        }
         Member member = optionalMember.get();
+
 
         return member;
     }
 
-    public Member updateMember(MemberUpdateDto memberUpdateDto)
+    public void updateMember(Member member, MemberDto memberUpdateDto)
     {
-        String email = memberUpdateDto.getEmail();
-        Optional<Member> optionalMember = memberRepository.findByEmail(email);
-
-        if (optionalMember.isEmpty())
-        {
-            throw new MemberNotFoundException("존재하지 않는 회원입니다.");
-        }
-
-        Member member = optionalMember.get();
-
         member.setPassword(memberUpdateDto.getPassword());
         member.setIs_korean(memberUpdateDto.getIs_korean());
         member.setBio(memberUpdateDto.getBio());
@@ -69,7 +66,16 @@ public class MemberService {
         member.setNickname(memberUpdateDto.getNickname());
 
         memberRepository.save(member);
-
-        return member;
     }
+
+//    public void logout(Member member) {
+//
+//        String email = member.getEmail();
+//        String role = member.getRole();
+//
+//        String expiredToken = jwtUtil.createAccessJwt(email, role, 10L);
+//        member.setTokenId(expiredToken);
+//        memberRepository.save(member);
+//
+//    }
 }
