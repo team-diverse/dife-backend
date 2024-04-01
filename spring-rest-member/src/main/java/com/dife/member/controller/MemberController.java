@@ -1,25 +1,29 @@
 package com.dife.member.controller;
 
-
-import com.dife.member.exception.MemberNotFoundException;
+import com.dife.member.model.Member;
+import com.dife.member.model.dto.LoginDto;
+import com.dife.member.model.dto.MemberUpdateDto;
 import com.dife.member.jwt.JWTUtil;
 import com.dife.member.model.Member;
-import com.dife.member.model.dto.MemberUpdateDto;
+import com.dife.member.model.dto.MemberDto;
 import com.dife.member.model.dto.RegisterRequestDto;
 import com.dife.member.repository.MemberRepository;
 import com.dife.member.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,34 +34,34 @@ public class MemberController {
     @Autowired
     private MemberRepository memberRepository;
     private final MemberService memberService;
-    private final JWTUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto request) {
+    public ResponseEntity<RegisterRequestDto> register(@Valid @RequestBody RegisterRequestDto request) {
         this.memberService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("유저가 생성되었습니다.");
+        return ResponseEntity
+                .status(CREATED.value())
+                .body(new RegisterRequestDto(request));
     }
-    @GetMapping("/mypage")
-    public ResponseEntity<String> profile()
-    {
-        try
-        {
-            String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-            Member member = memberService.getMember(memberEmail);
-            return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저의 마이페이지 입니다.\n유저 소개말 :" + member.getBio());
-        }
-        catch (MemberNotFoundException e)
-        {
-            throw new MemberNotFoundException("유저를 찾을 수 없습니다!");
-        }
 
+    @GetMapping("/mypage")
+    public ResponseEntity<MemberDto> profile()
+    {
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberService.getMember(memberEmail);
+        log.info(member.getTokenId());
+        MemberDto memberDto = new MemberDto(member);
+        return ResponseEntity.ok(memberDto);
     }
 
     @PutMapping("/mypage")
-    public ResponseEntity<String> editProfile(@RequestBody MemberUpdateDto memberUpdateDto)
+    public ResponseEntity<MemberDto> editProfile(@RequestBody MemberDto memberUpdateDto)
     {
-        Member member = memberService.updateMember(memberUpdateDto);
-        return ResponseEntity.status(HttpStatus.OK).body(member.getEmail() + "유저 업데이트된 마이페이지입니다.\n유저 소개말 : " + member.getBio());
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberService.getMember(memberEmail);
+        this.memberService.updateMember(member, memberUpdateDto);
+
+        MemberDto memberDto = new MemberDto(member);
+        return ResponseEntity.ok(memberDto);
     }
 
 }
