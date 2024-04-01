@@ -1,15 +1,16 @@
 package com.dife.member.jwt;
 
-import com.dife.member.exception.MemberNotFoundException;
-import com.dife.member.exception.UnAuthorizationException;
-import com.dife.member.model.Member;
 import com.dife.member.model.dto.CustomUserDetails;
-import com.dife.member.repository.MemberRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import com.dife.member.exception.MemberNotFoundException;
+import com.dife.member.exception.UnAuthorizationException;
+import com.dife.member.model.Member;
+import com.dife.member.model.dto.*;
+import com.dife.member.repository.MemberRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -18,14 +19,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
+import java.io.IOException;
 import java.util.Optional;
 
+import static org.springframework.http.HttpStatus.CREATED;
 
+
+@Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
@@ -42,6 +44,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+
         try
         {
             String email = request.getParameter("email");
@@ -57,7 +60,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException{
 
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
@@ -68,31 +71,21 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-//        Optional<Member> optionalMember = memberRepository.findByEmail(email);
-//        Member member = optionalMember.get();
+        String token = jwtUtil.createAccessJwt(email, role, 60 * 60 * 1000L);
 
-        String token = jwtUtil.createAccessJwt(email, role, 24 * 60 * 60 * 1000L);
-//        member.setTokenId(token);
-//
-        String responseBody = "유저가 로그인했습니다.\n사용자 TokenID : " + token;
-        ResponseEntity<String> responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+        ResponseEntity<LoginSuccessDto> responseEntity = ResponseEntity
+                .status(CREATED)
+                .body(new LoginSuccessDto(token));
 
-
-        response.setStatus(responseEntity.getStatusCode().value());
-        response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-
-        response.getWriter().write(responseEntity.getBody());
-
+        String responseBody = new ObjectMapper().writeValueAsString(responseEntity.getBody());
+        response.getWriter().write(responseBody);
         response.addHeader("Authorization", "Bearer " + token);
-
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException{
         response.setStatus(401);
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("인증되지 않은 회원입니다!");
-//        throw new UnAuthorizationException("인증되지 않은 회원입니다!");
     }
 }
