@@ -45,9 +45,9 @@ public class MemberService {
     }
 
     @Transactional
-    public Member updateMember(MemberUpdateDto memberUpdateDto)
+    public Member updateMember(Long id, MemberUpdateDto memberUpdateDto)
     {
-        Optional<Member> optionalMember = memberRepository.findByEmail(memberUpdateDto.getEmail());
+        Optional<Member> optionalMember = memberRepository.findById(id);
 
         if (optionalMember.isEmpty())
         {
@@ -56,13 +56,11 @@ public class MemberService {
 
         Member member = optionalMember.get();
 
-        member.setEmail(memberUpdateDto.getEmail());
         member.setPassword(memberUpdateDto.getPassword());
         member.setIs_korean(memberUpdateDto.getIs_korean());
         member.setBio(memberUpdateDto.getBio());
         member.setMbti(memberUpdateDto.getMbti());
         member.setIs_public(memberUpdateDto.getIs_public());
-        member.setFile_id(memberUpdateDto.getFile_id());
         member.setNickname(memberUpdateDto.getNickname());
 
         memberRepository.save(member);
