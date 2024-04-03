@@ -1,44 +1,61 @@
 package com.dife.member.config;
 
-import lombok.RequiredArgsConstructor;
+import com.dife.member.jwt.JWTFilter;
+import com.dife.member.jwt.JWTUtil;
+import com.dife.member.jwt.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final AuthenticationConfiguration authenticationConfiguration;
+
+    private final JWTUtil jwtUtil;
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
+
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+
+        return configuration.getAuthenticationManager();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
+        httpSecurity
+                .csrf((auth) -> auth.disable());
+        httpSecurity
+                .formLogin((auth) -> auth.disable());
+        httpSecurity
+                .httpBasic((auth) -> auth.disable());
+        httpSecurity
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/api/members/register", "/api/members/login",
+                                "/api/members/**",
+                                "/api/**").permitAll()
+                        .anyRequest().authenticated()
+                );
+        httpSecurity
+                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+        httpSecurity
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity
+                .sessionManagement((sessionManagement) ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
-//                .sessionManagement(
-//                        sessionManagement ->
-//                                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                )
-                .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers("/api/members/register").permitAll();
-                    requests.requestMatchers("/api/members/login").permitAll();
-                    requests.requestMatchers("/api/members/**").permitAll();
-                    requests.requestMatchers("/api/**").authenticated();
-                })
-//                .formLogin((formlogin) -> formlogin
-//                        .loginPage("/api/members/login")
-//                        .permitAll()
-//                        .defaultSuccessUrl("/api/members/"))
-
-                .build();
+         return httpSecurity.build();
     }
 }

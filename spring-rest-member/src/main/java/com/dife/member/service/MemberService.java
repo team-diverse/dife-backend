@@ -1,5 +1,6 @@
 package com.dife.member.service;
 
+import com.dife.member.jwt.JWTUtil;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.LoginDto;
 import com.dife.member.model.dto.MemberUpdateDto;
@@ -21,6 +22,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JWTUtil jwtUtil;
 
     public void register(RegisterRequestDto dto) {
         Member member = modelMapper.map(dto, Member.class);
@@ -31,7 +33,7 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    public Member login(LoginDto dto)
+    public String login(LoginDto dto)
     {
         Optional<Member> optionalMember = memberRepository.findByEmail(dto.getEmail());
 
@@ -41,7 +43,7 @@ public class MemberService {
         }
 
         Member member = optionalMember.get();
-        return member;
+        return jwtUtil.createJwt(member.getEmail(), member.getRole(), 3000L);
     }
 
     @Transactional
