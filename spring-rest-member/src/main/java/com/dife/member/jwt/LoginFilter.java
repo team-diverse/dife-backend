@@ -4,7 +4,9 @@ import com.dife.member.exception.MemberNotFoundException;
 import com.dife.member.exception.UnAuthorizationException;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.CustomUserDetails;
+import com.dife.member.model.dto.LoginSuccessDto;
 import com.dife.member.repository.MemberRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.CREATED;
 
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -68,22 +72,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-//        Optional<Member> optionalMember = memberRepository.findByEmail(email);
-//        Member member = optionalMember.get();
+        String token = jwtUtil.createAccessJwt(email, role, 60 * 60 * 1000L);
 
-        String token = jwtUtil.createAccessJwt(email, role, 24 * 60 * 60 * 1000L);
-//        member.setTokenId(token);
-//
-        String responseBody = "유저가 로그인했습니다.\n사용자 TokenID : " + token;
-        ResponseEntity<String> responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+        ResponseEntity<LoginSuccessDto> responseEntity = ResponseEntity
+                .status(CREATED)
+                .body(new LoginSuccessDto(token));
 
-
-        response.setStatus(responseEntity.getStatusCode().value());
-        response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-
-        response.getWriter().write(responseEntity.getBody());
-
+        String responseBody = new ObjectMapper().writeValueAsString(responseEntity.getBody());
+        response.getWriter().write(responseBody);
         response.addHeader("Authorization", "Bearer " + token);
 
     }
@@ -93,6 +89,5 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setStatus(401);
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("인증되지 않은 회원입니다!");
-//        throw new UnAuthorizationException("인증되지 않은 회원입니다!");
     }
 }

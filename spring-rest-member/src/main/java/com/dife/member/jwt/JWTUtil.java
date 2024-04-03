@@ -51,11 +51,11 @@ public class JWTUtil {
     }
     public String resolveToken(HttpServletRequest request) {
         String authorization= request.getHeader("Authorization");
-        if (authorization == null || !authorization.startsWith("Bearer "))
+        if (authorization != null && authorization.startsWith("Bearer "))
         {
-            throw new UnAuthorizationException("인증되지 않은 회원입니다!");
+            return authorization.split(" ")[1];
         }
-        return authorization.split(" ")[1];
+        return null;
     }
 
 }

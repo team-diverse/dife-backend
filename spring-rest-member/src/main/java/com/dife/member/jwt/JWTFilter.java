@@ -76,7 +76,7 @@ public class JWTFilter  extends OncePerRequestFilter {
             member.setTokenId(newToken);
             memberRepository.save(member);
 
-            log.info("New Token : " + member.getTokenId());
+            log.info("Refresh Token : " + member.getTokenId());
 
             response.setHeader("Authorization", "Bearer " + newToken);
             filterChain.doFilter(request, response);

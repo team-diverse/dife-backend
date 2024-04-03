@@ -2,8 +2,7 @@ package com.dife.member.controller;
 
 
 import com.dife.member.model.Member;
-import com.dife.member.model.dto.LoginDto;
-import com.dife.member.model.dto.MemberUpdateDto;
+import com.dife.member.model.dto.*;
 
 import com.dife.member.model.dto.LoginDto;
 import com.dife.member.model.dto.MemberUpdateDto;
