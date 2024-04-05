@@ -1,5 +1,7 @@
 package com.dife.member.service;
 
+import com.dife.member.exception.DuplicateMemberException;
+import com.dife.member.exception.MemberNotFoundException;
 import com.dife.member.jwt.JWTUtil;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.LoginDto;
@@ -27,12 +29,18 @@ public class MemberService {
     public void register(RegisterRequestDto dto) {
         Member member = modelMapper.map(dto, Member.class);
 
+        if (memberRepository.existsByEmail(dto.getEmail()))
+        {
+            throw new DuplicateMemberException("이미 등록한 회원입니다!");
+        }
+
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
         member.setPassword(encodedPassword);
 
         memberRepository.save(member);
     }
 
+<<<<<<< HEAD
     public String login(LoginDto dto)
     {
         Optional<Member> optionalMember = memberRepository.findByEmail(dto.getEmail());
@@ -44,6 +52,14 @@ public class MemberService {
 
         Member member = optionalMember.get();
         return jwtUtil.createJwt(member.getEmail(), member.getRole(), 3000L);
+=======
+    public Member getMember(String email) {
+
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        Member member = optionalMember.get();
+
+        return member;
+>>>>>>> c3768c7 (에러 헨들링 코드 작성)
     }
 
     @Transactional
@@ -53,7 +69,7 @@ public class MemberService {
 
         if (optionalMember.isEmpty())
         {
-            throw new IllegalStateException("존재하지 않는 회원입니다.");
+            throw new MemberNotFoundException("존재하지 않는 회원입니다.");
         }
 
         Member member = optionalMember.get();
