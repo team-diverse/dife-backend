@@ -1,14 +1,14 @@
 package com.dife.member.jwt;
 
+import com.dife.member.exception.MemberNotFoundException;
 import com.dife.member.ExceptionResonse;
 import com.dife.member.exception.ForbiddenException;
 import com.dife.member.exception.MemberNotFoundException;
 import com.dife.member.exception.UnAuthorizationException;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.CustomUserDetails;
-import com.dife.member.model.dto.LoginDto;
 import com.dife.member.repository.MemberRepository;
-import com.dife.member.service.CustomUserDetailsService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.UnavailableException;
@@ -22,91 +22,79 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-<<<<<<< HEAD
-=======
+import java.util.Optional;
 import java.security.SignatureException;
 import java.util.Optional;
->>>>>>> c3768c7 (에러 헨들링 코드 작성)
 
 
 @Slf4j
 public class JWTFilter  extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final MemberRepository memberRepository;
 
-    public JWTFilter(JWTUtil jwtUtil) {
+    public JWTFilter(JWTUtil jwtUtil, MemberRepository memberRepository) {
 
         this.jwtUtil = jwtUtil;
+        this.memberRepository = memberRepository;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-<<<<<<< HEAD
-        String authorization= request.getHeader("Authorization");
+        String token = jwtUtil.resolveToken(request);
 
-        if (authorization == null || !authorization.startsWith("Bearer "))
-        {
-
-            System.out.println("토큰 없음");
-            filterChain.doFilter(request, response);
-
-            return;
-        }
-
-        System.out.println("인증됨");
-
-        String token = authorization.split(" ")[1];
-
-
-        if (jwtUtil.isExpired(token))
-        {
-
-            System.out.println("토큰 만료됨");
-            filterChain.doFilter(request, response);
-
-            return;
-=======
         if (token == null) {
             log.info("토큰 없음");
-            throw new UnAuthorizationException("회원만 접근 가능합니다!");
+            filterChain.doFilter(request, response);
+            return;
         }
         log.info("순수 토큰 획득");
-        if (jwtUtil.isExpired(token))
+        try
         {
+            log.info("AceessToken : " + token);
+            response.addHeader("Authorization", "Bearer " + token);
+            String email = jwtUtil.getEmail(token);
+            Optional<Member> optionalMember = memberRepository.findByEmail(email);
+            if (optionalMember.isEmpty())
+            {
+                throw new MemberNotFoundException("유저를 찾을 수 없습니다!");
+            }
+            Member member = optionalMember.get();
+
+            CustomUserDetails customUserDetails = new CustomUserDetails(member);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            filterChain.doFilter(request, response);
+        } catch(ExpiredJwtException e) {
             log.info("만료된 토큰");
-            throw new ForbiddenException("만료된 토큰입니다!");
->>>>>>> c3768c7 (에러 헨들링 코드 작성)
-        }
 
-        log.info("토큰 획득 : ");
-        String email = jwtUtil.getEmail(token);
-<<<<<<< HEAD
-        String role = jwtUtil.getRole(token);
+            String email = e.getClaims().get("email", String.class);
+            String role = e.getClaims().get("role", String.class);
 
+            String newToken = jwtUtil.createAccessJwt(email, role, 14 * 24 * 60 * 60 * 1000L);
 
-        Member member = new Member();
-        member.setEmail(email);
-        member.setPassword("password");
-        member.setIs_public(true);
-        member.setIs_korean(true);
-        member.setRole(role);
-        member.setUsername("username");
-        member.setMajor("major");
-=======
+            Optional<Member> optionalMember = memberRepository.findByEmail(email);
 
-        Optional<Member> optionalMember = memberRepository.findByEmail(email);
-        if (optionalMember.isEmpty())
+            if (optionalMember.isEmpty()) {
+                throw new MemberNotFoundException("유저를 찾을 수 없습니다!");
+            }
+            Member member = optionalMember.get();
+            member.setTokenId(newToken);
+            memberRepository.save(member);
+
+            log.info("Refresh Token : " + member.getTokenId());
+
+            response.setHeader("Authorization", "Bearer " + newToken);
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e)
         {
-            throw new MemberNotFoundException("유저를 찾을 수 없습니다!");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("인증되지 않은 회원입니다!");
         }
-        Member member = optionalMember.get();
->>>>>>> c3768c7 (에러 헨들링 코드 작성)
-
-        CustomUserDetails customUserDetails = new CustomUserDetails(member);
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-        filterChain.doFilter(request, response);
     }
 
 

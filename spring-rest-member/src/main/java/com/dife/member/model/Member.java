@@ -57,4 +57,6 @@ public class Member {
 
     private String role;
 
+    private String tokenId;
+
 }

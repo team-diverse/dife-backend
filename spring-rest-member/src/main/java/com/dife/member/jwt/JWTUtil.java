@@ -1,12 +1,13 @@
 package com.dife.member.jwt;
 
-<<<<<<< HEAD
-=======
 import com.dife.member.exception.UnAuthorizationException;
 import com.dife.member.repository.MemberRepository;
 import com.dife.member.service.CustomUserDetailsService;
->>>>>>> c3768c7 (에러 헨들링 코드 작성)
+import com.dife.member.exception.UnAuthorizationException;
+import com.dife.member.repository.MemberRepository;
+import com.dife.member.service.CustomUserDetailsService;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +42,7 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createJwt(String email, String role, Long expiredMs) {
+    public String createAccessJwt(String email, String role, Long expiredMs) {
 
         return Jwts.builder()
                 .claim("email", email)
@@ -51,18 +52,12 @@ public class JWTUtil {
                 .signWith(secretKey)
                 .compact();
     }
-<<<<<<< HEAD
-=======
-
     public String resolveToken(HttpServletRequest request) {
         String authorization= request.getHeader("Authorization");
-        if (authorization == null || !authorization.startsWith("Bearer "))
+        if (authorization != null && authorization.startsWith("Bearer "))
         {
-            throw new UnAuthorizationException("인증되지 않은 회원입니다!");
+            return authorization.split(" ")[1];
         }
-        return authorization.split(" ")[1];
+        return null;
     }
-
-
->>>>>>> c3768c7 (에러 헨들링 코드 작성)
 }
