@@ -3,6 +3,9 @@ package com.dife.member.jwt;
 import com.dife.member.exception.MemberNotFoundException;
 import com.dife.member.exception.UnAuthorizationException;
 import com.dife.member.model.Member;
+import com.dife.member.exception.MemberNotFoundException;
+import com.dife.member.exception.UnAuthorizationException;
+import com.dife.member.model.Member;
 import com.dife.member.model.dto.CustomUserDetails;
 import com.dife.member.model.dto.LoginSuccessDto;
 import com.dife.member.repository.MemberRepository;
@@ -74,6 +77,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String token = jwtUtil.createAccessJwt(email, role, 60 * 60 * 1000L);
 
+        String responseBody = "유저가 로그인했습니다.\n사용자 TokenID : " + token;
+        ResponseEntity<String> responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+
+
+        response.setStatus(responseEntity.getStatusCode().value());
+        response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+
+        response.getWriter().write(responseEntity.getBody());
+
         ResponseEntity<LoginSuccessDto> responseEntity = ResponseEntity
                 .status(CREATED)
                 .body(new LoginSuccessDto(token));
@@ -89,5 +102,4 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setStatus(401);
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("인증되지 않은 회원입니다!");
-    }
 }

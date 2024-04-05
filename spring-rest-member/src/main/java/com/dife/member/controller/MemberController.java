@@ -1,6 +1,8 @@
 package com.dife.member.controller;
 
 
+import com.dife.member.exception.MemberNotFoundException;
+import com.dife.member.jwt.JWTUtil;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.*;
 

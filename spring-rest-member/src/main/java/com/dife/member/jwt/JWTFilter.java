@@ -1,21 +1,29 @@
 package com.dife.member.jwt;
 
 import com.dife.member.exception.MemberNotFoundException;
+import com.dife.member.ExceptionResonse;
+import com.dife.member.exception.ForbiddenException;
+import com.dife.member.exception.MemberNotFoundException;
+import com.dife.member.exception.UnAuthorizationException;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.CustomUserDetails;
 import com.dife.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.UnavailableException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.security.SignatureException;
 import java.util.Optional;
 
 
@@ -80,13 +88,13 @@ public class JWTFilter  extends OncePerRequestFilter {
 
             response.setHeader("Authorization", "Bearer " + newToken);
             filterChain.doFilter(request, response);
+
         } catch (Exception e)
         {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write("인증되지 않은 회원입니다!");
         }
-
     }
 
 

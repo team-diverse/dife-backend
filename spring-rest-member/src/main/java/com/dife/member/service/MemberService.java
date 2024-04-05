@@ -2,6 +2,7 @@ package com.dife.member.service;
 
 import com.dife.member.exception.DuplicateMemberException;
 import com.dife.member.exception.UnAuthorizationException;
+import com.dife.member.exception.MemberNotFoundException;
 import com.dife.member.jwt.JWTUtil;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.LoginDto;
@@ -43,6 +44,7 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+
     public Member getMember(String email) {
 
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
@@ -52,11 +54,19 @@ public class MemberService {
         }
         Member member = optionalMember.get();
         return member;
-
     }
 
     public void updateMember(Member member, MemberDto memberUpdateDto)
     {
+        Optional<Member> optionalMember = memberRepository.findById(id);
+
+        if (optionalMember.isEmpty())
+        {
+            throw new MemberNotFoundException("존재하지 않는 회원입니다.");
+        }
+
+        Member member = optionalMember.get();
+
         member.setPassword(memberUpdateDto.getPassword());
         member.setIs_korean(memberUpdateDto.getIs_korean());
         member.setBio(memberUpdateDto.getBio());

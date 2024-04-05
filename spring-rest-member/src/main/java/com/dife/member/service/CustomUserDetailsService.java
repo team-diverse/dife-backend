@@ -28,7 +28,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         if (optionalMember.isEmpty())
         {
+<<<<<<< HEAD
             return null;
+=======
+            throw new MemberNotFoundException(email + " 유저 못찾음!");
+>>>>>>> c3768c7 (에러 헨들링 코드 작성)
         }
 
         Member member = optionalMember.get();

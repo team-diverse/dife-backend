@@ -3,6 +3,9 @@ package com.dife.member.jwt;
 import com.dife.member.exception.UnAuthorizationException;
 import com.dife.member.repository.MemberRepository;
 import com.dife.member.service.CustomUserDetailsService;
+import com.dife.member.exception.UnAuthorizationException;
+import com.dife.member.repository.MemberRepository;
+import com.dife.member.service.CustomUserDetailsService;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,5 +60,4 @@ public class JWTUtil {
         }
         return null;
     }
-
 }
