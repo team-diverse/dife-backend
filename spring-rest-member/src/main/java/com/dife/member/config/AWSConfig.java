@@ -1,4 +1,4 @@
-package com.dife.file.config;
+package com.dife.member.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

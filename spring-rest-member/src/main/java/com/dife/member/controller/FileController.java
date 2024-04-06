@@ -1,6 +1,6 @@
-package com.dife.file.controller;
+package com.dife.member.controller;
 
-import com.dife.file.service.FileService;
+import com.dife.member.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

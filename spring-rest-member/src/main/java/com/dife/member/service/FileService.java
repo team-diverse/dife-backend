@@ -1,11 +1,8 @@
-package com.dife.file.service;
+package com.dife.member.service;
 
-import com.dife.file.model.File;
-import com.dife.file.model.Format;
-import com.dife.file.repository.FileRepository;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.dife.member.model.File;
+import com.dife.member.model.Format;
+import com.dife.member.repository.FileRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
