@@ -3,6 +3,7 @@ package com.dife.api.controller;
 
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.MemberDto;
+import com.dife.api.model.dto.MemberUpdateDto;
 import com.dife.api.model.dto.RegisterRequestDto;
 import com.dife.api.model.dto.VerifyEmailDto;
 import com.dife.api.repository.MemberRepository;
@@ -10,8 +11,9 @@ import com.dife.api.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +32,8 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Slf4j
 public class MemberController {
 
-    @Autowired
-    private MemberRepository memberRepository;
     private final MemberService memberService;
+    private final ModelMapper modelMapper;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterRequestDto> register(@Valid @RequestBody RegisterRequestDto request) {
@@ -53,14 +54,13 @@ public class MemberController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<MemberDto> editProfile(@RequestBody MemberDto memberUpdateDto)
+    public ResponseEntity<MemberUpdateDto> editProfile(@RequestBody MemberUpdateDto requestDto, Authentication auth)
     {
-        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberService.getMember(memberEmail);
-        this.memberService.updateMember(member, memberUpdateDto);
+        String email = auth.getName();
+        Member member = this.memberService.updateMember(email, requestDto);
 
-        MemberDto memberDto = new MemberDto(member);
-        return ResponseEntity.ok(memberDto);
+        MemberUpdateDto responseDto = modelMapper.map(member, MemberUpdateDto.class);
+        return ResponseEntity.ok(responseDto);
     }
 
     @PutMapping("/change-password")

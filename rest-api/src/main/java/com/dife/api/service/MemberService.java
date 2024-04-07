@@ -5,12 +5,12 @@ import com.dife.api.exception.DuplicateMemberException;
 import com.dife.api.exception.MemberException;
 import com.dife.api.exception.RegisterException;
 import com.dife.api.jwt.JWTUtil;
-import com.dife.api.model.dto.MemberDto;
 import com.dife.api.model.dto.RegisterRequestDto;
 import com.dife.api.model.dto.VerifyEmailDto;
-import lombok.RequiredArgsConstructor;
 import com.dife.api.model.Member;
+import com.dife.api.model.dto.MemberUpdateDto;
 import com.dife.api.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,18 +67,16 @@ public class MemberService {
 
     }
 
-    public void updateMember(Member member, MemberDto memberUpdateDto)
-    {
-        String encodedPassword = passwordEncoder.encode(memberUpdateDto.getPassword());
-        member.setPassword(encodedPassword);
+    public Member updateMember(String email, MemberUpdateDto dto) {
+        Member member = this.getMember(email);
 
-        member.setIs_korean(memberUpdateDto.getIs_korean());
-        member.setBio(memberUpdateDto.getBio());
-        member.setMbti(memberUpdateDto.getMbti());
-        member.setIs_public(memberUpdateDto.getIs_public());
-        member.setNickname(memberUpdateDto.getNickname());
+        member.setBio(dto.getBio());
+        member.setIs_public(dto.getIs_public());
+        member.setMajor(dto.getMajor());
+        member.setMbti(dto.getMbti());
+        member.setNickname(dto.getNickname());
 
-        memberRepository.save(member);
+        return member;
     }
 
     public boolean changePassword(VerifyEmailDto emailDto)
