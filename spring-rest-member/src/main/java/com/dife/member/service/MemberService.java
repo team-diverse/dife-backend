@@ -1,7 +1,8 @@
 package com.dife.member.service;
 
 import com.dife.member.exception.DuplicateMemberException;
-import com.dife.member.exception.UnAuthorizationException;
+import com.dife.member.exception.MemberException;
+import com.dife.member.exception.RegisterException;
 import com.dife.member.jwt.JWTUtil;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.MemberDto;
@@ -11,6 +12,7 @@ import com.dife.member.model.dto.RegisterRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ import java.util.UUID;
 @Slf4j
 public class MemberService {
 
+    @Autowired
     private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -36,9 +38,14 @@ public class MemberService {
     public void register(RegisterRequestDto dto) {
         Member member = modelMapper.map(dto, Member.class);
 
-        if (memberRepository.existsByEmail(dto.getEmail()))
+        if (dto.getEmail().isEmpty() || dto.getPassword().isEmpty() || dto.getUsername().isEmpty() ||
+                dto.getMajor().isEmpty() || dto.getStudent_id().isEmpty()) {
+            throw new RegisterException("이메일, 비밀번호, 이름, 전공, 학번을 모두 입력해주세요.");
+        }
+
+        if (memberRepository.existsByEmail(member.getEmail()))
         {
-            throw new DuplicateMemberException("이미 등록한 회원입니다!");
+            throw new DuplicateMemberException("존재하는 회원입니다!");
         }
 
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
@@ -52,7 +59,7 @@ public class MemberService {
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         if (optionalMember.isEmpty())
         {
-            throw new UnAuthorizationException("인증되지 않은 회원입니다!");
+            throw new MemberException("회원을 찾을 수 없습니다!");
         }
         Member member = optionalMember.get();
         return member;
@@ -61,7 +68,6 @@ public class MemberService {
 
     public void updateMember(Member member, MemberDto memberUpdateDto)
     {
-        member.setPassword(memberUpdateDto.getPassword());
         member.setIs_korean(memberUpdateDto.getIs_korean());
         member.setBio(memberUpdateDto.getBio());
         member.setMbti(memberUpdateDto.getMbti());
@@ -73,12 +79,12 @@ public class MemberService {
 
     public boolean changePassword(VerifyEmailDto emailDto)
     {
-        Optional<Member> optionalMember = memberRepository.findByEmail(emailDto.getEmail());
-        if (optionalMember.isEmpty())
+
+        if (!memberRepository.existsByEmail(emailDto.getEmail()))
         {
             return false;
         }
-
+        Optional<Member> optionalMember = memberRepository.findByEmail(emailDto.getEmail());
         Member member = optionalMember.get();
 
         String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -92,8 +98,6 @@ public class MemberService {
         String newPassword = sb.toString();
         String encodedPassword = passwordEncoder.encode(newPassword);
         member.setPassword(encodedPassword);
-
-        memberRepository.save(member);
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setTo(member.getEmail());
