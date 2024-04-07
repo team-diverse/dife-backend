@@ -26,7 +26,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/members")
+@RequestMapping("/api/members")
 @Slf4j
 public class MemberController {
 
@@ -42,7 +42,7 @@ public class MemberController {
                 .body(new RegisterRequestDto(request));
     }
 
-    @GetMapping("/mypage")
+    @GetMapping("/profile")
     public ResponseEntity<MemberDto> profile()
     {
         String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -52,7 +52,7 @@ public class MemberController {
         return ResponseEntity.ok(memberDto);
     }
 
-    @PutMapping("/mypage")
+    @PutMapping("/profile")
     public ResponseEntity<MemberDto> editProfile(@RequestBody MemberDto memberUpdateDto)
     {
         String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
