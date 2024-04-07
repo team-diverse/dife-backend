@@ -30,8 +30,6 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Slf4j
 public class MemberController {
 
-    @Autowired
-    private MemberRepository memberRepository;
     private final MemberService memberService;
 
     @PostMapping("/register")
@@ -47,7 +45,7 @@ public class MemberController {
     {
         String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberService.getMember(memberEmail);
-        log.info(member.getTokenId());
+        log.info("TokenId : " + member.getTokenId());
         MemberDto memberDto = new MemberDto(member);
         return ResponseEntity.ok(memberDto);
     }
@@ -62,7 +60,6 @@ public class MemberController {
         MemberDto memberDto = new MemberDto(member);
         return ResponseEntity.ok(memberDto);
     }
-
     @PutMapping("/change-password")
     public ResponseEntity<HashMap> mailCheck(@RequestBody VerifyEmailDto emailDto)
     {
