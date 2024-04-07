@@ -52,6 +52,7 @@ public class MemberDto {
         this.student_id = request.getStudent_id();
         this.username = request.getUsername();
         this.bio = request.getBio();
+        this.mbti = request.getMbti();
         this.is_korean = request.getIs_korean();
         this.is_public = request.getIs_public();
         this.major = request.getMajor();
