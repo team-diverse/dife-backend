@@ -2,6 +2,7 @@ package com.dife.api.controller;
 
 
 import com.dife.api.model.Member;
+import com.dife.api.model.dto.MemberDto;
 import com.dife.api.model.dto.MemberUpdateDto;
 import com.dife.api.model.RegisterRequestDto;
 import com.dife.api.repository.MemberRepository;

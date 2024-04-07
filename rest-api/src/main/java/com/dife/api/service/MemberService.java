@@ -1,6 +1,11 @@
 package com.dife.api.service;
 
+import com.dife.api.exception.DuplicateMemberException;
+import com.dife.api.exception.MemberNotFoundException;
+import com.dife.api.exception.UnAuthorizationException;
+import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.Member;
+import com.dife.api.model.dto.MemberDto;
 import com.dife.api.model.dto.MemberUpdateDto;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.model.RegisterRequestDto;
@@ -53,22 +58,20 @@ public class MemberService {
 
     public void updateMember(Member member, MemberDto memberUpdateDto)
     {
-        Optional<Member> optionalMember = memberRepository.findById(id);
+        Optional<Member> optionalMember = memberRepository.findById(member.getId());
 
         if (optionalMember.isEmpty())
         {
             throw new MemberNotFoundException("존재하지 않는 회원입니다.");
         }
 
-        Member member = optionalMember.get();
+        Member updatedMember = optionalMember.get();
 
-        member.setPassword(memberUpdateDto.getPassword());
-        member.setIs_korean(memberUpdateDto.getIs_korean());
-        member.setBio(memberUpdateDto.getBio());
-        member.setMbti(memberUpdateDto.getMbti());
-        member.setIs_public(memberUpdateDto.getIs_public());
-        member.setNickname(memberUpdateDto.getNickname());
-
-        memberRepository.save(member);
+        updatedMember.setPassword(memberUpdateDto.getPassword());
+        updatedMember.setIs_korean(memberUpdateDto.getIs_korean());
+        updatedMember.setBio(memberUpdateDto.getBio());
+        updatedMember.setMbti(memberUpdateDto.getMbti());
+        updatedMember.setIs_public(memberUpdateDto.getIs_public());
+        updatedMember.setNickname(memberUpdateDto.getNickname());
     }
 }
