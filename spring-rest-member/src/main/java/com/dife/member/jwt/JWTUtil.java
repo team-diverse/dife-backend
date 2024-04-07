@@ -1,8 +1,5 @@
 package com.dife.member.jwt;
 
-import com.dife.member.exception.UnAuthorizationException;
-import com.dife.member.repository.MemberRepository;
-import com.dife.member.service.CustomUserDetailsService;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +8,6 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
 import java.util.Date;
 
 @Component
@@ -26,7 +22,6 @@ public class JWTUtil {
     }
 
     public String getEmail(String token) {
-
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("email", String.class);
     }
 

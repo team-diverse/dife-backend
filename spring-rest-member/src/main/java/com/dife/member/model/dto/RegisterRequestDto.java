@@ -32,12 +32,12 @@ public class RegisterRequestDto {
     @NotNull()
     private Boolean is_korean;
 
-    @NotNull()
     private String bio;
 
     @NotNull()
     private String password;
 
+    @NotNull()
     private String role;
 
 
