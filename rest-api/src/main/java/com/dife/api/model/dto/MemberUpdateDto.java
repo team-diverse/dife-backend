@@ -14,9 +14,6 @@ import lombok.*;
 public class MemberUpdateDto {
 
     @NotNull
-    private String password;
-
-    @NotNull
     private Boolean is_korean;
 
     @NotNull
