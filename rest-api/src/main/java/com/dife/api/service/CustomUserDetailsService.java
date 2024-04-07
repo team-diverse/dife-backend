@@ -1,6 +1,5 @@
 package com.dife.api.service;
 
-<<<<<<< HEAD:rest-api/src/main/java/com/dife/api/service/CustomUserDetailsService.java
 import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.model.Member;
 import com.dife.api.repository.MemberRepository;

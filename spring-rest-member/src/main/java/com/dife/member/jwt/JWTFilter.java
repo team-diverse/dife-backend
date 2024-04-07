@@ -1,10 +1,10 @@
 package com.dife.member.jwt;
 
-import com.dife.member.exception.MemberNotFoundException;
 import com.dife.member.model.Member;
 import com.dife.member.model.dto.CustomUserDetails;
 import com.dife.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 
@@ -34,24 +35,22 @@ public class JWTFilter  extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+        String servletPath = request.getServletPath();
         String token = jwtUtil.resolveToken(request);
 
-        if (token == null) {
-            log.info("토큰 없음");
+        if (servletPath.equals("/api/members/login")|| servletPath.equals("/api/members/register")||servletPath.equals("/api/members/change-password"))
+        {
             filterChain.doFilter(request, response);
             return;
         }
-        log.info("순수 토큰 획득");
+
         try
         {
             log.info("AceessToken : " + token);
-            response.addHeader("Authorization", "Bearer " + token);
+
             String email = jwtUtil.getEmail(token);
+
             Optional<Member> optionalMember = memberRepository.findByEmail(email);
-            if (optionalMember.isEmpty())
-            {
-                throw new MemberNotFoundException("유저를 찾을 수 없습니다!");
-            }
             Member member = optionalMember.get();
 
             CustomUserDetails customUserDetails = new CustomUserDetails(member);
@@ -65,13 +64,9 @@ public class JWTFilter  extends OncePerRequestFilter {
             String email = e.getClaims().get("email", String.class);
             String role = e.getClaims().get("role", String.class);
 
-            String newToken = jwtUtil.createAccessJwt(email, role, 14 * 24 * 60 * 60 * 1000L);
+            String newToken = jwtUtil.createAccessJwt(email, role, 20 * 1000L);
 
             Optional<Member> optionalMember = memberRepository.findByEmail(email);
-
-            if (optionalMember.isEmpty()) {
-                throw new MemberNotFoundException("유저를 찾을 수 없습니다!");
-            }
             Member member = optionalMember.get();
             member.setTokenId(newToken);
             memberRepository.save(member);
@@ -80,14 +75,24 @@ public class JWTFilter  extends OncePerRequestFilter {
 
             response.setHeader("Authorization", "Bearer " + newToken);
             filterChain.doFilter(request, response);
-        } catch (Exception e)
+        } catch (JwtException | IllegalArgumentException e)
         {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("인증되지 않은 회원입니다!");
+            log.error("유효하지 않은 토큰이 입력되었습니다.");
+            filterChain.doFilter(request, response);
+        } catch (NullPointerException e)
+        {
+            log.info("사용자를 찾을 수 없습니다.");
+            filterChain.doFilter(request, response);
+        } catch (NoSuchElementException e)
+        {
+            log.error("NoSuchElementException");
+            filterChain.doFilter(request, response);
+        } catch (ArrayIndexOutOfBoundsException e)
+        {
+            log.error("토큰을 추출할 수 없습니다.");
+            filterChain.doFilter(request, response);
         }
 
     }
-
 
 }
