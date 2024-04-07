@@ -1,18 +1,16 @@
 package com.dife.api.jwt;
 
-import com.dife.api.exception.MemberNotFoundException;
-import com.dife.api.exception.UnAuthorizationException;
-import com.dife.api.model.Member;
-import com.dife.api.exception.MemberNotFoundException;
-import com.dife.api.exception.UnAuthorizationException;
-import com.dife.api.model.Member;
+import com.dife.api.ExceptionResonse;
 import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.model.dto.LoginSuccessDto;
 import com.dife.api.repository.MemberRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,35 +30,52 @@ import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
-
+@Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
-    private final MemberRepository memberRepository;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, MemberRepository memberRepository)
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil)
     {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.memberRepository = memberRepository;
         this.setFilterProcessesUrl("/api/members/login");
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        try
-        {
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
 
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password, null);
-            return authenticationManager.authenticate(authToken);
-
-        } catch (AuthenticationException e)
+        log.info("email : " + email);
+        log.info("password : " + password);
+        if (email == null || password == null || email.isEmpty() || password.isEmpty())
         {
-            throw new AuthenticationServiceException("인증에 실패했습니다!", e);
+            String errorMessage = "이메일과 비밀번호는 필수 사항";
+            log.warn("이메일과 비밀번호는 필수 사항");
+
+            ExceptionResonse exceptionResponse = new ExceptionResonse(errorMessage);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String result = null;
+            try {
+                result = objectMapper.writeValueAsString(exceptionResponse);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+            response.setStatus(422);
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("application/json");
+            try {
+                response.getWriter().write(result);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password, null);
+        return authenticationManager.authenticate(authToken);
     }
 
     @Override
@@ -77,16 +92,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String token = jwtUtil.createAccessJwt(email, role, 60 * 60 * 1000L);
 
-        String responseBody = "유저가 로그인했습니다.\n사용자 TokenID : " + token;
-        ResponseEntity<String> responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
-
-
-        response.setStatus(responseEntity.getStatusCode().value());
-        response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-
-        response.getWriter().write(responseEntity.getBody());
-
         ResponseEntity<LoginSuccessDto> responseEntity = ResponseEntity
                 .status(CREATED)
                 .body(new LoginSuccessDto(token));
@@ -98,8 +103,19 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
-        response.setStatus(401);
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("인증되지 않은 회원입니다!");
+    public void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+
+        log.error("로그인 실패");
+        String errorMessage = "인증에 실패했습니다: " + failed.getMessage();
+
+        ExceptionResonse exceptionResponse = new ExceptionResonse(errorMessage);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String result = objectMapper.writeValueAsString(exceptionResponse);
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("application/json");
+        response.getWriter().write(result);
+    }
 }
