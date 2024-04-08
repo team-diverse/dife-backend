@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -13,7 +14,6 @@ import java.time.LocalDateTime;
 @Table(name = "member")
 public class Member {
 
-    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -56,5 +56,11 @@ public class Member {
     private String role;
 
     private String tokenId;
+
+    @OneToMany(mappedBy = "member1")
+    private Set<Connect> sent;
+
+    @OneToMany(mappedBy = "member2")
+    private Set<Connect> received;
 
 }
