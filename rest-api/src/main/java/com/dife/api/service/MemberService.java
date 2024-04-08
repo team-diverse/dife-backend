@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class MemberService {
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
+    private final JavaMailSender javaMailSender;
 
     public Member register(RegisterRequestDto dto) {
         Member member = modelMapper.map(dto, Member.class);
@@ -71,6 +73,9 @@ public class MemberService {
         member.setIs_public(memberUpdateDto.getIs_public());
         member.setNickname(memberUpdateDto.getNickname());
 
+        String encodedPassword = passwordEncoder.encode(memberUpdateDto.getPassword());
+        member.setPassword(encodedPassword);
+
         memberRepository.save(member);
     }
 
@@ -103,6 +108,7 @@ public class MemberService {
                 "걱정하지 마세요!. 새 비밀번호를 부여해드릴게요!\n" +
                 "새 비밀번호 : " + newPassword + "\n" +
                 "안전한 인터넷 환경에서 항상 비밀번호를 관리하세요.");
+        javaMailSender.send(simpleMailMessage);
         return true;
     }
 
