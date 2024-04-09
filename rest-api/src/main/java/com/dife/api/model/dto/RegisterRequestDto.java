@@ -34,6 +34,8 @@ public class RegisterRequestDto {
 
     private String bio;
 
+    private String nickname;
+
     @NotNull()
     private String password;
 
@@ -47,6 +49,7 @@ public class RegisterRequestDto {
         this.student_id = request.getStudent_id();
         this.username = request.getUsername();
         this.bio = request.getBio();
+        this.nickname = request.getNickname();
         this.is_korean = request.getIs_korean();
         this.is_public = request.getIs_public();
         this.major = request.getMajor();
