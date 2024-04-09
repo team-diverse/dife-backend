@@ -41,7 +41,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ExceptionResonse> handleRegisterException(RegisterException exception)
     {
         return ResponseEntity
-                .status(INTERNAL_SERVER_ERROR.value())
+                .status(UNPROCESSABLE_ENTITY.value())
                 .body(new ExceptionResonse(exception.getMessage()));
     }
     @ExceptionHandler(IllegalArgumentException.class)

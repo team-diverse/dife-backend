@@ -69,6 +69,9 @@ public class MemberService {
 
     public void updateMember(Member member, MemberDto memberUpdateDto)
     {
+        String encodedPassword = passwordEncoder.encode(memberUpdateDto.getPassword());
+        member.setPassword(encodedPassword);
+
         member.setIs_korean(memberUpdateDto.getIs_korean());
         member.setBio(memberUpdateDto.getBio());
         member.setMbti(memberUpdateDto.getMbti());
