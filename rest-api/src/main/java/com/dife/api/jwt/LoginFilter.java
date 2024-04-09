@@ -1,12 +1,15 @@
 package com.dife.api.jwt;
 
+import com.dife.api.ExceptionResonse;
 import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.model.dto.LoginSuccessDto;
 import com.dife.api.repository.MemberRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,7 @@ import java.util.Iterator;
 import static org.springframework.http.HttpStatus.CREATED;
 
 
+@Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
@@ -39,16 +43,37 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        try {
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
 
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password, null);
-            return authenticationManager.authenticate(authToken);
+        log.info("email : " + email);
+        log.info("password : " + password);
+        if (email == null || password == null || email.isEmpty() || password.isEmpty())
+        {
+            String errorMessage = "이메일과 비밀번호는 필수 사항";
+            log.warn("이메일과 비밀번호는 필수 사항");
 
-        } catch (AuthenticationException e) {
-            throw new AuthenticationServiceException("인증에 실패했습니다!", e);
+            ExceptionResonse exceptionResponse = new ExceptionResonse(errorMessage);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String result = null;
+            try {
+                result = objectMapper.writeValueAsString(exceptionResponse);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("application/json");
+            try {
+                response.getWriter().write(result);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password, null);
+        return authenticationManager.authenticate(authToken);
     }
 
     @Override
@@ -77,8 +102,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
-        response.setStatus(401);
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("인증되지 않은 회원입니다!");
+
+        log.error("로그인 실패");
+        String errorMessage = "인증에 실패했습니다: " + failed.getMessage();
+
+        ExceptionResonse exceptionResponse = new ExceptionResonse(errorMessage);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String result = objectMapper.writeValueAsString(exceptionResponse);
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("application/json");
+        response.getWriter().write(result);
     }
 }
