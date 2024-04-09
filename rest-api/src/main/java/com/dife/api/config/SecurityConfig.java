@@ -39,20 +39,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new JWTFilter(jwtUtil, memberRepository), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, memberRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(
                         sessionManagement ->
                                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers("/api/members/register", "/api/members/login").permitAll();
+                    requests.requestMatchers("/api/members/register", "/api/members/login", "/api/members/change-password").permitAll();
                     requests.requestMatchers("/api/members/**").authenticated();
                     requests.requestMatchers("/api/**").authenticated();
                 })
                 .build();
     }
+
 }

@@ -2,18 +2,13 @@ package com.dife.api.model.dto;
 
 import com.dife.api.model.MBTI_category;
 import com.dife.api.model.Member;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberDto {

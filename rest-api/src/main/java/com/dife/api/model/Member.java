@@ -28,7 +28,6 @@ public class Member {
     @Column(nullable = false)
     private Boolean is_korean;
 
-
     @Column(nullable = false)
     private String username;
 

@@ -1,4 +1,4 @@
-package com.dife.api.model;
+package com.dife.api.model.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -32,12 +32,12 @@ public class RegisterRequestDto {
     @NotNull()
     private Boolean is_korean;
 
-    @NotNull()
     private String bio;
 
     @NotNull()
     private String password;
 
+    @NotNull()
     private String role;
 
 
