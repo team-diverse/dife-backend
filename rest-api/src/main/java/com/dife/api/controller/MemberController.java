@@ -26,7 +26,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/members")
+@RequestMapping("/api/members")
 @Slf4j
 public class MemberController {
 
