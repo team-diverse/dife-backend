@@ -1,6 +1,7 @@
 package com.dife.api.service;
 
 import com.dife.api.model.BoardCategory;
+import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.Member;
 import com.dife.api.model.Post;
 import com.dife.api.model.dto.BoardDto;
@@ -9,6 +10,7 @@ import com.dife.api.model.dto.PostCreateRequestDto;
 import com.dife.api.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.dife.api.model.dto.PostUpdateRequestDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,8 +50,20 @@ public class PostService {
     public Post getPost(Long id)
     {
         Post post = postRepository.findById(id).orElseThrow(()
-            -> new IllegalArgumentException("해당 게시물이 존재하지 않습니다!"));
+            -> new PostNotFoundException("해당 게시물이 존재하지 않습니다!"));
 
         return post;
+    }
+
+    public Post updatePost(Long id, PostUpdateRequestDto dto, Member currentMember) {
+        Post post = postRepository.findByMemberAndId(currentMember, id)
+                .orElseThrow(() -> new PostNotFoundException("해당 게시물에 대한 수정 권한이 없습니다!"));
+
+        post.setBoardType(dto.getBoardType());
+        post.setTitle(dto.getTitle());
+        post.setContent(dto.getContent());
+        post.setIs_public(dto.getIs_public());
+
+        return postRepository.save(post);
     }
 }
