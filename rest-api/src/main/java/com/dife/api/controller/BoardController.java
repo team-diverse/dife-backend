@@ -62,4 +62,11 @@ public class BoardController {
                 .status(OK.value())
                 .body(new PostResponseDto(post));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deletePost(@PathVariable Long id, Authentication auth) {
+        Member currentMember = memberService.getMember(auth.getName());
+        this.postService.deletePost(id, currentMember);
+        return ResponseEntity.ok().body("게시물이 삭제되었습니다!");
+    }
 }

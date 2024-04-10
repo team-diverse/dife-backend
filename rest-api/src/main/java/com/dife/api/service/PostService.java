@@ -66,4 +66,12 @@ public class PostService {
 
         return postRepository.save(post);
     }
+
+    public void deletePost(Long id, Member currentMember) {
+        Post post = postRepository.findByMemberAndId(currentMember, id)
+                .orElseThrow(() -> new PostNotFoundException("해당 게시물에 대한 삭제 권한이 없습니다!"));
+
+        postRepository.delete(post);
+    }
+
 }
