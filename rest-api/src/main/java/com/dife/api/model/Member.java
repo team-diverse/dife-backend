@@ -21,6 +21,10 @@ public class Member {
     @Column(nullable = false)
     private String email;
 
+    @Column
+    private String abc;
+    sdfklasdjlfsdf
+
     @JsonIgnore
     @Column(nullable = false)
     private String password;
