@@ -23,7 +23,6 @@ public class Member {
 
     @Column
     private String abc;
-    sdfklasdjlfsdf
 
     @JsonIgnore
     @Column(nullable = false)
