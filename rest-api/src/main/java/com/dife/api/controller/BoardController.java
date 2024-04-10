@@ -6,6 +6,7 @@ import com.dife.api.model.Post;
 import com.dife.api.model.dto.BoardDto;
 import com.dife.api.model.dto.PostCreateRequestDto;
 import com.dife.api.model.dto.PostResponseDto;
+import com.dife.api.model.dto.PostUpdateRequestDto;
 import com.dife.api.service.MemberService;
 import com.dife.api.service.PostService;
 import jakarta.validation.Valid;
@@ -47,6 +48,16 @@ public class BoardController {
     public ResponseEntity<PostResponseDto> seatchById(@PathVariable Long id)
     {
         Post post = postService.getPost(id);
+        return ResponseEntity
+                .status(OK.value())
+                .body(new PostResponseDto(post));
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<PostResponseDto> editPost(@PathVariable Long id, @RequestBody PostUpdateRequestDto request, Authentication auth)
+    {
+        Member currentMember = memberService.getMember(auth.getName());
+        Post post = postService.updatePost(id, request, currentMember);
+
         return ResponseEntity
                 .status(OK.value())
                 .body(new PostResponseDto(post));

@@ -3,6 +3,7 @@ package com.dife.api;
 import com.dife.api.exception.DuplicateException;
 import com.dife.api.exception.MemberException;
 import com.dife.api.exception.RegisterException;
+import com.dife.api.exception.PostNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,6 +49,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ExceptionResonse> handleIllegalArgumentException(IllegalArgumentException exception)
+    {
+        return ResponseEntity
+                .status(UNAUTHORIZED.value())
+                .body(new ExceptionResonse(exception.getMessage()));
+    }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<ExceptionResonse> handlePostNotFoundException(PostNotFoundException exception)
     {
         return ResponseEntity
                 .status(UNAUTHORIZED.value())
