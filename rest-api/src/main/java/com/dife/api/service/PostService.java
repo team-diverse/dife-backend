@@ -47,4 +47,12 @@ public class PostService {
                 .map(BoardDto::new)
                 .collect(Collectors.toList());
     }
+
+    public Post getPost(Long id)
+    {
+        Post post = postRepository.findById(id).orElseThrow(()
+            -> new IllegalArgumentException("해당 게시물이 존재하지 않습니다!"));
+
+        return post;
+    }
 }

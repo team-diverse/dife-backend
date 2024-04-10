@@ -30,7 +30,7 @@ public class Post {
     @NotNull
     private Boolean is_public;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "member", referencedColumnName = "id")
     private Member member;
 

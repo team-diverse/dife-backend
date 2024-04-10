@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,4 +43,12 @@ public class BoardController {
         return ResponseEntity.ok(posts);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<PostResponseDto> seatchById(@PathVariable Long id)
+    {
+        Post post = postService.getPost(id);
+        return ResponseEntity
+                .status(OK.value())
+                .body(new PostResponseDto(post));
+    }
 }
