@@ -41,21 +41,22 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_REGION_CODE: ${{ secrets.AWS_REGION_CODE }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
+          envs: ECR_REGISTRY, ECR_REPOSITORY, AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, AWS_REGION_CODE
           script: |
-            aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_KEY }} 
-            aws configure set default.region ${{ secrets.AWS_REGION_CODE }}
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $AWS_SECRET_KEY
+            aws configure set default.region $AWS_REGION_CODE
             aws configure set default.ouput json
             
-            if docker ps -a --filter name=myapp | grep myapp; then
-              docker stop myapp || true
-              docker rm myapp || true
-            fi
-            
+            docker stop myapp || true
+            docker rm myapp || true
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker run -d --name myapp -p 8080:8080 $ECR_REGISTRY/$ECR_REPOSITORY:latest
