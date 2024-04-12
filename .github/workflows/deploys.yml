@@ -52,7 +52,10 @@ jobs:
             aws configure set default.region ${{ secrets.AWS_REGION_CODE }}
             aws configure set default.ouput json
             
-            docker stop myapp || true
-            docker rm myapp || true
+            if docker ps -a --filter name=myapp | grep myapp; then
+              docker stop myapp || true
+              docker rm myapp || true
+            fi
+            
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker run -d --name myapp -p 8080:8080 $ECR_REGISTRY/$ECR_REPOSITORY:latest
