@@ -58,5 +58,6 @@ jobs:
             
             docker stop myapp || true
             docker rm myapp || true
+            aws ecr get-login-password --region $AWS_REGION_CODE | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker run -d --name myapp -p 8080:8080 $ECR_REGISTRY/$ECR_REPOSITORY:latest
