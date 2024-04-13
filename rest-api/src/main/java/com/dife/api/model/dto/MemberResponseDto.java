@@ -19,8 +19,6 @@ public class MemberResponseDto {
 
     private String email;
 
-    private String password;
-
     private String name;
 
     private String student_id;
@@ -30,8 +28,6 @@ public class MemberResponseDto {
     private String role;
 
     private String username;
-
-    private String verification_file_id;
 
     private Boolean is_korean;
 
@@ -49,21 +45,17 @@ public class MemberResponseDto {
 
     private Boolean is_verified;
 
-    private String tokenId;
-
     private LocalDateTime created;
 
     private LocalDateTime modified;
 
     public MemberResponseDto(Member member) {
         this.email = member.getEmail();
-        this.password = member.getPassword();
         this.name = member.getName();
         this.student_id = member.getStudent_id();
         this.major = member.getMajor();
         this.role = member.getRole();
         this.username = member.getUsername();
-        this.verification_file_id = member.getVerification_file_id();
         this.is_korean = member.getIs_korean();
         this.is_public = member.getIs_public();
         this.mbti = member.getMbti();
@@ -80,7 +72,6 @@ public class MemberResponseDto {
         this.profile_file_id = member.getProfile_file_id();
         this.bio = member.getBio();
         this.is_verified = member.getIs_verified();
-        this.tokenId = member.getTokenId();
         this.created = member.getCreated();
         this.modified = member.getModified();
     }
