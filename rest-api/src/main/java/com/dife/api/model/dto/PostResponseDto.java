@@ -39,7 +39,7 @@ public class PostResponseDto {
         this.content = request.getContent();
         this.is_public = request.getIs_public();
         this.boardType = request.getBoardType();
-        this.username = request.getMember().getNickname();
+        this.username = request.getMember().getUsername();
         this.created = request.getCreated();
         this.modified = request.getModified();
     }

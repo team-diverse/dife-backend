@@ -1,6 +1,6 @@
 package com.dife.api.model;
 
-public enum MBTI_category {
+public enum MbtiCategory {
     ISTJ,
     ISFJ,
     INFJ,
