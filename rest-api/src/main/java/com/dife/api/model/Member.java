@@ -39,7 +39,7 @@ public class Member extends BaseTimeEntity{
 
     private String role = "user";
 
-    private String auth_file_id;
+    private String verification_file_id;
 
     private Boolean is_korean;
 

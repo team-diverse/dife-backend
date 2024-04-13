@@ -75,7 +75,7 @@ public class MemberController {
 
         Member member = memberService.register7(dto, id);
         member.setProfile_file_id(profileImgPath);
-        member.setAuth_file_id(verificationImgPath);
+        member.setVerification_file_id(verificationImgPath);
         return ResponseEntity.status(HttpStatus.CREATED).body(new MemberResponseDto(member));
     }
 

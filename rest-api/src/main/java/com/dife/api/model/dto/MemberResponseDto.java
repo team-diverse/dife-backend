@@ -31,7 +31,7 @@ public class MemberResponseDto {
 
     private String username;
 
-    private String auth_file_id;
+    private String verification_file_id;
 
     private Boolean is_korean;
 
@@ -63,7 +63,7 @@ public class MemberResponseDto {
         this.major = member.getMajor();
         this.role = member.getRole();
         this.username = member.getUsername();
-        this.auth_file_id = member.getAuth_file_id();
+        this.verification_file_id = member.getVerification_file_id();
         this.is_korean = member.getIs_korean();
         this.is_public = member.getIs_public();
         this.mbti = member.getMbti();
