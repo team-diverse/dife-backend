@@ -1,8 +1,8 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.MBTI_category;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
+
+import java.util.Set;
 
 
 @Getter
@@ -11,16 +11,18 @@ import lombok.*;
 @NoArgsConstructor
 public class MemberUpdateDto {
 
-    @NotNull
-    private String bio;
+    private String password;
 
-    @NotNull
+    private String username;
+
     private Boolean is_public;
 
-    @NotNull
-    private String major;
+    private Set<String> languages;
 
-    private MBTI_category mbti;
+    private Set<String> hobbies;
 
-    private String nickname;
+    private String profile_file_id;
+
+    private String bio;
+
 }
