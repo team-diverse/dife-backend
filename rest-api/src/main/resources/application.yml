@@ -3,6 +3,8 @@ spring:
         database-platform: org.hibernate.dialect.MySQLDialect
         open-in-view: false
         show-sql: true
+        hibernate:
+            ddl-auto: create
 
     datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver
