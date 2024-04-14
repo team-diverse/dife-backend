@@ -66,21 +66,11 @@ jobs:
             aws configure set default.region $AWS_REGION_CODE
             aws configure set default.ouput json
             
-            echo "$ECR_REGISTRY" >> test.txt
-            echo "$ECR_REPOSITORY" >> test.txt
-            echo "$AWS_ACCESS_KEY_ID" >> test.txt
-            echo "$DB_HOST" >> test.txt
-            echo "$DB_PORT" >> test.txt
-            echo "$DB_NAME" >> test.txt
-            echo "$DB_PASSWORD" >> test.txt
-            
             docker stop myapp || true
             docker rm myapp || true
             aws ecr get-login-password --region $AWS_REGION_CODE | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker run -d \
-            --name myapp \
-            -p 8080:8080 \
             -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
             -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
             -e AWS_REGION_CODE=$AWS_REGION_CODE \
@@ -93,4 +83,5 @@ jobs:
             -e JWT_SECRET=$JWT_SECRET \
             -e GOOGLE_EMAIL=$GOOGLE_EMAIL \
             -e GOOGLE_APP_PASSWORD=$GOOGLE_APP_PASSWORD \
-            $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            -p 8080:8080 \
+            --name myapp $ECR_REGISTRY/$ECR_REPOSITORY:latest
