@@ -66,6 +66,14 @@ jobs:
             aws configure set default.region $AWS_REGION_CODE
             aws configure set default.ouput json
             
+            echo "$ECR_REGISTRY" >> test.txt
+            echo "$ECR_REPOSITORY" >> test.txt
+            echo "$AWS_ACCESS_KEY_ID" >> test.txt
+            echo "$DB_HOST" >> test.txt
+            echo "$DB_PORT" >> test.txt
+            echo "$DB_NAME" >> test.txt
+            echo "$DB_PASSWORD" >> test.txt
+            
             docker stop myapp || true
             docker rm myapp || true
             aws ecr get-login-password --region $AWS_REGION_CODE | docker login --username AWS --password-stdin $ECR_REGISTRY
