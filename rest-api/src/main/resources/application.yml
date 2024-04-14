@@ -1,13 +1,15 @@
 spring:
-    profiles:
-        active: local
-
     jpa:
         database-platform: org.hibernate.dialect.MySQLDialect
         open-in-view: false
         show-sql: true
-        hibernate:
-            ddl-auto: create
+
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: ${DB_URL}
+        username: ${DB_USER}
+        password: ${DB_PASSWORD}
+
     mail:
         host: smtp.gmail.com
         port: 587
@@ -20,5 +22,11 @@ spring:
                       enable: true
                       auth: true
 
+    aws:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_KEY}
+        region: ${AWS_REGION_CODE}
+        bucket-name: ${AWS_S3_BUCKET_NAME}
+
 jwt:
-    secret : ${JWT_ACCESS_KEY}
+    secret: ${JWT_SECRET}

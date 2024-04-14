@@ -3,15 +3,9 @@ spring:
     activate:
       on-profile: local
 
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:${DB_PORT}/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: create
 
   aws:
-    access-key: ${AWS_ACCESS_KEY_ID}
-    secret-key: ${AWS_SECRET_KEY}
     session-token: ${AWS_SESSION_TOKEN}
-    region: ${AWS_REGION}
-    bucket-name: ${AWS_S3_BUCKET_NAME}
