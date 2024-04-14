@@ -8,7 +8,7 @@ spring:
 
     datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://dife-rds.cng444maeo0c.ap-northeast-2.rds.amazonaws.com:3306/dife_prod
+        url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
         username: ${DB_USER}
         password: ${DB_PASSWORD}
 
