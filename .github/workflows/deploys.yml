@@ -44,12 +44,19 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
           AWS_REGION_CODE: ${{ secrets.AWS_REGION_CODE }}
+          AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          GOOGLE_EMAIL: ${{ secrets.GOOGLE_EMAIL }}
+          GOOGLE_APP_PASSWORD: ${{ secrets.GOOGLE_APP_PASSWORD }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
-          envs: ECR_REGISTRY, ECR_REPOSITORY, AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, AWS_REGION_CODE
+          envs: ECR_REGISTRY, ECR_REPOSITORY, AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, AWS_REGION_CODE, AWS_S3_BUCKET_NAME, DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET, GOOGLE_EMAIL, GOOGLE_APP_PASSWORD
           script: |
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_KEY
@@ -60,4 +67,14 @@ jobs:
             docker rm myapp || true
             aws ecr get-login-password --region $AWS_REGION_CODE | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
-            docker run -d --name myapp -p 8080:8080 $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            docker run -d --name myapp -p 8080:8080 $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+            -e AWS_SECRET_KEY=$AWS_SECRET_KEY \
+            -e AWS_REGION_CODE=$AWS_REGION_CODE \
+            -e AWS_S3_BUCKET_NAME=$AWS_S3_BUCKET_NAME \
+            -e DB_URL=$DB_URL \
+            -e DB_USER=$DB_USER \
+            -e DB_PASSWORD=$DB_PASSWORD \
+            -e JWT_SECRET=$JWT_SECRET \
+            -e GOOGLE_EMAIL=$GOOGLE_EMAIL \
+            -e GOOGLE_APP_PASSWORD=$GOOGLE_APP_PASSWORD \
