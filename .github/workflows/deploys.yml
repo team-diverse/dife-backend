@@ -66,22 +66,24 @@ jobs:
             aws configure set default.region $AWS_REGION_CODE
             aws configure set default.ouput json
             
+            rm env.prod
+            touch env.prod
+            echo "ECR_REGISTRY=$ECR_REGISTRY" >> env.prod
+            echo "ECR_REPOSITORY=$ECR_REPOSITORY" >> env.prod
+            echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> env.prod
+            echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> env.prod
+            echo "AWS_REGION_CODE=$AWS_REGION_CODE" >> env.prod
+            echo "AWS_S3_BUCKET_NAME=$AWS_S3_BUCKET_NAME" >> env.prod
+            echo "DB_HOST=$DB_HOST" >> env.prod
+            echo "DB_PORT=$DB_NAME" >> env.prod
+            echo "DB_USER=$DB_USER" >> env.prod
+            echo "DB_PASSWORD=$DB_PASSWORD" >> env.prod
+            echo "JWT_SECRET=$JWT_SECRET" >> env.prod
+            echo "GOOGLE_EMAIL=$GOOGLE_EMAIL" >> env.prod
+            echo "GOOGLE_APP_PASSWORD=$GOOGLE_APP_PASSWORD" >> env.prod
+            
             docker stop myapp || true
             docker rm myapp || true
             aws ecr get-login-password --region $AWS_REGION_CODE | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
-            docker run -d \
-              -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-              -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-              -e AWS_REGION_CODE=$AWS_REGION_CODE \
-              -e AWS_S3_BUCKET_NAME=$AWS_S3_BUCKET_NAME \
-              -e DB_HOST=$DB_HOST \
-              -e DB_PORT=$DB_PORT \
-              -e DB_NAME=$DB_NAME \
-              -e DB_USER=$DB_USER \
-              -e DB_PASSWORD=$DB_PASSWORD \
-              -e JWT_SECRET=$JWT_SECRET \
-              -e GOOGLE_EMAIL=$GOOGLE_EMAIL \
-              -e GOOGLE_APP_PASSWORD=$GOOGLE_APP_PASSWORD \
-              -p 8080:8080 \
-              --name myapp $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            docker run -d --env-file ./env.prod -p 8080:8080 --name myapp $ECR_REGISTRY/$ECR_REPOSITORY:latest
