@@ -58,6 +58,7 @@ jobs:
           port: ${{ secrets.EC2_SSH_PORT }}
           envs: ECR_REGISTRY, ECR_REPOSITORY, AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, AWS_REGION_CODE, AWS_S3_BUCKET_NAME, DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET, GOOGLE_EMAIL, GOOGLE_APP_PASSWORD
           script: |
+            sudo rm -rf .aws
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_KEY
             aws configure set default.region $AWS_REGION_CODE
