@@ -19,7 +19,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION_CODE }}
 
       - name: Upload to AWS ECR
@@ -42,7 +42,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION_CODE: ${{ secrets.AWS_REGION_CODE }}
           AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
           DB_URL: ${{ secrets.DB_URL }}
@@ -56,11 +56,11 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
-          envs: ECR_REGISTRY, ECR_REPOSITORY, AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, AWS_REGION_CODE, AWS_S3_BUCKET_NAME, DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET, GOOGLE_EMAIL, GOOGLE_APP_PASSWORD
+          envs: ECR_REGISTRY, ECR_REPOSITORY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_CODE, AWS_S3_BUCKET_NAME, DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET, GOOGLE_EMAIL, GOOGLE_APP_PASSWORD
           script: |
             sudo rm -rf .aws
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-            aws configure set aws_secret_access_key $AWS_SECRET_KEY
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set default.region $AWS_REGION_CODE
             aws configure set default.ouput json
             
@@ -70,7 +70,7 @@ jobs:
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker run -d --name myapp -p 8080:8080 $ECR_REGISTRY/$ECR_REPOSITORY:latest \
             -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-            -e AWS_SECRET_KEY=$AWS_SECRET_KEY \
+            -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
             -e AWS_REGION_CODE=$AWS_REGION_CODE \
             -e AWS_S3_BUCKET_NAME=$AWS_S3_BUCKET_NAME \
             -e DB_URL=$DB_URL \
