@@ -75,7 +75,7 @@ jobs:
             echo "AWS_REGION_CODE=$AWS_REGION_CODE" >> env.prod
             echo "AWS_S3_BUCKET_NAME=$AWS_S3_BUCKET_NAME" >> env.prod
             echo "DB_HOST=$DB_HOST" >> env.prod
-            echo "DB_PORT=$DB_NAME" >> env.prod
+            echo "DB_PORT=$DB_PORT" >> env.prod
             echo "DB_USER=$DB_USER" >> env.prod
             echo "DB_PASSWORD=$DB_PASSWORD" >> env.prod
             echo "JWT_SECRET=$JWT_SECRET" >> env.prod
