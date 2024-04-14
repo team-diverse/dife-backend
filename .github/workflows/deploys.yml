@@ -60,7 +60,6 @@ jobs:
           port: ${{ secrets.EC2_SSH_PORT }}
           envs: ECR_REGISTRY, ECR_REPOSITORY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_CODE, AWS_S3_BUCKET_NAME, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, JWT_SECRET, GOOGLE_EMAIL, GOOGLE_APP_PASSWORD
           script: |
-            printenv
             sudo rm -rf .aws
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
@@ -71,7 +70,9 @@ jobs:
             docker rm myapp || true
             aws ecr get-login-password --region $AWS_REGION_CODE | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
-            docker run -d --name myapp -p 8080:8080 $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            docker run -d \
+            --name myapp \
+            -p 8080:8080 \
             -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
             -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
             -e AWS_REGION_CODE=$AWS_REGION_CODE \
@@ -84,3 +85,4 @@ jobs:
             -e JWT_SECRET=$JWT_SECRET \
             -e GOOGLE_EMAIL=$GOOGLE_EMAIL \
             -e GOOGLE_APP_PASSWORD=$GOOGLE_APP_PASSWORD \
+            $ECR_REGISTRY/$ECR_REPOSITORY:latest \
