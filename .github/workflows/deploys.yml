@@ -45,7 +45,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION_CODE: ${{ secrets.AWS_REGION_CODE }}
           AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
-          DB_URL: ${{ secrets.DB_URL }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ screts.DB_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -56,7 +58,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
-          envs: ECR_REGISTRY, ECR_REPOSITORY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_CODE, AWS_S3_BUCKET_NAME, DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET, GOOGLE_EMAIL, GOOGLE_APP_PASSWORD
+          envs: ECR_REGISTRY, ECR_REPOSITORY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_CODE, AWS_S3_BUCKET_NAME, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, JWT_SECRET, GOOGLE_EMAIL, GOOGLE_APP_PASSWORD
           script: |
             sudo rm -rf .aws
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
@@ -73,7 +75,9 @@ jobs:
             -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
             -e AWS_REGION_CODE=$AWS_REGION_CODE \
             -e AWS_S3_BUCKET_NAME=$AWS_S3_BUCKET_NAME \
-            -e DB_URL=$DB_URL \
+            -e DB_HOST=$DB_HOST \
+            -e DB_PORT=$DB_PORT \
+            -e DB_NAME=$DB_NAME \
             -e DB_USER=$DB_USER \
             -e DB_PASSWORD=$DB_PASSWORD \
             -e JWT_SECRET=$JWT_SECRET \
