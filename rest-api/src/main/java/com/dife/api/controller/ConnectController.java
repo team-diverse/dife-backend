@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -20,7 +23,12 @@ import static org.springframework.http.HttpStatus.OK;
 public class ConnectController {
 
     private final ConnectService connectService;
-    private final MemberService memberService;
+
+    @GetMapping("/")
+    public ResponseEntity<List<ConnectResponseDto>> getConnects(Authentication auth) {
+        List<ConnectResponseDto> responseDto = connectService.getConnects(auth.getName());
+        return ResponseEntity.status(OK).body(responseDto);
+    }
 
     @PostMapping("/")
     public ResponseEntity<ConnectResponseDto> createConnect(@Valid @RequestBody ConnectRequestDto requestDto, Authentication auth) {

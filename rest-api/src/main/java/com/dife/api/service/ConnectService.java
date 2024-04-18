@@ -9,10 +9,15 @@ import com.dife.api.model.dto.ConnectRequestDto;
 import com.dife.api.model.dto.ConnectResponseDto;
 import com.dife.api.repository.ConnectRepository;
 import com.dife.api.repository.MemberRepository;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,14 @@ public class ConnectService {
     private final MemberRepository memberRepository;
 
     private final ModelMapper modelMapper;
+
+    @Transactional(readOnly = true)
+    public List<ConnectResponseDto> getConnects(String currentMemberEmail) {
+        Member currentMember = memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
+        List<Connect> connects = connectRepository.findAllByMemberAndStatus(currentMember, ConnectStatus.ACCEPTED);
+
+        return connects.stream().map(c -> modelMapper.map(c, ConnectResponseDto.class)).collect(toList());
+    }
 
     public ConnectResponseDto saveConnect(ConnectRequestDto dto, String currentMemberEmail) {
         Member currentMember = memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
