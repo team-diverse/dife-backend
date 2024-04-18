@@ -66,6 +66,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ExceptionResonse(exception.getMessage()));
     }
 
+    @ExceptionHandler(ConnectNotFoundException.class)
+    public ResponseEntity<ExceptionResonse> handleConnectException(ConnectNotFoundException exception) {
+        return ResponseEntity
+                .status(NOT_FOUND)
+                .body(new ExceptionResonse(exception.getMessage()));
+    }
+    
+    @ExceptionHandler(ConnectUnauthorizedException.class)
+    public ResponseEntity<ExceptionResonse> handleConnectException(ConnectUnauthorizedException exception) {
+        return ResponseEntity
+                .status(UNAUTHORIZED)
+                .body(new ExceptionResonse(exception.getMessage()));
+    }
 
     @ExceptionHandler(IdenticalConnectException.class)
     public ResponseEntity<ExceptionResonse> handleConnectException(IdenticalConnectException exception) {
