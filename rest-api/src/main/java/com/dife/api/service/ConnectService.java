@@ -4,6 +4,7 @@ import com.dife.api.exception.*;
 import com.dife.api.model.Connect;
 import com.dife.api.model.ConnectStatus;
 import com.dife.api.model.Member;
+import com.dife.api.model.dto.ConnectPatchRequestDto;
 import com.dife.api.model.dto.ConnectRequestDto;
 import com.dife.api.model.dto.ConnectResponseDto;
 import com.dife.api.repository.ConnectRepository;
@@ -40,5 +41,23 @@ public class ConnectService {
         connectRepository.save(connect);
 
         return modelMapper.map(connect, ConnectResponseDto.class);
+    }
+
+    public void acceptConnect(ConnectPatchRequestDto requestDto, String currentMemberEmail) {
+        if (!isConnectRelevant(requestDto.getMemberId(), currentMemberEmail)) {
+            throw new ConnectUnauthorizedException();
+        }
+        Member currentMember = memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
+        Member otherMember = memberRepository.findById(requestDto.getMemberId()).orElseThrow(MemberNotFoundException::new);
+
+        Connect connect = connectRepository.findByFromMemberAndToMember(otherMember, currentMember).orElseThrow(ConnectNotFoundException::new);
+        connect.setStatus(ConnectStatus.ACCEPTED);
+    }
+
+    public boolean isConnectRelevant(Long id, String email) {
+        Connect connect = connectRepository.findById(id).orElseThrow(ConnectNotFoundException::new);
+        String fromMemberEmail = connect.getFromMember().getEmail();
+        String toMemberEmail = connect.getToMember().getEmail();
+        return fromMemberEmail.equals(email) || toMemberEmail.equals(email);
     }
 }
