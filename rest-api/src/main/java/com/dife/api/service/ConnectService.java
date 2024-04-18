@@ -54,6 +54,13 @@ public class ConnectService {
         connect.setStatus(ConnectStatus.ACCEPTED);
     }
 
+    public void deleteConnect(Long id, String email) {
+        if (!isConnectRelevant(id, email)) {
+            throw new ConnectUnauthorizedException();
+        }
+        connectRepository.deleteById(id);
+    }
+
     public boolean isConnectRelevant(Long id, String email) {
         Connect connect = connectRepository.findById(id).orElseThrow(ConnectNotFoundException::new);
         String fromMemberEmail = connect.getFromMember().getEmail();
