@@ -1,5 +1,6 @@
 package com.dife.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -63,10 +64,11 @@ public class Member extends BaseTimeEntity{
 
     private String tokenId;
 
-    @OneToMany(mappedBy = "member1")
+    @JsonIgnore
+    @OneToMany(mappedBy = "fromMember")
     private Set<Connect> sent;
 
-    @OneToMany(mappedBy = "member2")
+    @JsonIgnore
+    @OneToMany(mappedBy = "toMember")
     private Set<Connect> received;
-
 }

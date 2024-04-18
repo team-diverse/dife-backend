@@ -1,7 +1,7 @@
 package com.dife.api.controller;
 
 import com.dife.api.model.Member;
-import com.dife.api.model.dto.ConnectDto;
+import com.dife.api.model.dto.ConnectRequestDto;
 import com.dife.api.service.ConnectService;
 import com.dife.api.service.MemberService;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ public class ConnectController {
     private final MemberService memberService;
 
     @PostMapping("/")
-    public ResponseEntity<String> connect(@Valid @RequestBody ConnectDto requestDto, Authentication auth) {
+    public ResponseEntity<String> connect(@Valid @RequestBody ConnectRequestDto requestDto, Authentication auth) {
         Member currentMember = memberService.getMember(auth.getName());
         connectService.connectMembers(requestDto, currentMember);
 
