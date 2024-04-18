@@ -36,6 +36,16 @@ public class ConnectService {
         return connects.stream().map(c -> modelMapper.map(c, ConnectResponseDto.class)).collect(toList());
     }
 
+    @Transactional(readOnly = true)
+    public ConnectResponseDto getConnect(Long memberId, String currentMemberEmail) {
+        Member currentMember = memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
+        Member otherMember = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+        Connect connect = connectRepository.findByMemberPair(otherMember, currentMember).orElseThrow(ConnectNotFoundException::new);
+
+        return modelMapper.map(connect, ConnectResponseDto.class);
+    }
+
     public ConnectResponseDto saveConnect(ConnectRequestDto dto, String currentMemberEmail) {
         Member currentMember = memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
         Member toMember = memberRepository.findById(dto.getToMemberId()).orElseThrow(MemberNotFoundException::new);
