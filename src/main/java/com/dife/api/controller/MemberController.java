@@ -4,7 +4,6 @@ package com.dife.api.controller;
 import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.*;
-import com.dife.api.model.dto.RegisterDto.*;
 import com.dife.api.service.FileService;
 import com.dife.api.service.MemberService;
 import jakarta.validation.Valid;
