@@ -49,6 +49,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(requests -> {
                     requests.requestMatchers("/api/members/register/**", "/api/members/change-password", "/api/members/login").permitAll();
+                    requests.requestMatchers(request -> request.getParameter("username") != null).permitAll();
                     requests.requestMatchers("/api/members/**").authenticated();
                     requests.requestMatchers("/api/**").authenticated();
                 })
