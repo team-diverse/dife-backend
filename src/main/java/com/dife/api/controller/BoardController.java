@@ -29,7 +29,7 @@ public class BoardController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<PostResponseDto> createPost(@Valid @RequestBody PostCreateRequestDto request, Authentication auth) {
+    public ResponseEntity<PostResponseDto> create(@Valid @RequestBody PostCreateRequestDto request, Authentication auth) {
         Member currentMember = memberService.getMember(auth.getName());
         Post post = postService.create(request, currentMember);
 
@@ -45,21 +45,21 @@ public class BoardController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponseDto> seatchById(@PathVariable Long id)
+    public ResponseEntity<PostResponseDto> getPost(@PathVariable Long id)
     {
         Post post = postService.getPost(id);
         return ResponseEntity
-                .status(OK.value())
+                .status(OK)
                 .body(new PostResponseDto(post));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponseDto> editPost(@PathVariable Long id, @RequestBody PostUpdateRequestDto request, Authentication auth)
+    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody PostUpdateRequestDto request, Authentication auth)
     {
         Member currentMember = memberService.getMember(auth.getName());
         Post post = postService.updatePost(id, request, currentMember);
 
         return ResponseEntity
-                .status(OK.value())
+                .status(OK)
                 .body(new PostResponseDto(post));
     }
 
