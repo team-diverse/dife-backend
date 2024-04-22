@@ -12,7 +12,5 @@ import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findPostsByBoardType(BoardCategory boardType);
-
-    @Query("SELECT p FROM Post p WHERE p.member = :member AND p.id = :postId")
     Optional<Post> findByMemberAndId(@Param("member") Member member, @Param("postId") Long postId);
 }

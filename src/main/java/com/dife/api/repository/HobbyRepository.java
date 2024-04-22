@@ -9,6 +9,5 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface HobbyRepository extends JpaRepository<Hobby, Long> {
-    @Query("SELECT h FROM Hobby h WHERE h.member = :member AND h.name = :hobbyName")
     Optional<Hobby> findByMemberAndName(@Param("member") Member member, @Param("hobbyName") String hobbyName);
 }
