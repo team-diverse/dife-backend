@@ -76,7 +76,6 @@ public class MemberService {
     {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
-
         FileDto profileImgPath = fileService.upload(profile_img);
         FileDto verificationImgPath = fileService.upload(verification_file);
 

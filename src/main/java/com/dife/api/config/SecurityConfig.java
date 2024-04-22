@@ -48,10 +48,16 @@ public class SecurityConfig {
                                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(requests -> {
+<<<<<<< HEAD:src/main/java/com/dife/api/config/SecurityConfig.java
                     requests.requestMatchers(
                             "/api/members/register",
                             "/api/members/change-password",
                             "/api/members/login").permitAll();
+=======
+                    requests.requestMatchers("/api/members/register/**", "/api/members/change-password", "/api/members/login").permitAll();
+                    requests.requestMatchers(request -> request.getParameter("username") != null).permitAll();
+                    requests.requestMatchers("/api/members/**").authenticated();
+>>>>>>> c3cb7f4 (fix/member-signup-2: 회원가입 수정사항 반영):rest-api/src/main/java/com/dife/api/config/SecurityConfig.java
                     requests.requestMatchers("/api/**").authenticated();
                 })
                 .build();
