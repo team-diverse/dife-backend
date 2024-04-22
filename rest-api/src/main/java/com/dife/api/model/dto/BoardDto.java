@@ -19,6 +19,6 @@ public class BoardDto {
     public BoardDto(Post post) {
         this.id = post.getId();
         this.title = post.getTitle();
-        this.username = post.getMember().getNickname();
+        this.username = post.getMember().getUsername();
     }
 }

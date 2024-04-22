@@ -1,6 +1,5 @@
 package com.dife.api.jwt;
 
-import com.dife.api.exception.MemberException;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.repository.MemberRepository;
@@ -39,7 +38,7 @@ public class JWTFilter  extends OncePerRequestFilter {
         String servletPath = request.getServletPath();
         String token = jwtUtil.resolveToken(request);
 
-        if (servletPath.equals("/api/members/login")|| servletPath.equals("/api/members/register")||servletPath.equals("/api/members/change-password"))
+        if (servletPath.startsWith("/api/members/register") || servletPath.equals("/api/members/change-password")|| servletPath.equals("/api/members/login"))
         {
             filterChain.doFilter(request, response);
             return;

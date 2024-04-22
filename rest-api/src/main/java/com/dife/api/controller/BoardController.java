@@ -6,6 +6,7 @@ import com.dife.api.model.Post;
 import com.dife.api.model.dto.BoardDto;
 import com.dife.api.model.dto.PostCreateRequestDto;
 import com.dife.api.model.dto.PostResponseDto;
+import com.dife.api.model.dto.PostUpdateRequestDto;
 import com.dife.api.service.MemberService;
 import com.dife.api.service.PostService;
 import jakarta.validation.Valid;
@@ -50,5 +51,22 @@ public class BoardController {
         return ResponseEntity
                 .status(OK.value())
                 .body(new PostResponseDto(post));
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<PostResponseDto> editPost(@PathVariable Long id, @RequestBody PostUpdateRequestDto request, Authentication auth)
+    {
+        Member currentMember = memberService.getMember(auth.getName());
+        Post post = postService.updatePost(id, request, currentMember);
+
+        return ResponseEntity
+                .status(OK.value())
+                .body(new PostResponseDto(post));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deletePost(@PathVariable Long id, Authentication auth) {
+        Member currentMember = memberService.getMember(auth.getName());
+        this.postService.deletePost(id, currentMember);
+        return ResponseEntity.ok().body("게시물이 삭제되었습니다!");
     }
 }

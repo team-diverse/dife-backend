@@ -52,5 +52,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ExceptionResonse(exception.getMessage()));
     }
 
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<ExceptionResonse> handlePostNotFoundException(PostNotFoundException exception)
+    {
+        return ResponseEntity
+                .status(UNAUTHORIZED.value())
+                .body(new ExceptionResonse(exception.getMessage()));
+    }
+
 
 }

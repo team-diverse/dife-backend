@@ -1,19 +1,17 @@
 package com.dife.api.controller;
 
 
+import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.Member;
-import com.dife.api.model.dto.MemberDto;
-import com.dife.api.model.dto.MemberUpdateDto;
-import com.dife.api.model.dto.RegisterRequestDto;
-import com.dife.api.model.dto.VerifyEmailDto;
-import com.dife.api.repository.MemberRepository;
+import com.dife.api.model.dto.*;
+import com.dife.api.model.dto.RegisterDto.*;
+import com.dife.api.service.ImageService;
 import com.dife.api.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +19,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
@@ -33,34 +33,70 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class MemberController {
 
     private final MemberService memberService;
-    private final ModelMapper modelMapper;
+    private final ImageService imageService;
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterRequestDto> register(@Valid @RequestBody RegisterRequestDto request) {
-        this.memberService.register(request);
+    public ResponseEntity<MemberResponseDto> register1(@Valid @RequestBody Register1RequestDto dto) {
+        Member member = memberService.register1(dto);
+
         return ResponseEntity
                 .status(CREATED.value())
-                .body(new RegisterRequestDto(request));
+                .body(new MemberResponseDto(member));
+    }
+
+    @GetMapping("/register")
+    public ResponseEntity<String> registerStep2(@RequestParam("username") String username) {
+        Boolean result = memberService.register2(username);
+
+        if (result)
+        {
+            return ResponseEntity.status(HttpStatus.OK).body("유효한 닉네임입니다!");
+        }
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("유효하지 않은 닉네임입니다!");
+    }
+
+    @PutMapping("/register/{id}")
+    public ResponseEntity<MemberResponseDto> registerStep7(@RequestParam("username") String username,
+                                                           @RequestParam(value = "is_korean", required = false) Boolean is_korean,
+                                                           @RequestParam(value = "bio", required = false) String bio,
+                                                           @RequestParam("mbti") MbtiCategory mbti,
+                                                           @RequestParam("hobbies") Set<String> hobbies,
+                                                           @RequestParam(value = "languages", required = false) Set<String> languages,
+                                                           @RequestParam(value = "profile_img", required = false) MultipartFile profile_img,
+                                                           @RequestParam("verification_file") MultipartFile verification_file,
+                                                           @PathVariable Long id) {
+
+        String profileImgPath = imageService.uploadImage(profile_img);
+        String verificationImgPath = imageService.uploadImage(verification_file);
+
+        ModelMapper modelMapper = new ModelMapper();
+        Register7RequestDto dto = modelMapper.map(new Register7RequestDto(username, is_korean, bio, mbti, hobbies, languages), Register7RequestDto.class);
+
+        Member member = memberService.register7(dto, id);
+        member.setProfile_file_id(profileImgPath);
+        member.setVerification_file_id(verificationImgPath);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new MemberResponseDto(member));
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<MemberDto> profile()
+    public ResponseEntity<MemberResponseDto> profile()
     {
         String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Member member = memberService.getMember(memberEmail);
-        log.info(member.getTokenId());
-        MemberDto memberDto = new MemberDto(member);
-        return ResponseEntity.ok(memberDto);
+        log.info("TokenId : " + member.getTokenId());
+        MemberResponseDto memberResponseDto = new MemberResponseDto(member);
+        return ResponseEntity.ok(memberResponseDto);
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<MemberUpdateDto> editProfile(@RequestBody MemberUpdateDto requestDto, Authentication auth)
+    public ResponseEntity<MemberResponseDto> editProfile(@RequestBody MemberUpdateDto dto)
     {
-        String email = auth.getName();
-        Member member = this.memberService.updateMember(email, requestDto);
+        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member member = memberService.updateMember(memberEmail, dto);
 
-        MemberUpdateDto responseDto = modelMapper.map(member, MemberUpdateDto.class);
-        return ResponseEntity.ok(responseDto);
+        MemberResponseDto memberResponseDto = new MemberResponseDto(member);
+        return ResponseEntity.ok(memberResponseDto);
     }
 
     @PutMapping("/change-password")
