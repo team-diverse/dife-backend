@@ -9,9 +9,9 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConnectDto {
+public class ConnectRequestDto {
 
     @NotNull
-    @JsonProperty("member_id")
-    private Long memberId;
+    @JsonProperty("to_member_id")
+    private Long toMemberId;
 }

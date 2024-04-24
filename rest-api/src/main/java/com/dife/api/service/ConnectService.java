@@ -1,10 +1,11 @@
 package com.dife.api.service;
 
-import com.dife.api.exception.MemberNotFoundException;
+import com.dife.api.exception.*;
 import com.dife.api.model.Connect;
 import com.dife.api.model.ConnectStatus;
 import com.dife.api.model.Member;
-import com.dife.api.model.dto.ConnectDto;
+import com.dife.api.model.dto.ConnectRequestDto;
+import com.dife.api.model.dto.ConnectResponseDto;
 import com.dife.api.repository.ConnectRepository;
 import com.dife.api.repository.MemberRepository;
 import jakarta.transaction.Transactional;
@@ -19,15 +20,25 @@ public class ConnectService {
     private final ConnectRepository connectRepository;
     private final MemberRepository memberRepository;
 
-    public void connectMembers(ConnectDto dto, Member currentMember) {
-        Member connectMember = memberRepository.findById(dto.getMemberId())
-                                .orElseThrow(MemberNotFoundException::new);
+    private final ModelMapper modelMapper;
+
+    public ConnectResponseDto saveConnect(ConnectRequestDto dto, String currentMemberEmail) {
+        Member currentMember = memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
+        Member toMember = memberRepository.findById(dto.getToMemberId()).orElseThrow(MemberNotFoundException::new);
+
+        if (currentMember.getId().equals(toMember.getId())) {
+            throw new IdenticalConnectException();
+        }
+        if (!connectRepository.findByMemberPair(currentMember, toMember).isEmpty()) {
+            throw new ConnectDuplicateException();
+        }
 
         Connect connect = new Connect();
-        connect.setMember1(currentMember);
-        connect.setMember2(connectMember);
+        connect.setFromMember(currentMember);
+        connect.setToMember(toMember);
         connect.setStatus(ConnectStatus.PENDING);
-
         connectRepository.save(connect);
+
+        return modelMapper.map(connect, ConnectResponseDto.class);
     }
 }

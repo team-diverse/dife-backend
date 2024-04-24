@@ -10,22 +10,21 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "connect", uniqueConstraints = @UniqueConstraint(columnNames = {"member1_id", "member2_id"}))
+@Table(name = "connect", uniqueConstraints = @UniqueConstraint(columnNames = {"from_member_id", "to_member_id"}))
 public class Connect {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "member1_id", referencedColumnName = "id")
-    private Member member1;
+    @JoinColumn(name = "from_member_id", referencedColumnName = "id")
+    private Member fromMember;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "member2_id", referencedColumnName = "id")
-    private Member member2;
+    @JoinColumn(name = "to_member_id", referencedColumnName = "id")
+    private Member toMember;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -33,14 +32,4 @@ public class Connect {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
-
-    @PreUpdate
-    @PrePersist
-    private void sortMember() {
-        if (this.member1.getId() > this.member2.getId()) {
-            Member temp = this.member1;
-            this.member1 = this.member2;
-            this.member2 = temp;
-        }
-    }
 }
