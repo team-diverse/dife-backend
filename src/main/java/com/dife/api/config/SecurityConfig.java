@@ -48,9 +48,10 @@ public class SecurityConfig {
                                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers("/api/members/register/**", "/api/members/change-password", "/api/members/login").permitAll();
-                    requests.requestMatchers(request -> request.getParameter("username") != null).permitAll();
-                    requests.requestMatchers("/api/members/**").authenticated();
+                    requests.requestMatchers(
+                            "/api/members/register",
+                            "/api/members/change-password",
+                            "/api/members/login").permitAll();
                     requests.requestMatchers("/api/**").authenticated();
                 })
                 .build();

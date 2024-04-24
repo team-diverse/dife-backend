@@ -157,6 +157,7 @@ public class MemberService {
         String newPassword = sb.toString();
         String encodedPassword = passwordEncoder.encode(newPassword);
         member.setPassword(encodedPassword);
+        memberRepository.save(member);
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setTo(member.getEmail());

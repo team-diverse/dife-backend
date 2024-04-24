@@ -41,27 +41,25 @@ public class MemberController {
                 .status(CREATED.value())
                 .body(new MemberResponseDto(member));
     }
+    @RequestMapping(path = "/{id}", method = RequestMethod.HEAD)
+    public ResponseEntity<Void> checkUsername(@RequestParam("username") String username, @PathVariable Long id) {
+        Boolean isValid = memberService.checkUsername(username);
 
-    @GetMapping("")
-    public ResponseEntity<String> checkUsername(@RequestParam("username") String username) {
-        Boolean duplicated = memberService.checkUsername(username);
-
-        if (duplicated)
+        if (isValid)
         {
-            return ResponseEntity.status(HttpStatus.OK).body("유효한 닉네임입니다!");
+            return ResponseEntity.ok().build();
         }
-
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("유효하지 않은 닉네임입니다!");
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping( "/{id}")
     public ResponseEntity<MemberResponseDto> registerDetail(@RequestParam("username") String username,
-                                                           @RequestParam(value = "is_korean") Boolean is_korean,
-                                                           @RequestParam(value = "bio") String bio,
+                                                           @RequestParam("is_korean") Boolean is_korean,
+                                                           @RequestParam("bio") String bio,
                                                            @RequestParam("mbti") MbtiCategory mbti,
                                                            @RequestParam("hobbies") Set<String> hobbies,
-                                                           @RequestParam(value = "languages") Set<String> languages,
-                                                           @RequestParam(value = "profile_img") MultipartFile profile_img,
+                                                           @RequestParam("languages") Set<String> languages,
+                                                           @RequestParam("profile_img") MultipartFile profile_img,
                                                            @RequestParam("verification_file") MultipartFile verification_file,
                                                            @PathVariable Long id) {
 
