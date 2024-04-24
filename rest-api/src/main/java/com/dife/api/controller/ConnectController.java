@@ -33,4 +33,10 @@ public class ConnectController {
         connectService.acceptConnect(requestDto, auth.getName());
         return new ResponseEntity<>(OK);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteConnect(@PathVariable("id") Long id, Authentication auth) {
+        connectService.deleteConnect(id, auth.getName());
+        return new ResponseEntity<>(OK);
+    }
 }
