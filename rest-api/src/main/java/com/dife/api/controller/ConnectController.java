@@ -30,6 +30,12 @@ public class ConnectController {
         return ResponseEntity.status(OK).body(responseDto);
     }
 
+    @GetMapping(value = "/", params = "member_id")
+    public ResponseEntity<ConnectResponseDto> getConnect(@RequestParam("member_id") Long memberId, Authentication auth) {
+        ConnectResponseDto responseDto = connectService.getConnect(memberId, auth.getName());
+        return ResponseEntity.status(OK).body(responseDto);
+    }
+
     @PostMapping("/")
     public ResponseEntity<ConnectResponseDto> createConnect(@Valid @RequestBody ConnectRequestDto requestDto, Authentication auth) {
         ConnectResponseDto responseDto = connectService.saveConnect(requestDto, auth.getName());
