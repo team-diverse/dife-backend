@@ -94,8 +94,8 @@ jobs:
         run: |
           if docker ps | grep -w "myapp"; then
             echo "Container 'myapp' is running."
-            docker logs myapp
           else
             echo "Server check: Container 'myapp' is not running."
+            docker logs myapp
             exit 1 
           fi
