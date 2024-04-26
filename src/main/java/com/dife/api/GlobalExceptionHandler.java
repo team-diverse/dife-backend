@@ -18,7 +18,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     {
         return ResponseEntity
                 .status(INTERNAL_SERVER_ERROR.value())
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
 
     @ExceptionHandler(DuplicateException.class)
@@ -26,7 +26,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     {
         return ResponseEntity
                 .status(CONFLICT.value())
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     {
         return ResponseEntity
                 .status(INTERNAL_SERVER_ERROR.value())
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
 
     @ExceptionHandler(RegisterException.class)
@@ -42,20 +42,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     {
         return ResponseEntity
                 .status(UNPROCESSABLE_ENTITY.value())
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ExceptionResonse> handleIllegalArgumentException(IllegalArgumentException exception)
     {
         return ResponseEntity
                 .status(UNAUTHORIZED.value())
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
     @ExceptionHandler(ConnectDuplicateException.class)
     public ResponseEntity<ExceptionResonse> handleConnectException(ConnectDuplicateException exception) {
         return ResponseEntity
                 .status(CONFLICT)
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
 
     @ExceptionHandler(PostNotFoundException.class)
@@ -63,27 +63,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     {
         return ResponseEntity
                 .status(UNAUTHORIZED.value())
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
 
     @ExceptionHandler(ConnectNotFoundException.class)
     public ResponseEntity<ExceptionResonse> handleConnectException(ConnectNotFoundException exception) {
         return ResponseEntity
                 .status(NOT_FOUND)
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
     
     @ExceptionHandler(ConnectUnauthorizedException.class)
     public ResponseEntity<ExceptionResonse> handleConnectException(ConnectUnauthorizedException exception) {
         return ResponseEntity
                 .status(UNAUTHORIZED)
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
 
     @ExceptionHandler(IdenticalConnectException.class)
     public ResponseEntity<ExceptionResonse> handleConnectException(IdenticalConnectException exception) {
         return ResponseEntity
                 .status(BAD_REQUEST)
-                .body(new ExceptionResonse(exception.getMessage()));
+                .body(new ExceptionResonse(false, exception.getMessage()));
     }
 }

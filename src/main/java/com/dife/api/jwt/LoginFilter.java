@@ -48,7 +48,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             String errorMessage = "이메일과 비밀번호는 필수 사항";
             log.warn("이메일과 비밀번호는 필수 사항");
 
-            ExceptionResonse exceptionResponse = new ExceptionResonse(errorMessage);
+            ExceptionResonse exceptionResponse = new ExceptionResonse(false, errorMessage);
 
             ObjectMapper objectMapper = new ObjectMapper();
             String result = null;
@@ -101,7 +101,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         log.error("로그인 실패");
         String errorMessage = "인증에 실패했습니다: " + failed.getMessage();
 
-        ExceptionResonse exceptionResponse = new ExceptionResonse(errorMessage);
+        ExceptionResonse exceptionResponse = new ExceptionResonse(false, errorMessage);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String result = objectMapper.writeValueAsString(exceptionResponse);
