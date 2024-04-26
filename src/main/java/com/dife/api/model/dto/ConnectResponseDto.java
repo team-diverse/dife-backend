@@ -6,10 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,20 +16,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConnectResponseDto {
-    private Long id;
+	private Long id;
 
-    @NotNull
-    @JsonProperty("from_member")
-    private Member fromMember;
+	@NotNull
+	@JsonProperty("from_member")
+	private Member fromMember;
 
-    @NotNull
-    @JsonProperty("to_member")
-    private Member toMember;
+	@NotNull
+	@JsonProperty("to_member")
+	private Member toMember;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private ConnectStatus status;
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	private ConnectStatus status;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+	@CreationTimestamp private LocalDateTime createdAt;
 }

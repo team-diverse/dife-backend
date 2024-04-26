@@ -1,19 +1,16 @@
 package com.dife.api.exception;
 
-public class DuplicateMemberException extends DuplicateException{
+public class DuplicateMemberException extends DuplicateException {
 
-    public DuplicateMemberException(String message)
-    {
-        super(message);
-    }
+	public DuplicateMemberException(String message) {
+		super(message);
+	}
 
-    public DuplicateMemberException(Throwable cause)
-    {
-        super(cause);
-    }
+	public DuplicateMemberException(Throwable cause) {
+		super(cause);
+	}
 
-    public DuplicateMemberException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
+	public DuplicateMemberException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

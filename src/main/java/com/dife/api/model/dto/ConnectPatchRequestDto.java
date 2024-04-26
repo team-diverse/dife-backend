@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 public class ConnectPatchRequestDto {
 
-    @NotNull
-    @JsonProperty("member_id")
-    private Long memberId;
+	@NotNull
+	@JsonProperty("member_id")
+	private Long memberId;
 }

@@ -9,5 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class LoginSuccessDto {
 
-    private final String accessToken;
+	private final String accessToken;
 }

@@ -7,13 +7,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 class DifeApplicationTests {
 
-    @MockBean
-    AWSConfig awsConfig;
-    @MockBean
-    PasswordEncoderConfig passwordEncoderConfig;
+	@MockBean AWSConfig awsConfig;
+	@MockBean PasswordEncoderConfig passwordEncoderConfig;
 
-    @Test
-    void contextLoads() {
-    }
-
+	@Test
+	void contextLoads() {}
 }

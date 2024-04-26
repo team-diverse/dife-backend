@@ -14,17 +14,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PostUpdateRequestDto {
 
-    private String title;
+	private String title;
 
-    private String content;
+	private String content;
 
-    private Boolean is_public;
+	private Boolean is_public;
 
-    private BoardCategory boardType;
+	private BoardCategory boardType;
 
-    @NotNull
-    @JsonProperty("member_id")
-    private Long memberId;
-
-
+	@NotNull
+	@JsonProperty("member_id")
+	private Long memberId;
 }

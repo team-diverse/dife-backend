@@ -13,17 +13,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PostCreateRequestDto {
 
-    @NotNull
-    private String title;
+	@NotNull private String title;
 
-    @NotNull
-    private String content;
+	@NotNull private String content;
 
-    @NotNull
-    private Boolean is_public;
+	@NotNull private Boolean is_public;
 
-    @NotNull
-    private BoardCategory boardType;
-
-
+	@NotNull private BoardCategory boardType;
 }
