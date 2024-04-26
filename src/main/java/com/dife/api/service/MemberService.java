@@ -77,15 +77,15 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
 
-        String profileImgPath = fileService.upload(profile_img);
-        String verificationImgPath = fileService.upload(verification_file);
+        FileDto profileImgPath = fileService.upload(profile_img);
+        FileDto verificationImgPath = fileService.upload(verification_file);
 
         member.setUsername(username);
         member.setIs_korean(is_korean);
         member.setBio(bio);
         member.setMbti(mbti);
-        member.setProfile_file_id(profileImgPath);
-        member.setVerification_file_id(verificationImgPath);
+        member.setProfile_file_id(profileImgPath.getName());
+        member.setVerification_file_id(verificationImgPath.getName());
 
         Set<Hobby> myhobbies = new HashSet<>();
 
