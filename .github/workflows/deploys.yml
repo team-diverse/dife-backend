@@ -85,6 +85,16 @@ jobs:
             
             docker stop myapp || true
             docker rm myapp || true
+            docker rmi -f $(docker images -aq)
             aws ecr get-login-password --region $AWS_REGION_CODE | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker run -d --env-file ./env.prod -p 80:8080 --name myapp $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            
+      - name: Check Container Status
+        run: |
+          if docker ps | grep -w "myapp"; then
+            echo "Container 'myapp' is running."
+            docker logs myapp
+          else
+            echo "Server check: Container 'myapp' is not running."
+            exit 1 
