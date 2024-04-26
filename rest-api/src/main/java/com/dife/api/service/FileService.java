@@ -2,7 +2,10 @@ package com.dife.api.service;
 
 import com.dife.api.model.File;
 import com.dife.api.model.Format;
+import com.dife.api.model.dto.FileDto;
 import com.dife.api.repository.FileRepository;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,20 +17,17 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class FileService {
-
     private final FileRepository fileRepository;
     private final S3Client s3Client;
-    private final String bucketName;
+    private final ModelMapper modelMapper;
 
-    public FileService(FileRepository fileRepository, S3Client s3Client, @Value("${spring.aws.bucket-name}") String bucketName) {
-        this.fileRepository = fileRepository;
-                this.s3Client = s3Client;
-        this.bucketName = bucketName;
-    }
+    @Value("${spring.aws.bucket-name}")
+    private String bucketName;
 
-    public void upload(MultipartFile file) {
+    public FileDto upload(MultipartFile file) {
 
         if (file.isEmpty()) {
             throw new RuntimeException("Empty file cannot be uploaded");
@@ -56,7 +56,8 @@ public class FileService {
         fileInfo.setSize(fileSize);
         fileInfo.setUrl("https://");
         fileInfo.setFormat(Format.JPG);
-
         fileRepository.save(fileInfo);
+
+        return modelMapper.map(fileInfo, FileDto.class);
     }
 }

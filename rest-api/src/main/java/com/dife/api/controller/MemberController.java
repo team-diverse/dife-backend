@@ -5,7 +5,7 @@ import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.*;
 import com.dife.api.model.dto.RegisterDto.*;
-import com.dife.api.service.ImageService;
+import com.dife.api.service.FileService;
 import com.dife.api.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class MemberController {
 
     private final MemberService memberService;
-    private final ImageService imageService;
+    private final FileService fileService;
 
     @PostMapping("/register")
     public ResponseEntity<MemberResponseDto> register1(@Valid @RequestBody Register1RequestDto dto) {
@@ -67,15 +67,15 @@ public class MemberController {
                                                            @RequestParam("verification_file") MultipartFile verification_file,
                                                            @PathVariable Long id) {
 
-        String profileImgPath = imageService.uploadImage(profile_img);
-        String verificationImgPath = imageService.uploadImage(verification_file);
+        FileDto profileImgDto = fileService.upload(profile_img);
+        FileDto verificationFileDto = fileService.upload(verification_file);
 
         ModelMapper modelMapper = new ModelMapper();
         Register7RequestDto dto = modelMapper.map(new Register7RequestDto(username, is_korean, bio, mbti, hobbies, languages), Register7RequestDto.class);
 
         Member member = memberService.register7(dto, id);
-        member.setProfile_file_id(profileImgPath);
-        member.setVerification_file_id(verificationImgPath);
+        member.setProfile_file_id(profileImgDto.getUrl());
+        member.setVerification_file_id(verificationFileDto.getUrl());
         return ResponseEntity.status(HttpStatus.CREATED).body(new MemberResponseDto(member));
     }
 
