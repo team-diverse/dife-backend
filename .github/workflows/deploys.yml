@@ -91,11 +91,17 @@ jobs:
             docker run -d --env-file ./env.prod -p 80:8080 --name myapp $ECR_REGISTRY/$ECR_REPOSITORY:latest
             
       - name: Check Container Status
-        run: |
-          if docker ps | grep -w "myapp"; then
-            echo "Container 'myapp' is running."
-          else
-            echo "Server check: Container 'myapp' is not running."
-            docker logs myapp
-            exit 1 
-          fi
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          script: |
+            if docker ps | grep -w "myapp"; then
+              echo "Container 'myapp' is running."
+            else
+              echo "Server check: Container 'myapp' is not running."
+              docker logs myapp
+              exit 1 
+            fi
