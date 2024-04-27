@@ -4,15 +4,13 @@ package com.dife.api.controller;
 import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.*;
-import com.dife.api.model.dto.RegisterDto.*;
 import com.dife.api.service.FileService;
 import com.dife.api.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,66 +34,45 @@ public class MemberController {
     private final FileService fileService;
 
     @PostMapping("/register")
-    public ResponseEntity<MemberResponseDto> register1(@Valid @RequestBody Register1RequestDto dto) {
-        Member member = memberService.register1(dto);
+    public ResponseEntity<MemberResponseDto> registerEmailAndPassword(@Valid @RequestBody RegisterEmailAndPasswordRequestDto dto) {
+        Member member = memberService.registerEmailAndPassword(dto);
 
         return ResponseEntity
                 .status(CREATED.value())
                 .body(new MemberResponseDto(member));
     }
+    @RequestMapping(path = "/{id}", method = RequestMethod.HEAD)
+    public ResponseEntity<Void> checkUsername(@RequestParam("username") String username, @PathVariable Long id) {
+        Boolean isValid = memberService.checkUsername(username);
 
-    @GetMapping("/register")
-    public ResponseEntity<String> registerStep2(@RequestParam("username") String username) {
-        Boolean result = memberService.register2(username);
-
-        if (result)
+        if (isValid)
         {
-            return ResponseEntity.status(HttpStatus.OK).body("유효한 닉네임입니다!");
+            return ResponseEntity.ok().build();
         }
-
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("유효하지 않은 닉네임입니다!");
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 
-    @PutMapping("/register/{id}")
-    public ResponseEntity<MemberResponseDto> registerStep7(@RequestParam("username") String username,
-                                                           @RequestParam(value = "is_korean", required = false) Boolean is_korean,
-                                                           @RequestParam(value = "bio", required = false) String bio,
+    @PutMapping( "/{id}")
+    public ResponseEntity<MemberResponseDto> registerDetail(@RequestParam("username") String username,
+                                                           @RequestParam("is_korean") Boolean is_korean,
+                                                           @RequestParam("bio") String bio,
                                                            @RequestParam("mbti") MbtiCategory mbti,
                                                            @RequestParam("hobbies") Set<String> hobbies,
-                                                           @RequestParam(value = "languages", required = false) Set<String> languages,
-                                                           @RequestParam(value = "profile_img", required = false) MultipartFile profile_img,
+                                                           @RequestParam("languages") Set<String> languages,
+                                                           @RequestParam("profile_img") MultipartFile profile_img,
                                                            @RequestParam("verification_file") MultipartFile verification_file,
                                                            @PathVariable Long id) {
 
-        FileDto profileImgDto = fileService.upload(profile_img);
-        FileDto verificationFileDto = fileService.upload(verification_file);
-
-        ModelMapper modelMapper = new ModelMapper();
-        Register7RequestDto dto = modelMapper.map(new Register7RequestDto(username, is_korean, bio, mbti, hobbies, languages), Register7RequestDto.class);
-
-        Member member = memberService.register7(dto, id);
-        member.setProfile_file_id(profileImgDto.getUrl());
-        member.setVerification_file_id(verificationFileDto.getUrl());
+        Member member = memberService.registerDetail(username, is_korean, bio, mbti, hobbies, languages, id, profile_img, verification_file);
         return ResponseEntity.status(HttpStatus.CREATED).body(new MemberResponseDto(member));
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<MemberResponseDto> profile()
+    public ResponseEntity<MemberResponseDto> profile(Authentication auth)
     {
-        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberService.getMember(memberEmail);
-        log.info("TokenId : " + member.getTokenId());
-        MemberResponseDto memberResponseDto = new MemberResponseDto(member);
-        return ResponseEntity.ok(memberResponseDto);
-    }
-
-    @PutMapping("/profile")
-    public ResponseEntity<MemberResponseDto> editProfile(@RequestBody MemberUpdateDto dto)
-    {
-        String memberEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberService.updateMember(memberEmail, dto);
-
-        MemberResponseDto memberResponseDto = new MemberResponseDto(member);
+        Member currentMember = memberService.getMember(auth.getName());
+        log.info("TokenId : " + currentMember.getTokenId());
+        MemberResponseDto memberResponseDto = new MemberResponseDto(currentMember);
         return ResponseEntity.ok(memberResponseDto);
     }
 

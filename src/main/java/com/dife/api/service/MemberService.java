@@ -3,20 +3,13 @@ package com.dife.api.service;
 
 import com.dife.api.config.EmailValidator;
 import com.dife.api.exception.*;
-import com.dife.api.jwt.JWTUtil;
-import com.dife.api.model.Hobby;
-import com.dife.api.model.Image;
-import com.dife.api.model.Language;
+import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
-import com.dife.api.model.Member;
-import com.dife.api.model.dto.RegisterDto.*;
 import com.dife.api.repository.HobbyRepository;
-import com.dife.api.repository.ImageRepository;
 import com.dife.api.repository.LanguageRepository;
 import com.dife.api.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -39,15 +32,12 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final LanguageRepository languageRepository;
     private final HobbyRepository hobbyRepository;
-    private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailValidator emailValidator;
-    private final JWTUtil jwtUtil;
     private final JavaMailSender javaMailSender;
     private final FileService fileService;
-    private final ImageRepository imageRepository;
 
-    public Member register1(Register1RequestDto dto)
+    public Member registerEmailAndPassword(RegisterEmailAndPasswordRequestDto dto)
     {
         if(!emailValidator.isValidEmail(dto.getEmail())) {
             throw new RegisterException("유효하지 않은 이메일입니다");
@@ -71,7 +61,7 @@ public class MemberService {
         return member;
 
     }
-    public Boolean register2(String username)
+    public Boolean checkUsername(String username)
     {
         if (memberRepository.existsByUsername(username))
         {
@@ -80,84 +70,26 @@ public class MemberService {
         return true;
     }
 
-    public Member register7(Register7RequestDto dto, Long id)
+    public Member registerDetail(String username, Boolean is_korean, String bio, MbtiCategory mbti,
+                                 Set<String> hobbies, Set<String> languages, Long id,
+                                 MultipartFile profile_img, MultipartFile verification_file)
     {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
 
-        member.setUsername(dto.getUsername());
-        member.setIs_korean(dto.getIs_korean());
-        member.setBio(dto.getBio());
-        member.setMbti(dto.getMbti());
+        FileDto profileImgPath = fileService.upload(profile_img);
+        FileDto verificationImgPath = fileService.upload(verification_file);
 
-        Set<Hobby> hobbies = new HashSet<>();
-        for (String hob : dto.getHobbies()) {
-            Hobby hobby = new Hobby();
-            hobby.setName(hob);
-            hobby.setMember(member);
+        member.setUsername(username);
+        member.setIs_korean(is_korean);
+        member.setBio(bio);
+        member.setMbti(mbti);
+        member.setProfile_file_id(profileImgPath.getName());
+        member.setVerification_file_id(verificationImgPath.getName());
 
-            hobbies.add(hobby);
-            hobbyRepository.save(hobby);
-        }
-        member.setHobbies(hobbies);
+        Set<Hobby> myhobbies = new HashSet<>();
 
-        Set<Language> languages = new HashSet<>();
-        for (String lan : dto.getLanguages()) {
-            Language language = new Language();
-            language.setName(lan);
-            language.setMember(member);
-
-            languages.add(language);
-            languageRepository.save(language);
-        }
-        member.setLanguages(languages);
-
-        memberRepository.save(member);
-
-        return member;
-    }
-
-
-
-    public Member getMember(String email) {
-
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
-
-        return member;
-
-    }
-
-    public Member updateMember(String email, MemberUpdateDto dto) {
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
-
-        String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        member.setPassword(encodedPassword);
-        member.setUsername(dto.getUsername());
-        member.setIs_public(dto.getIs_public());
-
-        Set<Language> languages = new HashSet<>();
-
-        for (String lan : dto.getLanguages())
-        {
-            Optional<Language> languageOptional = languageRepository.findByMemberAndName(member, lan);
-            if (!languageOptional.isPresent()) {
-                Language newLanguage = new Language();
-                newLanguage.setName(lan);
-                newLanguage.setMember(member);
-                languageRepository.save(newLanguage);
-                languages.add(newLanguage);
-            } else {
-                languages.add(languageOptional.get());
-            }
-        }
-
-        member.setLanguages(languages);
-
-        Set<Hobby> hobbies = new HashSet<>();
-
-        for (String hob : dto.getHobbies())
+        for (String hob : hobbies)
         {
             Optional<Hobby> hobbyOptional = hobbyRepository.findByMemberAndName(member, hob);
             if (!hobbyOptional.isPresent()) {
@@ -165,20 +97,43 @@ public class MemberService {
                 newHobby.setName(hob);
                 newHobby.setMember(member);
                 hobbyRepository.save(newHobby);
-                hobbies.add(newHobby);
+                myhobbies.add(newHobby);
             } else {
-                hobbies.add(hobbyOptional.get());
+                myhobbies.add(hobbyOptional.get());
             }
         }
 
-        member.setHobbies(hobbies);
+        member.setHobbies(myhobbies);
 
-        member.setProfile_file_id(dto.getProfile_file_id());
-        member.setBio(dto.getBio());
+        Set<Language> mylanguages = new HashSet<>();
+
+        for (String lan : languages)
+        {
+            Optional<Language> languageOptional = languageRepository.findByMemberAndName(member, lan);
+            if (!languageOptional.isPresent()) {
+                Language newLanguage = new Language();
+                newLanguage.setName(lan);
+                newLanguage.setMember(member);
+                languageRepository.save(newLanguage);
+                mylanguages.add(newLanguage);
+            } else {
+                mylanguages.add(languageOptional.get());
+            }
+        }
+
+        member.setLanguages(mylanguages);
 
         memberRepository.save(member);
 
         return member;
+    }
+    public Member getMember(String email) {
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
+
+        return member;
+
     }
 
     public boolean changePassword(VerifyEmailDto emailDto)
@@ -202,6 +157,7 @@ public class MemberService {
         String newPassword = sb.toString();
         String encodedPassword = passwordEncoder.encode(newPassword);
         member.setPassword(encodedPassword);
+        memberRepository.save(member);
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setTo(member.getEmail());

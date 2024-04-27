@@ -57,7 +57,7 @@ public class PostService {
 
     public Post updatePost(Long id, PostUpdateRequestDto dto, Member currentMember) {
         Post post = postRepository.findByMemberAndId(currentMember, id)
-                .orElseThrow(() -> new PostNotFoundException("해당 게시물에 대한 수정 권한이 없습니다!"));
+                .orElseThrow(() -> new PostNotFoundException("해당 게시물이 존재하지 않습니다!"));
 
         post.setBoardType(dto.getBoardType());
         post.setTitle(dto.getTitle());
@@ -69,7 +69,7 @@ public class PostService {
 
     public void deletePost(Long id, Member currentMember) {
         Post post = postRepository.findByMemberAndId(currentMember, id)
-                .orElseThrow(() -> new PostNotFoundException("해당 게시물에 대한 삭제 권한이 없습니다!"));
+                .orElseThrow(() -> new PostNotFoundException("해당 게시물이 존재하지 않습니다!"));
 
         postRepository.delete(post);
     }

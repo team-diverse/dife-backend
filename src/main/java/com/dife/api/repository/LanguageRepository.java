@@ -10,6 +10,5 @@ import java.util.Optional;
 
 public interface LanguageRepository extends JpaRepository<Language, Long> {
 
-    @Query("SELECT l FROM Language l WHERE l.member = :member AND l.name = :languageName")
     Optional<Language> findByMemberAndName(@Param("member") Member member, @Param("languageName") String languageName);
 }

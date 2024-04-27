@@ -38,7 +38,9 @@ public class JWTFilter  extends OncePerRequestFilter {
         String servletPath = request.getServletPath();
         String token = jwtUtil.resolveToken(request);
 
-        if (servletPath.startsWith("/api/members/register") || servletPath.equals("/api/members/change-password")|| servletPath.equals("/api/members/login"))
+        if (servletPath.startsWith("/api/members/register")
+                || servletPath.equals("/api/members/change-password")
+                || servletPath.equals("/api/members/login"))
         {
             filterChain.doFilter(request, response);
             return;

@@ -28,7 +28,6 @@ public class FileService {
     private String bucketName;
 
     public FileDto upload(MultipartFile file) {
-
         if (file.isEmpty()) {
             throw new RuntimeException("Empty file cannot be uploaded");
         }

@@ -1,6 +1,5 @@
-package com.dife.api.model.dto.RegisterDto;
+package com.dife.api.model.dto;
 
-import com.dife.api.model.MbtiCategory;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Register1RequestDto {
+public class RegisterEmailAndPasswordRequestDto {
 
     @NotNull()
     @Email
