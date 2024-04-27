@@ -39,9 +39,9 @@ public class MemberService {
 			throw new RegisterException("유효하지 않은 이메일입니다");
 		}
 
-        if (dto.getPassword() == null || !dto.getPassword().matches("(?=.*[0-9a-zA-Z\\\\W]).{8,20}")) {
-            throw new RegisterException("비밀번호는 영문 대,소문자와 숫자, 특수기호가 적어도 1개 이상 포함된 8자 ~ 20자의 비밀번호여야 합니다.");
-        }
+		if (dto.getPassword() == null || !dto.getPassword().matches("(?=.*[0-9a-zA-Z\\\\W]).{8,20}")) {
+			throw new RegisterException("비밀번호는 영문 대,소문자와 숫자, 특수기호가 적어도 1개 이상 포함된 8자 ~ 20자의 비밀번호여야 합니다.");
+		}
 
 		if (memberRepository.existsByEmail(dto.getEmail())) {
 			throw new DuplicateMemberException("이미 가입되어있는 이메일입니다");
@@ -83,12 +83,12 @@ public class MemberService {
 			member.setProfile_file_id(null);
 		}
 
-        if (verification_file != null && !verification_file.isEmpty()) {
-            FileDto verificationImgPath = fileService.upload(verification_file);
-            member.setVerification_file_id(verificationImgPath.getName());
-        } else {
-            throw new RegisterException("재학생 인증은 필수 사항입니다!");
-        }
+		if (verification_file != null && !verification_file.isEmpty()) {
+			FileDto verificationImgPath = fileService.upload(verification_file);
+			member.setVerification_file_id(verificationImgPath.getName());
+		} else {
+			throw new RegisterException("재학생 인증은 필수 사항입니다!");
+		}
 
 		member.setUsername(username);
 		member.setIs_korean(is_korean);
@@ -97,41 +97,41 @@ public class MemberService {
 
 		Set<Hobby> myhobbies = new HashSet<>();
 
-        if (hobbies != null) {
-            for (String hob : hobbies) {
-                Optional<Hobby> hobbyOptional = hobbyRepository.findByMemberAndName(member, hob);
-                if (!hobbyOptional.isPresent()) {
-                    Hobby newHobby = new Hobby();
-                    newHobby.setName(hob);
-                    newHobby.setMember(member);
-                    hobbyRepository.save(newHobby);
-                    myhobbies.add(newHobby);
-                } else {
-                    myhobbies.add(hobbyOptional.get());
-                }
-            }
-        }
+		if (hobbies != null) {
+			for (String hob : hobbies) {
+				Optional<Hobby> hobbyOptional = hobbyRepository.findByMemberAndName(member, hob);
+				if (!hobbyOptional.isPresent()) {
+					Hobby newHobby = new Hobby();
+					newHobby.setName(hob);
+					newHobby.setMember(member);
+					hobbyRepository.save(newHobby);
+					myhobbies.add(newHobby);
+				} else {
+					myhobbies.add(hobbyOptional.get());
+				}
+			}
+		}
 
 		member.setHobbies(myhobbies);
 
 		Set<Language> mylanguages = new HashSet<>();
 
-        if (languages == null || languages.isEmpty()) {
-            throw new RegisterException("언어 선택은 필수입니다.");
-        } else {
-            for (String lan : languages) {
-                Optional<Language> languageOptional = languageRepository.findByMemberAndName(member, lan);
-                if (!languageOptional.isPresent()) {
-                    Language newLanguage = new Language();
-                    newLanguage.setName(lan);
-                    newLanguage.setMember(member);
-                    languageRepository.save(newLanguage);
-                    mylanguages.add(newLanguage);
-                } else {
-                    mylanguages.add(languageOptional.get());
-                }
-            }
-        }
+		if (languages == null || languages.isEmpty()) {
+			throw new RegisterException("언어 선택은 필수입니다.");
+		} else {
+			for (String lan : languages) {
+				Optional<Language> languageOptional = languageRepository.findByMemberAndName(member, lan);
+				if (!languageOptional.isPresent()) {
+					Language newLanguage = new Language();
+					newLanguage.setName(lan);
+					newLanguage.setMember(member);
+					languageRepository.save(newLanguage);
+					mylanguages.add(newLanguage);
+				} else {
+					mylanguages.add(languageOptional.get());
+				}
+			}
+		}
 
 		member.setLanguages(mylanguages);
 
