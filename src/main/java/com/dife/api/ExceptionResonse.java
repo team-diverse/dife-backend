@@ -8,5 +8,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class ExceptionResonse {
 
-    private final String exceptionMessage;
+    private final Boolean success;
+    private final String message;
 }
