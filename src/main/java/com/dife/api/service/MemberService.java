@@ -43,8 +43,8 @@ public class MemberService {
             throw new RegisterException("유효하지 않은 이메일입니다");
         }
 
-        if (dto.getPassword() == null || dto.getPassword().length() < 8 || !dto.getPassword().matches("^[a-zA-Z0-9]{8,}$")) {
-            throw new RegisterException("영문, 숫자 포함 8자 이상의 비밀번호를 입력해주세요");
+        if (dto.getPassword() == null || dto.getPassword().length() < 8 || !dto.getPassword().matches("(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W)(?=\\S+$).{8,20}")) {
+            throw new RegisterException("비밀번호는 영문 대,소문자와 숫자, 특수기호가 적어도 1개 이상 포함된 8자 ~ 20자의 비밀번호여야 합니다.");
         }
 
         if (memberRepository.existsByEmail(dto.getEmail()))
@@ -76,15 +76,25 @@ public class MemberService {
     {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
-        FileDto profileImgPath = fileService.upload(profile_img);
-        FileDto verificationImgPath = fileService.upload(verification_file);
+
+        if (profile_img != null && !profile_img.isEmpty()) {
+            FileDto profileImgPath = fileService.upload(profile_img);
+            member.setProfile_file_id(profileImgPath.getName());
+        } else {
+            member.setProfile_file_id(null);
+        }
+
+        if (verification_file != null && !verification_file.isEmpty()) {
+            FileDto verificationImgPath = fileService.upload(verification_file);
+            member.setVerification_file_id(verificationImgPath.getName());
+        } else {
+            member.setVerification_file_id(null);
+        }
 
         member.setUsername(username);
         member.setIs_korean(is_korean);
         member.setBio(bio);
         member.setMbti(mbti);
-        member.setProfile_file_id(profileImgPath.getName());
-        member.setVerification_file_id(verificationImgPath.getName());
 
         Set<Hobby> myhobbies = new HashSet<>();
 

@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +47,7 @@ public class MemberController {
                 .body(new RegisterResponseDto(member));
     }
     @RequestMapping(path = "/{id}", method = RequestMethod.HEAD)
+    @Operation(summary = "중복 닉네임 확인", description = "중복 닉네임 여부를 확인합니다.")
     public ResponseEntity<Void> checkUsername(@RequestParam("username") String username, @PathVariable Long id) {
         Boolean isValid = memberService.checkUsername(username);
 
@@ -58,16 +58,16 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 
-    @PutMapping( "/{id}")
+    @PutMapping( value = "/{id}", consumes = "multipart/form-data")
     @Operation(summary = "회원가입2 API", description = "회원가입 세부사항을 입력합니다.")
     @ApiResponse(responseCode = "201", description = "회원가입2 성공 예시", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = MemberResponseDto.class))})
     public ResponseEntity<MemberResponseDto> registerDetail(@RequestParam("username") String username,
                                                            @RequestParam("is_korean") Boolean is_korean,
-                                                           @RequestParam("bio") String bio,
-                                                           @RequestParam("mbti") MbtiCategory mbti,
-                                                           @RequestParam("hobbies") Set<String> hobbies,
+                                                           @RequestParam(value="bio", required = false) String bio,
+                                                           @RequestParam(value="mbti", required = false) MbtiCategory mbti,
+                                                           @RequestParam(value="hobbies", required = false) Set<String> hobbies,
                                                            @RequestParam("languages") Set<String> languages,
-                                                           @RequestParam("profile_img") MultipartFile profile_img,
+                                                           @RequestParam(value="profile_img", required = false) MultipartFile profile_img,
                                                            @RequestParam("verification_file") MultipartFile verification_file,
                                                            @PathVariable Long id) {
 
@@ -76,6 +76,8 @@ public class MemberController {
     }
 
     @GetMapping("/profile")
+    @Operation(summary = "마이페이지 API", description = "로그인 한 유저의 개인 정보를 확인할 수 있는 마이페이지입니다.")
+    @ApiResponse(responseCode = "200", description = "마이페이지 정보 예시", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = MemberResponseDto.class))})
     public ResponseEntity<MemberResponseDto> profile(Authentication auth)
     {
         Member currentMember = memberService.getMember(auth.getName());
@@ -85,6 +87,8 @@ public class MemberController {
     }
 
     @PutMapping("/change-password")
+    @Operation(summary = "비밀번호 변경 API", description = "이메일을 발송해 유저는 변경된 비밀번호를 받아 유효한 로그인을 진행할 수 있게 됩니다.")
+    @ApiResponse(responseCode = "200", description = "비밀번호 변경 발송 예시", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = VerifyEmailDto.class))})
     public ResponseEntity<HashMap> mailCheck(@RequestBody VerifyEmailDto emailDto)
     {
         boolean success = memberService.changePassword(emailDto);

@@ -37,7 +37,7 @@ public class SwaggerConfig {
                 .type(SecurityScheme.Type.HTTP)
                 .in(SecurityScheme.In.HEADER)
                 .name("Authorization")
-                .scheme("bearer");
+                .scheme("Bearer");
 
         SecurityRequirement securityRequirement = new SecurityRequirement()
                 .addList("Bearer Token");
