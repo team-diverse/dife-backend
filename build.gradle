@@ -21,6 +21,13 @@ repositories {
 	mavenCentral()
 }
 
+tasks.withType(JavaCompile).configureEach {
+	options.incremental = true
+}
+gradle.startParameter.buildCacheEnabled = true
+
+
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
