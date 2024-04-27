@@ -11,5 +11,4 @@ public class DifeApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DifeApplication.class, args);
 	}
-
 }

@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 public class ConnectRequestDto {
 
-    @NotNull
-    @JsonProperty("to_member_id")
-    private Long toMemberId;
+	@NotNull
+	@JsonProperty("to_member_id")
+	private Long toMemberId;
 }

@@ -9,29 +9,25 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "post")
-public class Post extends BaseTimeEntity{
+public class Post extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @NotNull
-    private String title;
+	@NotNull private String title;
 
-    @NotNull
-    private String content;
+	@NotNull private String content;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private BoardCategory boardType;
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	private BoardCategory boardType;
 
-    private Integer viewCount;
+	private Integer viewCount;
 
-    @NotNull
-    private Boolean is_public;
+	@NotNull private Boolean is_public;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
-
+	@ManyToOne
+	@JoinColumn(name = "member_id")
+	private Member member;
 }

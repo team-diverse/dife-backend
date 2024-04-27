@@ -1,0 +1,22 @@
+name: Lint
+
+on:
+  pull_request:
+
+jobs:
+    linter:
+        name: Spotless
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Set Up JDK 17
+              uses: actions/setup-java@v4
+              with:
+                distribution: 'temurin'
+                java-version: '17'
+
+            - name: Spotless Check
+              run: ./gradlew spotlessCheck

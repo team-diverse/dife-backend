@@ -1,6 +1,5 @@
 package com.dife.api;
 
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -8,6 +7,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class ExceptionResonse {
 
-    private final Boolean success;
-    private final String message;
+	private final Boolean success;
+	private final String message;
 }

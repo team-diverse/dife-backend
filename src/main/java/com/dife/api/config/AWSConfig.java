@@ -13,34 +13,36 @@ import software.amazon.awssdk.services.s3.S3Client;
 @Configuration
 public class AWSConfig {
 
-    @Value("${spring.aws.access-key}")
-    private String accessKey;
+	@Value("${spring.aws.access-key}")
+	private String accessKey;
 
-    @Value("${spring.aws.secret-key}")
-    private String secretKey;
+	@Value("${spring.aws.secret-key}")
+	private String secretKey;
 
-    @Value("${spring.aws.session-token:#{null}}")
-    private String sessionToken;
+	@Value("${spring.aws.session-token:#{null}}")
+	private String sessionToken;
 
-    @Value("${spring.aws.region}")
-    private String awsRegion;
+	@Value("${spring.aws.region}")
+	private String awsRegion;
 
-    @Bean
-    @Profile("local")
-    public S3Client S3BucketWithSessionToken() {
-        return S3Client.builder().credentialsProvider(StaticCredentialsProvider.create(
-                        AwsSessionCredentials.create(accessKey, secretKey, sessionToken)))
-                .region(Region.of(awsRegion))
-                .build();
-    }
+	@Bean
+	@Profile("local")
+	public S3Client S3BucketWithSessionToken() {
+		return S3Client.builder()
+				.credentialsProvider(
+						StaticCredentialsProvider.create(
+								AwsSessionCredentials.create(accessKey, secretKey, sessionToken)))
+				.region(Region.of(awsRegion))
+				.build();
+	}
 
-    @Bean
-    @Profile("!local")
-    public S3Client S3BucketWithoutSessionToken() {
-        return S3Client.builder().credentialsProvider(StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(accessKey, secretKey)))
-                .region(Region.of(awsRegion))
-                .build();
-    }
-
+	@Bean
+	@Profile("!local")
+	public S3Client S3BucketWithoutSessionToken() {
+		return S3Client.builder()
+				.credentialsProvider(
+						StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+				.region(Region.of(awsRegion))
+				.build();
+	}
 }

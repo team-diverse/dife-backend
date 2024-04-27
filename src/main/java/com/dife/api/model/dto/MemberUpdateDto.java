@@ -1,9 +1,7 @@
 package com.dife.api.model.dto;
 
-import lombok.*;
-
 import java.util.Set;
-
+import lombok.*;
 
 @Getter
 @Setter
@@ -11,18 +9,17 @@ import java.util.Set;
 @NoArgsConstructor
 public class MemberUpdateDto {
 
-    private String password;
+	private String password;
 
-    private String username;
+	private String username;
 
-    private Boolean is_public;
+	private Boolean is_public;
 
-    private Set<String> languages;
+	private Set<String> languages;
 
-    private Set<String> hobbies;
+	private Set<String> hobbies;
 
-    private String profile_file_id;
+	private String profile_file_id;
 
-    private String bio;
-
+	private String bio;
 }
