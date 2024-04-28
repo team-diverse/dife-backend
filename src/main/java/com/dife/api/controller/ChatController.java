@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/chat")
 @Slf4j
-@Tag(name="Chat API", description = "Chat API")
+@Tag(name = "Chat API", description = "Chat API")
 public class ChatController {
 
     private final ChatRoomService chatRoomService;
