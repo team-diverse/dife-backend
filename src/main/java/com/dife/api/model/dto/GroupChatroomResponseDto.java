@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "그룹 채팅방 응답 객체")
-public class GroupChatroomDto {
+public class GroupChatroomResponseDto {
 
 	@Schema(description = "그룹 채팅방 생성 성공여부", example = "true")
 	private Boolean success;
@@ -29,7 +29,7 @@ public class GroupChatroomDto {
 	@Schema(description = "채팅방 생성 일시")
 	private LocalDateTime created;
 
-	public GroupChatroomDto(Chatroom chatroom) {
+	public GroupChatroomResponseDto(Chatroom chatroom) {
 		this.success = true;
 		this.roomId = chatroom.getId();
 		this.name = chatroom.getName();

@@ -1,9 +1,13 @@
 package com.dife.api.controller;
 
 import com.dife.api.model.Chatroom;
-import com.dife.api.model.dto.GroupChatroomDto;
+import com.dife.api.model.dto.GroupChatroomRequestDto;
+import com.dife.api.model.dto.GroupChatroomResponseDto;
 import com.dife.api.service.ChatroomService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,15 +27,15 @@ public class ChatController {
 
 	@Operation(summary = "그룹 채팅방 생성", description = "사용자가 그룹 채팅방 생성")
 	@PostMapping
-	public ResponseEntity<GroupChatroomDto> createGroupChatroom(
-			@RequestParam(value = "name") String name,
-			@RequestParam(value = "description") String description,
-			@RequestParam(value = "max_count") String max_count,
-			@RequestParam(value = "min_count") String min_count) {
+	public ResponseEntity<GroupChatroomResponseDto> createGroupChatroom(
+			@RequestBody(
+							description = "채팅방 이름, 한줄소개, 최소 인원수, 최대 인원수를 포함하는 그룹 채팅방 생성 데이터",
+							required = true,
+							content = @Content(schema = @Schema(implementation = GroupChatroomRequestDto.class)))
+					GroupChatroomRequestDto dto) {
 
-		Chatroom chatroom =
-				chatroomService.createGroupChatroom(name, description, max_count, min_count);
+		Chatroom chatroom = chatroomService.createGroupChatroom(dto);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomDto(chatroom));
+		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomResponseDto(chatroom));
 	}
 }
