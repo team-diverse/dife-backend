@@ -78,35 +78,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(BAD_REQUEST)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
-<<<<<<< HEAD
-=======
-
->>>>>>> 7c111c0 (refactor: Chatroom 엔티티 수정 및 필드명 개선)
 	@ExceptionHandler(ChatroomCountException.class)
 	public ResponseEntity<ExceptionResonse> handleChatroomCountException(
 			ChatroomCountException exception) {
 		return ResponseEntity.status(BAD_REQUEST)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
-<<<<<<< HEAD
-=======
-
->>>>>>> 7c111c0 (refactor: Chatroom 엔티티 수정 및 필드명 개선)
 	@ExceptionHandler(ChatroomDuplicateException.class)
 	public ResponseEntity<ExceptionResonse> handleChatroomDuplicateException(
 			ChatroomDuplicateException exception) {
 		return ResponseEntity.status(CONFLICT)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
-<<<<<<< HEAD
-	@ExceptionHandler(ChatroomException.class)
-	public ResponseEntity<ExceptionResonse> handleChatroomException(ChatroomException exception) {
-=======
 
 	@ExceptionHandler(ChatroomException.class)
 	public ResponseEntity<ExceptionResonse> handleChatroomException(
 			ChatroomException exception) {
->>>>>>> 7c111c0 (refactor: Chatroom 엔티티 수정 및 필드명 개선)
 		return ResponseEntity.status(BAD_REQUEST)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}

@@ -9,8 +9,7 @@ import lombok.Setter;
 @Embeddable
 public class ChatroomSetting {
 
-    private String description;
-    private Integer min_count;
-    private Integer max_count;
-
+	private String description;
+	private Integer min_count;
+	private Integer max_count;
 }
