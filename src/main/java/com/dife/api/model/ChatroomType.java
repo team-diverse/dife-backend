@@ -1,6 +1,6 @@
 package com.dife.api.model;
 
-public enum ChatRoomType {
+public enum ChatroomType {
     GROUP,
     SINGLE
 }

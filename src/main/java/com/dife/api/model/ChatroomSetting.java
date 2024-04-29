@@ -7,9 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Embeddable
-public class ChatRoomSetting {
+public class ChatroomSetting {
 
-    private String chatRoomBio;
+    private String description;
     private Integer min_count;
     private Integer max_count;
 
