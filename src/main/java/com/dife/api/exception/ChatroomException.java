@@ -1,6 +1,6 @@
 package com.dife.api.exception;
 
-public class ChatRoomException extends IllegalArgumentException{
+public class ChatroomException extends IllegalArgumentException{
 
-    public ChatRoomException(String message) { super(message); }
+    public ChatroomException(String message) { super(message); }
 }
