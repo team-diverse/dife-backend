@@ -12,16 +12,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "chatroom")
-public class Chatroom extends BaseTimeEntity{
+public class Chatroom extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String name;
+	private String name;
 
-    private ChatroomType chatroomType;
+	private ChatroomType chatroomType;
 
-    @Embedded
-    private ChatroomSetting setting;
+	@Embedded private ChatroomSetting setting;
 }
