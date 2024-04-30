@@ -78,12 +78,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(BAD_REQUEST)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
+
 	@ExceptionHandler(ChatroomCountException.class)
 	public ResponseEntity<ExceptionResonse> handleChatroomCountException(
 			ChatroomCountException exception) {
 		return ResponseEntity.status(BAD_REQUEST)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
+
 	@ExceptionHandler(ChatroomDuplicateException.class)
 	public ResponseEntity<ExceptionResonse> handleChatroomDuplicateException(
 			ChatroomDuplicateException exception) {
@@ -92,15 +94,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	@ExceptionHandler(ChatroomException.class)
-	public ResponseEntity<ExceptionResonse> handleChatroomException(
-			ChatroomException exception) {
-		return ResponseEntity.status(BAD_REQUEST)
-				.body(new ExceptionResonse(false, exception.getMessage()));
-	}
-
-	@ExceptionHandler(ChatroomNotFoundException.class)
-	public ResponseEntity<ExceptionResonse> handleChatroomNotFoundException(
-			ChatroomNotFoundException exception) {
+	public ResponseEntity<ExceptionResonse> handleChatroomException(ChatroomException exception) {
 		return ResponseEntity.status(BAD_REQUEST)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}

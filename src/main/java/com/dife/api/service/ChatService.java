@@ -20,7 +20,7 @@ import org.springframework.web.socket.WebSocketSession;
 public class ChatService {
 
 	private final ObjectMapper objectMapper;
-	private Map<String, Chatroom> chatrooms;
+	private Map<Long, Chatroom> chatrooms;
 
 	@PostConstruct
 	private void init() {
