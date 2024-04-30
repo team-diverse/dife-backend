@@ -97,4 +97,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(BAD_REQUEST)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
+
+	@ExceptionHandler(ChatroomNotFoundException.class)
+	public ResponseEntity<ExceptionResonse> handleChatroomNotFoundException(
+			ChatroomNotFoundException exception) {
+		return ResponseEntity.status(BAD_REQUEST)
+				.body(new ExceptionResonse(false, exception.getMessage()));
+	}
 }

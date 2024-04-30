@@ -3,14 +3,18 @@ package com.dife.api.service;
 import com.dife.api.exception.ChatroomCountException;
 import com.dife.api.exception.ChatroomDuplicateException;
 import com.dife.api.exception.ChatroomException;
+import com.dife.api.exception.ChatroomNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.GroupChatroomRequestDto;
 import com.dife.api.repository.ChatroomRepository;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 @Service
 @RequiredArgsConstructor
@@ -59,5 +63,21 @@ public class ChatroomService {
 		chatroomRepository.save(chatroom);
 
 		return chatroom;
+	}
+
+	public Chatroom findChatroomById(Long id, WebSocketSession session) throws IOException {
+		return chatRoomRepository
+				.findById(id)
+				.orElseThrow(
+						() -> {
+							try {
+								log.warn("존재하지 않는 채팅방 입니다!");
+								session.sendMessage(new TextMessage("존재하지 않는 채팅방입니다. 세션을 종료하겠습니다."));
+								session.close();
+							} catch (IOException e) {
+								log.error("세션 종료 중 에러 발생", e);
+							}
+							return new ChatroomNotFoundException();
+						});
 	}
 }
