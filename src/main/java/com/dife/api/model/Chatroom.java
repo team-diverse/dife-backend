@@ -1,6 +1,8 @@
 package com.dife.api.model;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,4 +25,7 @@ public class Chatroom extends BaseTimeEntity {
 	private ChatroomType chatroomType;
 
 	@Embedded private ChatroomSetting setting;
+
+	@OneToMany(mappedBy = "chatroom", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private Set<WebSocketSessionEntity> sessions = new HashSet<>();
 }
