@@ -22,5 +22,7 @@ public class Chatroom extends BaseTimeEntity {
 
 	private ChatroomType chatroomType;
 
-	@Embedded private ChatroomSetting setting;
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "crsetting_id")
+	private ChatroomSetting setting;
 }
