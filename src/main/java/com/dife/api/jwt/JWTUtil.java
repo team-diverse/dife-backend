@@ -21,6 +21,17 @@ public class JWTUtil {
 						secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
 	}
 
+	public String createAccessJwt(String email, String role, Long expiredMs) {
+
+		return Jwts.builder()
+				.claim("email", email)
+				.claim("role", role)
+				.issuedAt(new Date(System.currentTimeMillis()))
+				.expiration(new Date(System.currentTimeMillis() + expiredMs))
+				.signWith(secretKey)
+				.compact();
+	}
+
 	public String getEmail(String token) {
 		return Jwts.parser()
 				.verifyWith(secretKey)
@@ -48,17 +59,6 @@ public class JWTUtil {
 				.getPayload()
 				.getExpiration()
 				.before(new Date());
-	}
-
-	public String createAccessJwt(String email, String role, Long expiredMs) {
-
-		return Jwts.builder()
-				.claim("email", email)
-				.claim("role", role)
-				.issuedAt(new Date(System.currentTimeMillis()))
-				.expiration(new Date(System.currentTimeMillis() + expiredMs))
-				.signWith(secretKey)
-				.compact();
 	}
 
 	public String resolveToken(HttpServletRequest request) {
