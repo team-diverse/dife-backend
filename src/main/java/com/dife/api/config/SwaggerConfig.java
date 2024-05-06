@@ -17,7 +17,7 @@ import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@OpenAPIDefinition(info = @Info(title = "Dife API", description = "회원 명세서 작성중", version = "v1"))
+@OpenAPIDefinition(info = @Info(title = "Dife API", description = "커넥트 명세서 작성완료", version = "v1"))
 @Configuration
 public class SwaggerConfig {
 
