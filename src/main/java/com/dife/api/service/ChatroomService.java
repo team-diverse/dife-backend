@@ -4,21 +4,13 @@ import com.dife.api.exception.ChatroomCountException;
 import com.dife.api.exception.ChatroomDuplicateException;
 import com.dife.api.exception.ChatroomException;
 import com.dife.api.model.*;
-import com.dife.api.model.dto.ChatDto;
 import com.dife.api.model.dto.GroupChatroomRequestDto;
 import com.dife.api.repository.ChatroomRepository;
-import com.dife.api.repository.WebSocketSessionRepository;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +19,6 @@ import org.springframework.web.socket.WebSocketSession;
 public class ChatroomService {
 
 	@Autowired private final ChatroomRepository chatroomRepository;
-	private final WebSocketSessionRepository webSocketSessionRepository;
-	private final Map<String, WebSocketSession> webSocketSessionMap = new HashMap<>();
 
 	public Chatroom createGroupChatroom(GroupChatroomRequestDto dto) {
 
@@ -71,43 +61,8 @@ public class ChatroomService {
 		return chatroom;
 	}
 
-	public Chatroom findChatroomById(Long id, WebSocketSession session) {
+	public Boolean findChatroomById(Long id) {
 
-		Optional<Chatroom> optionalChatroom = chatroomRepository.findById(id);
-		if (optionalChatroom.isPresent()) {
-			return optionalChatroom.get();
-		}
-		try {
-			log.warn("존재하지 않는 채팅방 입니다!");
-			session.sendMessage(new TextMessage("존재하지 않는 채팅방입니다. 세션을 종료하겠습니다."));
-			session.close();
-		} catch (IOException e) {
-			log.error("세션 종료 중 에러 발생", e);
-		}
-		return null;
-	}
-
-	public void handleActions(
-			WebSocketSession session, ChatDto chatDto, ChatService chatService, Chatroom chatroom) {
-		if (chatroom == null) {
-			return;
-		}
-		if (chatDto.getChatType().equals(ChatType.ENTER)) {
-			String sessionId = session.getId();
-			WebSocketSessionEntity sessionEntity = new WebSocketSessionEntity();
-			sessionEntity.setSessionId(sessionId);
-			sessionEntity.setChatroom(chatroom);
-			webSocketSessionRepository.save(sessionEntity);
-			webSocketSessionMap.put(sessionId, session);
-			chatDto.setMessage(chatDto.getSender() + "님이 입장하셨습니다!");
-		}
-
-		sendMessage(chatDto, chatService);
-	}
-
-	public <T> void sendMessage(T message, ChatService chatService) {
-		for (WebSocketSession session : webSocketSessionMap.values()) {
-			chatService.sendMessage(session, message);
-		}
+		return chatroomRepository.existsById(id);
 	}
 }
