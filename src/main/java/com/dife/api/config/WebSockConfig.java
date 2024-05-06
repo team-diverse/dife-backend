@@ -11,7 +11,7 @@ import org.springframework.web.socket.config.annotation.*;
 @EnableWebSocketMessageBroker
 public class WebSockConfig implements WebSocketMessageBrokerConfigurer {
 
-	final StompHandler stompHandler;
+	private final StompHandler stompHandler;
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {

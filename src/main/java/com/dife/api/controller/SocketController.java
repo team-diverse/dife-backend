@@ -2,10 +2,8 @@ package com.dife.api.controller;
 
 import com.dife.api.model.dto.ChatDto;
 import com.dife.api.service.ChatService;
-import com.dife.api.service.ChatroomService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -17,15 +15,17 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class SocketController {
 
-	private final ChatroomService chatroomService;
 	private final ChatService chatService;
-	private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
 
 	@EventListener
 	public void handleWebSocketConnectListener(SessionConnectEvent event) {
-		LOGGER.info("Received a new web socket connection");
+		StompHeaderAccessor headerAccesor = StompHeaderAccessor.wrap(event.getMessage());
+		String sessionId = headerAccesor.getSessionId();
+
+		log.info("새로운 세션 입장 by EventListener : {}", sessionId);
 	}
 
 	@EventListener
@@ -33,7 +33,7 @@ public class SocketController {
 		StompHeaderAccessor headerAccesor = StompHeaderAccessor.wrap(event.getMessage());
 		String sessionId = headerAccesor.getSessionId();
 
-		LOGGER.info("sessionId Disconnected : " + sessionId);
+		log.info("세션 연결 끊김 by EventListener : {}", sessionId);
 	}
 
 	@MessageMapping("/chatroom/{id}")
