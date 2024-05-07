@@ -1,11 +1,13 @@
 package com.dife.api.controller;
 
 import com.dife.api.model.dto.ChatDto;
+import com.dife.api.model.dto.ChatEnterDto;
 import com.dife.api.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -36,9 +38,15 @@ public class SocketController {
 		log.info("세션 연결 끊김 by EventListener : {}", sessionId);
 	}
 
-	@MessageMapping("/chatroom/{id}")
+	@MessageMapping("/chatroom/enter/{id}")
 	@SendTo("/topic/chatroom")
-	public void sendMessage(@DestinationVariable("id") Long id, ChatDto dto) {
+	public void sendEnter(
+			@DestinationVariable("id") Long id,
+			ChatEnterDto dto,
+			@Header("simpSessionId") String sessionId) {
+
+		chatService.sendEnter(id, dto, sessionId);
+	}
 
 		chatService.sendMessage(id, dto);
 	}
