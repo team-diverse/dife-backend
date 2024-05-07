@@ -76,7 +76,8 @@ public class SwaggerConfig {
 																													new Schema<String>()
 																															.example(
 																																	new LoginSuccessDto(
-																																			"Given Bearer Token")))))))));
+																																			"Given Bearer Token",
+																																			1L)))))))));
 		};
 	}
 }

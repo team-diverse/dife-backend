@@ -10,4 +10,5 @@ import lombok.Setter;
 public class LoginSuccessDto {
 
 	private final String accessToken;
+	private final Long member_id;
 }
