@@ -131,4 +131,24 @@ public class ChatroomService {
 		chatroomRepository.save(chatroom);
 		return chatroom;
 	}
+
+	public Boolean isFull(Chatroom chatroom) {
+		ChatroomSetting setting = chatroom.getChatroom_setting();
+		Integer maxCount = setting.getMax_count();
+		Integer nCount = setting.getCount();
+		if (nCount >= maxCount) {
+			return true;
+		}
+		return false;
+	}
+
+	public Boolean isWrongPassword(Chatroom chatroom, String given_password) {
+		ChatroomSetting setting = chatroom.getChatroom_setting();
+		String password = setting.getPassword();
+
+		if (!password.equals(given_password)) {
+			return true;
+		}
+		return false;
+	}
 }
