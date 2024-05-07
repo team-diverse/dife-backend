@@ -40,7 +40,7 @@ public class ChatController {
 			@RequestParam(name = "description") String description,
 			@RequestParam(name = "profile_img") MultipartFile profile_img) {
 
-		Chatroom chatroom = chatroomService.createGroupChatroom(name, description, profile_img);
+		Chatroom chatroom = chatroomService.createGroupChatroom(name, description);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomRequestDto(chatroom));
 	}
@@ -66,7 +66,7 @@ public class ChatController {
 
 		Chatroom chatroom =
 				chatroomService.registerDetail(
-						tags, min_count, max_count, languages, purposes, is_public, password, id);
+						tags, max_count, languages, purposes, is_public, password, id);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomResponseDto(chatroom));
 	}
 
