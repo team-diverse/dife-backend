@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequiredArgsConstructor
@@ -37,10 +36,9 @@ public class ChatController {
 			})
 	public ResponseEntity<GroupChatroomRequestDto> createGroupChatroom(
 			@RequestParam(value = "name", required = false) String name,
-			@RequestParam("description") String description,
-			@RequestParam("profile_img") MultipartFile profile_img) {
+			@RequestParam("description") String description) {
 
-		Chatroom chatroom = chatroomService.createGroupChatroom(name, description, profile_img);
+		Chatroom chatroom = chatroomService.createGroupChatroom(name, description);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomRequestDto(chatroom));
 	}
@@ -56,7 +54,6 @@ public class ChatController {
 			})
 	public ResponseEntity<GroupChatroomResponseDto> registerDetail(
 			@RequestParam("tags") Set<String> tags,
-			@RequestParam("min_count") Integer min_count,
 			@RequestParam("max_count") Integer max_count,
 			@RequestParam("languages") Set<String> languages,
 			@RequestParam("purposes") Set<String> purposes,
@@ -66,7 +63,7 @@ public class ChatController {
 
 		Chatroom chatroom =
 				chatroomService.registerDetail(
-						tags, min_count, max_count, languages, purposes, is_public, password, id);
+						tags, max_count, languages, purposes, is_public, password, id);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomResponseDto(chatroom));
 	}
 
