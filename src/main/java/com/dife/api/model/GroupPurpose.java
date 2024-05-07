@@ -7,18 +7,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "language")
-public class Language {
+@Table(name = "group_purpose")
+public class GroupPurpose {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	private String name;
-
-	@ManyToOne
-	@JoinColumn(name = "member_id")
-	private Member member;
 
 	@ManyToOne
 	@JoinColumn(name = "chatroom_setting_id")
