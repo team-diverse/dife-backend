@@ -33,7 +33,7 @@ public class GroupChatroomRequestDto {
 		this.success = true;
 		this.roomId = chatroom.getId();
 		this.name = chatroom.getName();
-		this.description = chatroom.getSetting().getDescription();
-		this.profile_img_name = chatroom.getSetting().getProfile_img_name();
+		this.description = chatroom.getChatroom_setting().getDescription();
+		this.profile_img_name = chatroom.getChatroom_setting().getProfile_img_name();
 	}
 }

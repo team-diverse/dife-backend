@@ -23,6 +23,6 @@ public class Chatroom extends BaseTimeEntity {
 	private ChatroomType chatroomType;
 
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "crsetting_id")
-	private ChatroomSetting setting;
+	@JoinColumn(name = "chatroom_setting_id")
+	private ChatroomSetting chatroom_setting;
 }

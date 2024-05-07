@@ -60,31 +60,34 @@ public class GroupChatroomResponseDto {
 		this.success = true;
 
 		this.name = chatroom.getName();
-		this.description = chatroom.getSetting().getDescription();
-		this.profile_img_name = chatroom.getSetting().getProfile_img_name();
+		this.description = chatroom.getChatroom_setting().getDescription();
+		this.profile_img_name = chatroom.getChatroom_setting().getProfile_img_name();
 		this.roomId = chatroom.getId();
-		if (chatroom.getSetting().getTags() != null && !chatroom.getSetting().getTags().isEmpty()) {
+		if (chatroom.getChatroom_setting().getTags() != null
+				&& !chatroom.getChatroom_setting().getTags().isEmpty()) {
 			this.tags =
-					chatroom.getSetting().getTags().stream().map(Tag::getName).collect(Collectors.toSet());
+					chatroom.getChatroom_setting().getTags().stream()
+							.map(Tag::getName)
+							.collect(Collectors.toSet());
 		}
-		this.min_count = chatroom.getSetting().getMin_count();
-		this.max_count = chatroom.getSetting().getMax_count();
-		if (chatroom.getSetting().getLanguages() != null
-				&& !chatroom.getSetting().getLanguages().isEmpty()) {
+		this.min_count = chatroom.getChatroom_setting().getMin_count();
+		this.max_count = chatroom.getChatroom_setting().getMax_count();
+		if (chatroom.getChatroom_setting().getLanguages() != null
+				&& !chatroom.getChatroom_setting().getLanguages().isEmpty()) {
 			this.languages =
-					chatroom.getSetting().getLanguages().stream()
+					chatroom.getChatroom_setting().getLanguages().stream()
 							.map(Language::getName)
 							.collect(Collectors.toSet());
 		}
-		if (chatroom.getSetting().getPurposes() != null
-				&& !chatroom.getSetting().getPurposes().isEmpty()) {
+		if (chatroom.getChatroom_setting().getPurposes() != null
+				&& !chatroom.getChatroom_setting().getPurposes().isEmpty()) {
 			this.purposes =
-					chatroom.getSetting().getPurposes().stream()
+					chatroom.getChatroom_setting().getPurposes().stream()
 							.map(GroupPurpose::getName)
 							.collect(Collectors.toSet());
 		}
-		this.is_public = chatroom.getSetting().getIs_public();
-		this.password = chatroom.getSetting().getPassword();
+		this.is_public = chatroom.getChatroom_setting().getIs_public();
+		this.password = chatroom.getChatroom_setting().getPassword();
 		this.created = chatroom.getCreated();
 	}
 }

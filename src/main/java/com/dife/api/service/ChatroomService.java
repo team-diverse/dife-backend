@@ -55,7 +55,7 @@ public class ChatroomService {
 			setting.setProfile_img_name(null);
 		}
 
-		chatroom.setSetting(setting);
+		chatroom.setChatroom_setting(setting);
 
 		chatroomRepository.save(chatroom);
 
@@ -83,7 +83,7 @@ public class ChatroomService {
 			Long id) {
 		Chatroom chatroom = getChatroom(id);
 
-		ChatroomSetting setting = chatroom.getSetting();
+		ChatroomSetting setting = chatroom.getChatroom_setting();
 
 		Set<Tag> myTags = new HashSet<>();
 		if (tags == null || tags.isEmpty()) {
@@ -91,7 +91,7 @@ public class ChatroomService {
 		}
 		for (String tag : tags) {
 			Tag nTag = new Tag();
-			nTag.setCrsetting(setting);
+			nTag.setChatroom_setting(setting);
 			nTag.setName(tag);
 			tagRepository.save(nTag);
 			myTags.add(nTag);
@@ -114,7 +114,7 @@ public class ChatroomService {
 		for (String language : languages) {
 			Language nLanguage = new Language();
 			nLanguage.setName(language);
-			nLanguage.setCrsetting(setting);
+			nLanguage.setChatroom_setting(setting);
 			languageRepository.save(nLanguage);
 			myLanguages.add(nLanguage);
 		}
@@ -127,7 +127,7 @@ public class ChatroomService {
 		for (String purpose : purposes) {
 			GroupPurpose nPurpose = new GroupPurpose();
 			nPurpose.setName(purpose);
-			nPurpose.setCrsetting(setting);
+			nPurpose.setChatroom_setting(setting);
 			groupPurposesRepository.save(nPurpose);
 			myPurposes.add(nPurpose);
 		}

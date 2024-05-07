@@ -17,6 +17,6 @@ public class Tag {
 	private String name;
 
 	@ManyToOne
-	@JoinColumn(name = "crsetting_id")
-	private ChatroomSetting crsetting;
+	@JoinColumn(name = "chatroom_setting_id")
+	private ChatroomSetting chatroom_setting;
 }

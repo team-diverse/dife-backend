@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "crsetting")
+@Table(name = "chatroom_setting")
 public class ChatroomSetting {
 
 	@Id
@@ -22,16 +22,16 @@ public class ChatroomSetting {
 
 	@NotNull private String profile_img_name;
 
-	@OneToMany(mappedBy = "crsetting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Tag> tags;
 
 	private Integer min_count;
 	private Integer max_count;
 
-	@OneToMany(mappedBy = "crsetting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<GroupPurpose> purposes;
 
-	@OneToMany(mappedBy = "crsetting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Language> languages;
 
 	private Boolean is_public;
