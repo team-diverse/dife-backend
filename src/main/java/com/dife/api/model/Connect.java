@@ -2,9 +2,7 @@ package com.dife.api.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 @Getter
 @Setter
@@ -12,7 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Table(
 		name = "connect",
 		uniqueConstraints = @UniqueConstraint(columnNames = {"from_member_id", "to_member_id"}))
-public class Connect {
+public class Connect extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -30,6 +28,4 @@ public class Connect {
 	@NotNull
 	@Enumerated(EnumType.STRING)
 	private ConnectStatus status;
-
-	@CreationTimestamp private LocalDateTime createdAt;
 }
