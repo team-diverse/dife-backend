@@ -20,12 +20,12 @@ public class ChatroomSetting {
 
 	@NotNull private String description;
 
-	@NotNull private String profile_img_name;
+	private String profile_img_name;
 
 	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Tag> tags;
 
-	private Integer min_count;
+	private Integer count = 0;
 	private Integer max_count;
 
 	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

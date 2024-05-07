@@ -2,7 +2,6 @@ package com.dife.api.service;
 
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
-import com.dife.api.model.dto.FileDto;
 import com.dife.api.repository.ChatroomRepository;
 import com.dife.api.repository.GroupPurposesRepository;
 import com.dife.api.repository.LanguageRepository;
@@ -14,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +27,7 @@ public class ChatroomService {
 
 	private final FileService fileService;
 
-	public Chatroom createGroupChatroom(String name, String description, MultipartFile profile_img) {
+	public Chatroom createGroupChatroom(String name, String description) {
 
 		Chatroom chatroom = new Chatroom();
 		if (chatroomRepository.existsByName(name)) {
@@ -47,13 +45,6 @@ public class ChatroomService {
 			throw new ChatroomException("채팅방 한줄소개는 필수사항입니다.");
 		}
 		setting.setDescription(description);
-
-		if (profile_img != null && !profile_img.isEmpty()) {
-			FileDto profileImgPath = fileService.upload(profile_img);
-			setting.setProfile_img_name(profileImgPath.getName());
-		} else {
-			setting.setProfile_img_name(null);
-		}
 
 		chatroom.setChatroom_setting(setting);
 
@@ -74,7 +65,6 @@ public class ChatroomService {
 
 	public Chatroom registerDetail(
 			Set<String> tags,
-			Integer min_count,
 			Integer max_count,
 			Set<String> languages,
 			Set<String> purposes,
@@ -98,13 +88,9 @@ public class ChatroomService {
 		}
 		setting.setTags(myTags);
 
-		if (min_count == null || max_count == null) {
-			throw new ChatroomException("채팅방 인원수는 필수 입력사항입니다!");
-		}
-		if (min_count < 3 || min_count > 30 || max_count < 3 || max_count > 30) {
+		if (max_count == null || max_count > 30) {
 			throw new ChatroomException("채팅방 인원수 제한은 3~30명 입니다!");
 		}
-		setting.setMin_count(min_count);
 		setting.setMax_count(max_count);
 
 		Set<Language> myLanguages = new HashSet<>();

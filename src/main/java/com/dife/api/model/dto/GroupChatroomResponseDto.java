@@ -35,9 +35,6 @@ public class GroupChatroomResponseDto {
 	@Schema(description = "그룹 채팅방 태그", example = "cookie")
 	private Set<String> tags;
 
-	@Schema(description = "그룹 채팅방 최소 인원수", example = "3")
-	private Integer min_count;
-
 	@Schema(description = "그룹 채팅방 최대 인원수", example = "30")
 	private Integer max_count;
 
@@ -70,7 +67,6 @@ public class GroupChatroomResponseDto {
 							.map(Tag::getName)
 							.collect(Collectors.toSet());
 		}
-		this.min_count = chatroom.getChatroom_setting().getMin_count();
 		this.max_count = chatroom.getChatroom_setting().getMax_count();
 		if (chatroom.getChatroom_setting().getLanguages() != null
 				&& !chatroom.getChatroom_setting().getLanguages().isEmpty()) {
