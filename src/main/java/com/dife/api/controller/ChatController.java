@@ -55,12 +55,12 @@ public class ChatController {
 						schema = @Schema(implementation = GroupChatroomResponseDto.class))
 			})
 	public ResponseEntity<GroupChatroomResponseDto> registerDetail(
-			@RequestParam(value = "tags", required = false) Set<String> tags,
-			@RequestParam(value = "min_count", required = false) Integer min_count,
-			@RequestParam(value = "max_count", required = false) Integer max_count,
-			@RequestParam(value = "languages", required = false) Set<String> languages,
-			@RequestParam(value = "purposes", required = false) Set<String> purposes,
-			@RequestParam(value = "is_public", required = false) Boolean is_public,
+			@RequestParam("tags") Set<String> tags,
+			@RequestParam("min_count") Integer min_count,
+			@RequestParam("max_count") Integer max_count,
+			@RequestParam("languages") Set<String> languages,
+			@RequestParam("purposes") Set<String> purposes,
+			@RequestParam("is_public") Boolean is_public,
 			@RequestParam(value = "password", required = false) String password,
 			@PathVariable Long id) {
 
