@@ -117,8 +117,41 @@ public class ChatService {
 		messagingTemplate.convertAndSend("/topic/chatroom/" + room_id, dto.getMessage());
 	}
 
-		} else {
-			throw new ChatroomNotFoundException();
+	public void exit(Long room_id, String session_id, ChatDto dto) {
+		Boolean is_valid = chatroomService.findChatroomById(room_id);
+		if (!is_valid) {
+			disconnectSession(room_id, session_id);
+			log.warn("유효한 채팅방이 아닙니다!");
+			return;
 		}
+
+		Chatroom chatroom = chatroomService.getChatroom(room_id);
+
+		Map<String, Boolean> activeSessions = chatroom.getActiveSessions();
+
+		if (!activeSessions.containsKey(session_id)) {
+			disconnectSession(room_id, session_id);
+			log.warn("존재하지 않는 세션입니다!");
+			return;
+		}
+
+		activeSessions.remove(session_id);
+		ChatroomSetting setting = chatroom.getChatroom_setting();
+		Integer nCount = setting.getCount();
+		nCount--;
+		setting.setCount(nCount);
+		messagingTemplate.convertAndSend(
+				"/topic/chatroom/" + chatroom.getId(), dto.getSender() + "님이 퇴장하셨습니다!");
+
+		if (nCount < 2) {
+			log.warn("해당 채팅방은 한명의 사용자밖에 안 남았기 때문에 삭제됩니다");
+			chatroomRepository.delete(chatroom);
+			disconnectSession(room_id, session_id);
+			return;
+		}
+
+		chatroom.setActiveSessions(activeSessions);
+		chatroomRepository.save(chatroom);
+		disconnectSession(room_id, session_id);
 	}
 }
