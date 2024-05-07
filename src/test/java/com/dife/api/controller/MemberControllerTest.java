@@ -2,10 +2,13 @@ package com.dife.api.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.dife.api.GlobalExceptionHandler;
+import com.dife.api.exception.DuplicateMemberException;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.RegisterEmailAndPasswordRequestDto;
 import com.dife.api.service.MemberService;
@@ -31,7 +34,10 @@ public class MemberControllerTest {
 
 	@BeforeEach
 	public void setup() {
-		mockMvc = MockMvcBuilders.standaloneSetup(memberController).build();
+		mockMvc =
+				MockMvcBuilders.standaloneSetup(memberController)
+						.setControllerAdvice(new GlobalExceptionHandler())
+						.build();
 	}
 
 	@Test
@@ -56,5 +62,21 @@ public class MemberControllerTest {
 				.andExpect(jsonPath("$.success").value(true))
 				.andExpect(jsonPath("$.member_id").value(member.getId()))
 				.andExpect(jsonPath("$.email").value("email@example.com"));
+	}
+
+	@Test
+	public void registerEmailAndPassword_ShouldReturn409_WhenEmailExists() throws Exception {
+		RegisterEmailAndPasswordRequestDto requestDto =
+				new RegisterEmailAndPasswordRequestDto("email@example.com", "password123");
+		String reqBody = new ObjectMapper().writeValueAsString(requestDto);
+
+		when(memberService.registerEmailAndPassword(any(RegisterEmailAndPasswordRequestDto.class)))
+				.thenThrow(new DuplicateMemberException("이미 가입되어있는 이메일입니다."));
+
+		mockMvc
+				.perform(
+						post("/api/members/register").contentType(MediaType.APPLICATION_JSON).content(reqBody))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.success").value(false));
 	}
 }
