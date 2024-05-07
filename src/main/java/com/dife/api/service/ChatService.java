@@ -32,6 +32,13 @@ public class ChatService {
 	}
 
 	public void sendMessage(Long room_id, ChatDto dto) {
+	public void disconnectSession(Long room_id, String session_id) {
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
+		accessor.setSessionId(session_id);
+		accessor.setDestination("/topic/chatroom/" + room_id);
+		messagingTemplate.convertAndSend(
+				"/topic/chatroom/" + room_id, "Disconnect", accessor.getMessageHeaders());
+	}
 
 	public void enter(Long room_id, String session_id, ChatEnterDto dto) {
 		Boolean is_valid = chatroomService.findChatroomById(room_id);
