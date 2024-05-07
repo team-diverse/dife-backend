@@ -48,6 +48,11 @@ public class SocketController {
 		chatService.sendEnter(id, dto, sessionId);
 	}
 
-		chatService.sendMessage(id, dto);
+	@MessageMapping("/chatroom/chat/{id}")
+	@SendTo("/topic/chatroom")
+	public void sendMessage(
+			@DestinationVariable("id") Long id, ChatDto dto, @Header("simpSessionId") String sessionId) {
+
+		chatService.sendMessage(id, dto, sessionId);
 	}
 }

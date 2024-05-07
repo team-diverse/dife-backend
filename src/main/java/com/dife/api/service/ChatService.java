@@ -31,7 +31,21 @@ public class ChatService {
 		chatrooms = new LinkedHashMap<>();
 	}
 
-	public void sendMessage(Long room_id, ChatDto dto) {
+	public void sendEnter(Long room_id, ChatEnterDto dto, String session_id) {
+		enter(room_id, session_id, dto);
+	}
+
+	public void sendMessage(Long room_id, ChatDto dto, String session_id) {
+
+		switch (dto.getChatType()) {
+			case CHAT:
+				chat(room_id, session_id, dto);
+				break;
+			case EXIT:
+				exit(room_id, session_id, dto);
+		}
+	}
+
 	public void disconnectSession(Long room_id, String session_id) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		accessor.setSessionId(session_id);
@@ -77,9 +91,31 @@ public class ChatService {
 				messagingTemplate.convertAndSend(
 						"/topic/chatroom/" + room_id, dto.getSender() + "님이 입장하셨습니다!");
 			}
-			if (dto.getChatType() == ChatType.CHAT) {
-				messagingTemplate.convertAndSend("/topic/chatroom/" + room_id, dto.getMessage());
-			}
+			log.warn("이미 접속해있는 회원입니다!");
+		}
+		chatroomRepository.save(chatroom);
+	}
+
+	public void chat(Long room_id, String session_id, ChatDto dto) {
+		Boolean is_valid = chatroomService.findChatroomById(room_id);
+
+		if (!is_valid) {
+			disconnectSession(room_id, session_id);
+			log.warn("유효한 채팅방이 아닙니다!");
+			return;
+		}
+		Chatroom chatroom = chatroomService.getChatroom(room_id);
+
+		Map<String, Boolean> activeSessions = chatroom.getActiveSessions();
+
+		if (!activeSessions.containsKey(session_id)) {
+			disconnectSession(room_id, session_id);
+			log.warn("존재하지 않는 세션입니다!");
+			return;
+		}
+
+		messagingTemplate.convertAndSend("/topic/chatroom/" + room_id, dto.getMessage());
+	}
 
 		} else {
 			throw new ChatroomNotFoundException();
