@@ -14,6 +14,7 @@ import com.dife.api.model.dto.RegisterEmailAndPasswordRequestDto;
 import com.dife.api.service.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,43 +41,50 @@ public class MemberControllerTest {
 						.build();
 	}
 
-	@Test
-	public void registerEmailAndPassword_ShouldReturn201_WhenEmailPasswordIsPassed()
-			throws Exception {
-		RegisterEmailAndPasswordRequestDto requestDto =
-				new RegisterEmailAndPasswordRequestDto("email@example.com", "password123");
-		String reqBody = new ObjectMapper().writeValueAsString(requestDto);
+	@Nested
+	class registerEmailAndPasswordMethod {
+		@Test
+		public void shouldReturn201_WhenEmailPasswordIsPassed()
+				throws Exception {
+			RegisterEmailAndPasswordRequestDto requestDto =
+					new RegisterEmailAndPasswordRequestDto("email@example.com", "password123");
+			String reqBody = new ObjectMapper().writeValueAsString(requestDto);
 
-		Member member = new Member();
-		member.setId(1L);
-		member.setEmail(requestDto.getEmail());
-		member.setPassword(requestDto.getPassword());
+			Member member = new Member();
+			member.setId(1L);
+			member.setEmail(requestDto.getEmail());
+			member.setPassword(requestDto.getPassword());
 
-		given(memberService.registerEmailAndPassword(any(RegisterEmailAndPasswordRequestDto.class)))
-				.willReturn(member);
+			given(memberService.registerEmailAndPassword(any(RegisterEmailAndPasswordRequestDto.class)))
+					.willReturn(member);
 
-		mockMvc
-				.perform(
-						post("/api/members/register").contentType(MediaType.APPLICATION_JSON).content(reqBody))
-				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.member_id").value(member.getId()))
-				.andExpect(jsonPath("$.email").value("email@example.com"));
+			mockMvc
+					.perform(
+							post("/api/members/register").contentType(MediaType.APPLICATION_JSON).content(reqBody))
+					.andExpect(status().isCreated())
+					.andExpect(jsonPath("$.success").value(true))
+					.andExpect(jsonPath("$.member_id").value(member.getId()))
+					.andExpect(jsonPath("$.email").value("email@example.com"));
+		}
+
+
+		@Test
+		public void shouldReturn409_WhenEmailExists() throws Exception {
+			RegisterEmailAndPasswordRequestDto requestDto =
+					new RegisterEmailAndPasswordRequestDto("email@example.com", "password123");
+			String reqBody = new ObjectMapper().writeValueAsString(requestDto);
+
+			when(memberService.registerEmailAndPassword(any(RegisterEmailAndPasswordRequestDto.class)))
+					.thenThrow(new DuplicateMemberException("이미 가입되어있는 이메일입니다."));
+
+			mockMvc
+					.perform(
+							post("/api/members/register").contentType(MediaType.APPLICATION_JSON).content(reqBody))
+					.andExpect(status().isConflict())
+					.andExpect(jsonPath("$.success").value(false));
+		}
+
 	}
 
-	@Test
-	public void registerEmailAndPassword_ShouldReturn409_WhenEmailExists() throws Exception {
-		RegisterEmailAndPasswordRequestDto requestDto =
-				new RegisterEmailAndPasswordRequestDto("email@example.com", "password123");
-		String reqBody = new ObjectMapper().writeValueAsString(requestDto);
 
-		when(memberService.registerEmailAndPassword(any(RegisterEmailAndPasswordRequestDto.class)))
-				.thenThrow(new DuplicateMemberException("이미 가입되어있는 이메일입니다."));
-
-		mockMvc
-				.perform(
-						post("/api/members/register").contentType(MediaType.APPLICATION_JSON).content(reqBody))
-				.andExpect(status().isConflict())
-				.andExpect(jsonPath("$.success").value(false));
-	}
 }
