@@ -1,10 +1,12 @@
 package com.dife.api.service;
 
+import com.dife.api.model.Chat;
 import com.dife.api.model.ChatType;
 import com.dife.api.model.Chatroom;
 import com.dife.api.model.ChatroomSetting;
 import com.dife.api.model.dto.ChatDto;
 import com.dife.api.model.dto.ChatEnterDto;
+import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class ChatService {
 	private final SimpMessageSendingOperations messagingTemplate;
 	private final ChatroomService chatroomService;
 	private final ChatroomRepository chatroomRepository;
+	private final ChatRepository chatRepository;
 
 	public void sendEnter(Long room_id, ChatEnterDto dto, String session_id) {
 		enter(room_id, session_id, dto);
@@ -98,7 +101,7 @@ public class ChatService {
 		}
 
 		if (dto.getMessage().length() > 300) {
-			messagingTemplate.convertAndSend("/topic/chatroom/" + room_id, "메시지는 300자 이내로 입력하셔야 합니다.");
+			messagingTemplate.convertAndSendToUser(dto.getSender(),"/queue/" + dto.getSender(), "메시지는 300자 이내로 입력하셔야 합니다.");
 		} else {
 			Chat chat = new Chat();
 			chat.setMessage(dto.getMessage());
