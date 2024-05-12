@@ -58,7 +58,7 @@ public class MemberController {
 	@RequestMapping(path = "/{id}", method = RequestMethod.HEAD)
 	@Operation(summary = "중복 닉네임 확인", description = "중복 닉네임 여부를 확인합니다.")
 	public ResponseEntity<Void> checkUsername(
-			@RequestParam("username") String username, @PathVariable Long id) {
+			@RequestParam(name = "username") String username, @PathVariable(name = "id") Long id) {
 		Boolean isValid = memberService.checkUsername(username);
 
 		if (isValid) {
@@ -78,7 +78,7 @@ public class MemberController {
 						schema = @Schema(implementation = MemberResponseDto.class))
 			})
 	public ResponseEntity<MemberResponseDto> registerDetail(
-			@RequestParam("username") String username,
+			@RequestParam(name = "username") String username,
 			@RequestParam("is_korean") Boolean is_korean,
 			@RequestParam(value = "bio", required = false) String bio,
 			@RequestParam(value = "mbti", required = false) MbtiCategory mbti,
