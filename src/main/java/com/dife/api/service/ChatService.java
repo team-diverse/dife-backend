@@ -6,6 +6,7 @@ import com.dife.api.model.ChatroomSetting;
 import com.dife.api.model.dto.ChatDto;
 import com.dife.api.model.dto.ChatEnterDto;
 import com.dife.api.repository.ChatroomRepository;
+import com.dife.api.repository.ChatroomSettingRepository;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,11 +24,9 @@ public class ChatService {
 	private final SimpMessageSendingOperations messagingTemplate;
 	private final ChatroomService chatroomService;
 	private final ChatroomRepository chatroomRepository;
+	private final ChatroomSettingRepository chatroomSettingRepository;
 
-	public void sendEnter(Long room_id, ChatEnterDto dto, String session_id) {
-		enter(room_id, session_id, dto);
-	}
-
+	@Transactional
 	public void sendMessage(Long room_id, ChatDto dto, String session_id) {
 
 		switch (dto.getChatType()) {
@@ -46,42 +46,48 @@ public class ChatService {
 				"/topic/chatroom/" + room_id, "Disconnect", accessor.getMessageHeaders());
 	}
 
-	public void enter(Long room_id, String session_id, ChatEnterDto dto) {
-		Boolean is_valid = chatroomService.findChatroomById(room_id);
-		if (!is_valid) {
-			disconnectSession(room_id, session_id);
-			return;
-		}
-		if (dto.getChatType() != ChatType.ENTER) {
-			disconnectSession(room_id, session_id);
-			return;
-		}
+	@Transactional
+	public void enter(Long room_id, String session_id, ChatEnterDto dto) throws InterruptedException {
+		while (true) {
+			try {
+				Boolean is_valid = chatroomService.findChatroomById(room_id);
+				if (!is_valid) {
+					disconnectSession(room_id, session_id);
+					return;
+				}
+				if (dto.getChatType() != ChatType.ENTER) {
+					disconnectSession(room_id, session_id);
+					return;
+				}
 
-		Chatroom chatroom = chatroomService.getChatroom(room_id);
-		if (chatroomService.isFull(chatroom)) {
-			disconnectSession(room_id, session_id);
-			return;
-		}
-		if (chatroomService.isWrongPassword(chatroom, dto.getPassword())) {
-			disconnectSession(room_id, session_id);
-			return;
-		}
+				Chatroom chatroom = chatroomService.getChatroom(room_id);
+				if (chatroomService.isFull(chatroom)) {
+					disconnectSession(room_id, session_id);
+					return;
+				}
+				if (chatroomService.isWrongPassword(chatroom, dto.getPassword())) {
+					disconnectSession(room_id, session_id);
+					return;
+				}
+				Map<String, String> activeSessions = chatroom.getActiveSessions();
 
-		Map<String, String> activeSessions = chatroom.getActiveSessions();
-
-		synchronized (activeSessions) {
-			if (!activeSessions.containsKey(session_id)) {
-				activeSessions.put(session_id, dto.getSender());
-				ChatroomSetting setting = chatroom.getChatroom_setting();
-				Integer nCount = setting.getCount();
-				nCount++;
-				setting.setCount(nCount);
-				messagingTemplate.convertAndSend(
-						"/topic/chatroom/" + room_id, dto.getSender() + "님이 입장하셨습니다!");
+				if (!activeSessions.containsKey(session_id)) {
+					activeSessions.put(session_id, dto.getSender());
+					ChatroomSetting setting = chatroomSettingRepository.findByIdWithOptimisticLock(room_id);
+					Integer nCount = setting.getCount();
+					setting.setCount(nCount + 1);
+					chatroomSettingRepository.saveAndFlush(setting);
+					chatroom.setChatroom_setting(setting);
+					messagingTemplate.convertAndSend(
+							"/topic/chatroom/" + room_id, dto.getSender() + "님이 입장하셨습니다!");
+				}
+				chatroomRepository.save(chatroom);
+				break;
+			} catch (Exception e) {
+				log.info("Go To Sleep!!!!!");
+				Thread.sleep(50);
 			}
-			log.warn("이미 접속해있는 회원입니다!");
 		}
-		chatroomRepository.save(chatroom);
 	}
 
 	public void chat(Long room_id, String session_id, ChatDto dto) {
@@ -120,10 +126,11 @@ public class ChatService {
 		}
 
 		activeSessions.remove(session_id);
-		ChatroomSetting setting = chatroom.getChatroom_setting();
+		ChatroomSetting setting = chatroomSettingRepository.findByIdWithOptimisticLock(room_id);
 		Integer nCount = setting.getCount();
-		nCount--;
-		setting.setCount(nCount);
+		setting.setCount(nCount - 1);
+		chatroomSettingRepository.saveAndFlush(setting);
+		chatroom.setChatroom_setting(setting);
 		messagingTemplate.convertAndSend(
 				"/topic/chatroom/" + chatroom.getId(), dto.getSender() + "님이 퇴장하셨습니다!");
 

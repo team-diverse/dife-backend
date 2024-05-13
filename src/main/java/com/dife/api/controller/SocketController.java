@@ -23,9 +23,10 @@ public class SocketController {
 	public void sendEnter(
 			@DestinationVariable("id") Long id,
 			ChatEnterDto dto,
-			@Header("simpSessionId") String sessionId) {
+			@Header("simpSessionId") String sessionId)
+			throws InterruptedException {
 
-		chatService.sendEnter(id, dto, sessionId);
+		chatService.enter(id, sessionId, dto);
 	}
 
 	@MessageMapping("/chatroom/chat/{id}")
