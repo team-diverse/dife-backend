@@ -67,11 +67,11 @@ public class ChatService {
 			return;
 		}
 
-		Map<String, Boolean> activeSessions = chatroom.getActiveSessions();
+		Map<String, String> activeSessions = chatroom.getActiveSessions();
 
 		synchronized (activeSessions) {
 			if (!activeSessions.containsKey(session_id)) {
-				activeSessions.put(session_id, true);
+				activeSessions.put(session_id, dto.getSender());
 				ChatroomSetting setting = chatroom.getChatroom_setting();
 				Integer nCount = setting.getCount();
 				nCount++;
@@ -93,7 +93,7 @@ public class ChatService {
 		}
 		Chatroom chatroom = chatroomService.getChatroom(room_id);
 
-		Map<String, Boolean> activeSessions = chatroom.getActiveSessions();
+		Map<String, String> activeSessions = chatroom.getActiveSessions();
 
 		if (!activeSessions.containsKey(session_id)) {
 			disconnectSession(room_id, session_id);
@@ -112,7 +112,7 @@ public class ChatService {
 
 		Chatroom chatroom = chatroomService.getChatroom(room_id);
 
-		Map<String, Boolean> activeSessions = chatroom.getActiveSessions();
+		Map<String, String> activeSessions = chatroom.getActiveSessions();
 
 		if (!activeSessions.containsKey(session_id)) {
 			disconnectSession(room_id, session_id);
