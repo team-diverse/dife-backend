@@ -36,9 +36,9 @@ public class ChatController {
 						schema = @Schema(implementation = GroupChatroomRequestDto.class))
 			})
 	public ResponseEntity<GroupChatroomRequestDto> createGroupChatroom(
-			@RequestParam(value = "name", required = false) String name,
-			@RequestParam("description") String description,
-			@RequestParam("profile_img") MultipartFile profile_img) {
+			@RequestParam(name = "name", required = false) String name,
+			@RequestParam(name = "description") String description,
+			@RequestParam(name = "profile_img") MultipartFile profile_img) {
 
 		Chatroom chatroom = chatroomService.createGroupChatroom(name, description, profile_img);
 
@@ -55,14 +55,14 @@ public class ChatController {
 						schema = @Schema(implementation = GroupChatroomResponseDto.class))
 			})
 	public ResponseEntity<GroupChatroomResponseDto> registerDetail(
-			@RequestParam("tags") Set<String> tags,
-			@RequestParam("min_count") Integer min_count,
-			@RequestParam("max_count") Integer max_count,
-			@RequestParam("languages") Set<String> languages,
-			@RequestParam("purposes") Set<String> purposes,
-			@RequestParam("is_public") Boolean is_public,
-			@RequestParam(value = "password", required = false) String password,
-			@PathVariable Long id) {
+			@RequestParam(name = "tags") Set<String> tags,
+			@RequestParam(name = "min_count") Integer min_count,
+			@RequestParam(name = "max_count") Integer max_count,
+			@RequestParam(name = "languages") Set<String> languages,
+			@RequestParam(name = "purposes") Set<String> purposes,
+			@RequestParam(name = "is_public") Boolean is_public,
+			@RequestParam(name = "password", required = false) String password,
+			@PathVariable(name = "id") Long id) {
 
 		Chatroom chatroom =
 				chatroomService.registerDetail(
@@ -71,7 +71,8 @@ public class ChatController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<GroupChatroomResponseDto> getGroupChatroom(@PathVariable Long id) {
+	public ResponseEntity<GroupChatroomResponseDto> getGroupChatroom(
+			@PathVariable(name = "id") Long id) {
 		Chatroom chatroom = chatroomService.getChatroom(id);
 		return ResponseEntity.status(HttpStatus.OK).body(new GroupChatroomResponseDto(chatroom));
 	}

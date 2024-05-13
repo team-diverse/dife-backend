@@ -86,7 +86,7 @@ public class MemberController {
 			@RequestParam(name = "languages") Set<String> languages,
 			@RequestParam(name = "profile_img", required = false) MultipartFile profile_img,
 			@RequestParam(name = "verification_file") MultipartFile verification_file,
-			@PathVariable Long id) {
+			@PathVariable(name = "id") Long id) {
 
 		Member member =
 				memberService.registerDetail(
