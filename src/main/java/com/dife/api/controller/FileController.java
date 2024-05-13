@@ -17,7 +17,7 @@ public class FileController {
 	private final FileService fileService;
 
 	@PostMapping("/")
-	ResponseEntity<FileDto> uploadFile(@RequestParam("file") MultipartFile file) {
+	ResponseEntity<FileDto> uploadFile(@RequestParam(name = "file") MultipartFile file) {
 		FileDto dto = fileService.upload(file);
 		return ResponseEntity.status(CREATED).body(dto);
 	}

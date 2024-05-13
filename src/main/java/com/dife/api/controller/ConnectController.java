@@ -45,7 +45,7 @@ public class ConnectController {
 						schema = @Schema(implementation = ConnectResponseDto.class))
 			})
 	public ResponseEntity<ConnectResponseDto> getConnect(
-			@RequestParam("member_id") Long memberId, Authentication auth) {
+			@RequestParam(name = "member_id") Long memberId, Authentication auth) {
 		ConnectResponseDto responseDto = connectService.getConnect(memberId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
@@ -77,7 +77,8 @@ public class ConnectController {
 	@DeleteMapping("/{id}")
 	@Operation(summary = "커넥트 삭제 API", description = "커넥트를 맺을 회원 Id를 입력합니다.")
 	@ApiResponse(responseCode = "200", description = "커넥트 삭제 성공 예시")
-	public ResponseEntity<Void> deleteConnect(@PathVariable("id") Long id, Authentication auth) {
+	public ResponseEntity<Void> deleteConnect(
+			@PathVariable(name = "id") Long id, Authentication auth) {
 		connectService.deleteConnect(id, auth.getName());
 		return new ResponseEntity<>(OK);
 	}

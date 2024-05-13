@@ -38,20 +38,22 @@ public class BoardController {
 
 	@GetMapping("/")
 	public ResponseEntity<List<BoardDto>> getPostsByBoardType(
-			@RequestParam("boardType") BoardCategory boardType) {
+			@RequestParam(name = "boardType") BoardCategory boardType) {
 		List<BoardDto> posts = postService.getPostsByBoardType(boardType);
 		return ResponseEntity.ok(posts);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<PostResponseDto> getPost(@PathVariable Long id) {
+	public ResponseEntity<PostResponseDto> getPost(@PathVariable(name = "id") Long id) {
 		Post post = postService.getPost(id);
 		return ResponseEntity.status(OK).body(new PostResponseDto(post));
 	}
 
 	@PutMapping("/{id}")
 	public ResponseEntity<PostResponseDto> updatePost(
-			@PathVariable Long id, @RequestBody PostUpdateRequestDto request, Authentication auth) {
+			@PathVariable(name = "id") Long id,
+			@RequestBody PostUpdateRequestDto request,
+			Authentication auth) {
 		Member currentMember = memberService.getMember(auth.getName());
 		Post post = postService.updatePost(id, request, currentMember);
 
@@ -59,7 +61,8 @@ public class BoardController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deletePost(@PathVariable Long id, Authentication auth) {
+	public ResponseEntity<String> deletePost(
+			@PathVariable(name = "id") Long id, Authentication auth) {
 		Member currentMember = memberService.getMember(auth.getName());
 		this.postService.deletePost(id, currentMember);
 		return ResponseEntity.ok().body("게시물이 삭제되었습니다!");

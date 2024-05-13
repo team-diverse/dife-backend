@@ -58,7 +58,7 @@ public class MemberController {
 	@RequestMapping(path = "/{id}", method = RequestMethod.HEAD)
 	@Operation(summary = "중복 닉네임 확인", description = "중복 닉네임 여부를 확인합니다.")
 	public ResponseEntity<Void> checkUsername(
-			@RequestParam("username") String username, @PathVariable Long id) {
+			@RequestParam(name = "username") String username, @PathVariable(name = "id") Long id) {
 		Boolean isValid = memberService.checkUsername(username);
 
 		if (isValid) {
@@ -78,15 +78,15 @@ public class MemberController {
 						schema = @Schema(implementation = MemberResponseDto.class))
 			})
 	public ResponseEntity<MemberResponseDto> registerDetail(
-			@RequestParam("username") String username,
-			@RequestParam("is_korean") Boolean is_korean,
-			@RequestParam(value = "bio", required = false) String bio,
-			@RequestParam(value = "mbti", required = false) MbtiCategory mbti,
-			@RequestParam(value = "hobbies", required = false) Set<String> hobbies,
-			@RequestParam("languages") Set<String> languages,
-			@RequestParam(value = "profile_img", required = false) MultipartFile profile_img,
-			@RequestParam("verification_file") MultipartFile verification_file,
-			@PathVariable Long id) {
+			@RequestParam(name = "username") String username,
+			@RequestParam(name = "is_korean") Boolean is_korean,
+			@RequestParam(name = "bio", required = false) String bio,
+			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
+			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
+			@RequestParam(name = "languages") Set<String> languages,
+			@RequestParam(name = "profile_img", required = false) MultipartFile profile_img,
+			@RequestParam(name = "verification_file") MultipartFile verification_file,
+			@PathVariable(name = "id") Long id) {
 
 		Member member =
 				memberService.registerDetail(
