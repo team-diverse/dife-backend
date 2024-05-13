@@ -26,6 +26,9 @@ public class ChatroomSetting {
 	private Set<Tag> tags;
 
 	private Integer count = 0;
+
+	@Version private Long version;
+
 	private Integer max_count;
 
 	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
