@@ -79,6 +79,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 		String email = customUserDetails.getUsername();
 		Long id = customUserDetails.getId();
+		Boolean is_verified = customUserDetails.getIsVerified();
+		String verification_file_id = customUserDetails.getVerificationFileId();
 
 		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 		Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -87,7 +89,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 		String token = jwtUtil.createAccessJwt(email, role, 60 * 60 * 1000L);
 		ResponseEntity<LoginSuccessDto> responseEntity =
-				ResponseEntity.status(CREATED).body(new LoginSuccessDto(token, id));
+				ResponseEntity.status(CREATED)
+						.body(new LoginSuccessDto(token, id, is_verified, verification_file_id));
 
 		String responseBody = new ObjectMapper().writeValueAsString(responseEntity.getBody());
 		response.getWriter().write(responseBody);

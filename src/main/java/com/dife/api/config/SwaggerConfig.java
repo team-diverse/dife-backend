@@ -77,7 +77,9 @@ public class SwaggerConfig {
 																															.example(
 																																	new LoginSuccessDto(
 																																			"Given Bearer Token",
-																																			1L)))))))));
+																																			1L,
+																																			Boolean.TRUE,
+																																			"학생증.jpg")))))))));
 		};
 	}
 }
