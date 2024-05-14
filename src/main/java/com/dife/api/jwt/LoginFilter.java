@@ -40,11 +40,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		String email = request.getParameter("email");
 		String password = request.getParameter("password");
 
-		log.info("email : " + email);
-		log.info("password : " + password);
 		if (email == null || password == null || email.isEmpty() || password.isEmpty()) {
 			String errorMessage = "이메일과 비밀번호는 필수 사항";
-			log.warn("이메일과 비밀번호는 필수 사항");
 
 			ExceptionResonse exceptionResponse = new ExceptionResonse(false, errorMessage);
 
@@ -82,6 +79,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 		String email = customUserDetails.getUsername();
 		Long id = customUserDetails.getId();
+		Boolean is_verified = customUserDetails.getIsVerified();
+		String verification_file_id = customUserDetails.getVerificationFileId();
 
 		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 		Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -90,7 +89,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 		String token = jwtUtil.createAccessJwt(email, role, 60 * 60 * 1000L);
 		ResponseEntity<LoginSuccessDto> responseEntity =
-				ResponseEntity.status(CREATED).body(new LoginSuccessDto(token, id));
+				ResponseEntity.status(CREATED)
+						.body(new LoginSuccessDto(token, id, is_verified, verification_file_id));
 
 		String responseBody = new ObjectMapper().writeValueAsString(responseEntity.getBody());
 		response.getWriter().write(responseBody);
@@ -102,7 +102,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 			HttpServletRequest request, HttpServletResponse response, AuthenticationException failed)
 			throws IOException {
 
-		log.error("로그인 실패");
 		String errorMessage = "인증에 실패했습니다: " + failed.getMessage();
 
 		ExceptionResonse exceptionResponse = new ExceptionResonse(false, errorMessage);

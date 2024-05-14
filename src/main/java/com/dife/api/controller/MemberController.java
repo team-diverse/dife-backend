@@ -106,7 +106,6 @@ public class MemberController {
 			})
 	public ResponseEntity<MemberResponseDto> profile(Authentication auth) {
 		Member currentMember = memberService.getMember(auth.getName());
-		log.info("TokenId : " + currentMember.getTokenId());
 		MemberResponseDto memberResponseDto = new MemberResponseDto(currentMember);
 		return ResponseEntity.ok(memberResponseDto);
 	}

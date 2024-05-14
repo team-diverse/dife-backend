@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -68,12 +67,6 @@ public class JWTFilter extends OncePerRequestFilter {
 		String role = e.getClaims().get("role", String.class);
 
 		String newToken = jwtUtil.createAccessJwt(email, role, TOKEN_VALIDITY_DURATION);
-
-		Optional<Member> optionalMember = memberRepository.findByEmail(email);
-
-		Member member = optionalMember.get();
-		member.setTokenId(newToken);
-		memberRepository.save(member);
 
 		response.setHeader(AUTH_HEADER, BEARER_TOKEN_PREFIX + newToken);
 	}
