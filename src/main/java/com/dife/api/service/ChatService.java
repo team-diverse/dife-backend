@@ -69,17 +69,14 @@ public class ChatService {
 
 		Map<String, String> activeSessions = chatroom.getActiveSessions();
 
-		synchronized (activeSessions) {
-			if (!activeSessions.containsKey(session_id)) {
-				activeSessions.put(session_id, dto.getSender());
-				ChatroomSetting setting = chatroom.getChatroom_setting();
-				Integer nCount = setting.getCount();
-				nCount++;
-				setting.setCount(nCount);
-				messagingTemplate.convertAndSend(
-						"/topic/chatroom/" + room_id, dto.getSender() + "님이 입장하셨습니다!");
-			}
-			log.warn("이미 접속해있는 회원입니다!");
+		if (!activeSessions.containsKey(session_id)) {
+			activeSessions.put(session_id, dto.getSender());
+			ChatroomSetting setting = chatroom.getChatroom_setting();
+			Integer nCount = setting.getCount();
+			nCount++;
+			setting.setCount(nCount);
+			messagingTemplate.convertAndSend(
+					"/topic/chatroom/" + room_id, dto.getSender() + "님이 입장하셨습니다!");
 		}
 		chatroomRepository.save(chatroom);
 	}

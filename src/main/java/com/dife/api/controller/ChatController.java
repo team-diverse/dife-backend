@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequiredArgsConstructor
@@ -37,8 +36,7 @@ public class ChatController {
 			})
 	public ResponseEntity<GroupChatroomRequestDto> createGroupChatroom(
 			@RequestParam(name = "name", required = false) String name,
-			@RequestParam(name = "description") String description,
-			@RequestParam(name = "profile_img") MultipartFile profile_img) {
+			@RequestParam(name = "description") String description) {
 
 		Chatroom chatroom = chatroomService.createGroupChatroom(name, description);
 
@@ -56,7 +54,6 @@ public class ChatController {
 			})
 	public ResponseEntity<GroupChatroomResponseDto> registerDetail(
 			@RequestParam(name = "tags") Set<String> tags,
-			@RequestParam(name = "min_count") Integer min_count,
 			@RequestParam(name = "max_count") Integer max_count,
 			@RequestParam(name = "languages") Set<String> languages,
 			@RequestParam(name = "purposes") Set<String> purposes,
