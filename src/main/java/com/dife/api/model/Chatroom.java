@@ -1,6 +1,8 @@
 package com.dife.api.model;
 
 import jakarta.persistence.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +23,9 @@ public class Chatroom extends BaseTimeEntity {
 	private String name;
 
 	private ChatroomType chatroomType;
+
+	@ElementCollection(fetch = FetchType.EAGER)
+	private Map<String, String> activeSessions = new ConcurrentHashMap<>();
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "chatroom_setting_id")
