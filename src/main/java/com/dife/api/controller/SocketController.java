@@ -3,12 +3,11 @@ package com.dife.api.controller;
 import com.dife.api.model.dto.ChatDto;
 import com.dife.api.model.dto.ChatEnterDto;
 import com.dife.api.service.ChatService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.handler.annotation.*;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -18,14 +17,10 @@ public class SocketController {
 
 	private final ChatService chatService;
 
-	@MessageMapping("/chatroom/enter/{id}")
-	@SendTo("/topic/chatroom")
-	public void sendEnter(
-			@DestinationVariable("id") Long id,
-			ChatEnterDto dto,
-			@Header("simpSessionId") String sessionId) {
-
-		chatService.sendEnter(id, dto, sessionId);
+	@MessageMapping("/chatroom/enter")
+	public void sendEnter(ChatEnterDto dto, SimpMessageHeaderAccessor headerAccessor)
+			throws JsonProcessingException {
+		chatService.sendEnter(dto, headerAccessor);
 	}
 
 	@MessageMapping("/chatroom/chat/{id}")
