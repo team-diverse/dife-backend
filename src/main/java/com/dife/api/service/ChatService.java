@@ -6,11 +6,17 @@ import com.dife.api.model.Chatroom;
 import com.dife.api.model.ChatroomSetting;
 import com.dife.api.model.dto.ChatDto;
 import com.dife.api.model.dto.ChatEnterDto;
+import com.dife.api.redis.RedisPublisher;
+import com.dife.api.redis.RedisSubscriber;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -25,10 +31,10 @@ public class ChatService {
 	private final ChatroomService chatroomService;
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
-
-	public void sendEnter(Long room_id, ChatEnterDto dto, String session_id) {
-		enter(room_id, session_id, dto);
-	}
+	private final RedisMessageListenerContainer redisMessageListenerContainer;
+	private final RedisSubscriber redisSubscriber;
+	private final RedisPublisher redisPublisher;
+	private final ChannelTopic topic;
 
 	public void sendMessage(Long room_id, ChatDto dto, String session_id) {
 
@@ -44,12 +50,18 @@ public class ChatService {
 	public void disconnectSession(Long room_id, String session_id) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		accessor.setSessionId(session_id);
-		accessor.setDestination("/topic/chatroom/" + room_id);
+		accessor.setDestination("/sub/chatroom/" + room_id);
 		messagingTemplate.convertAndSend(
-				"/topic/chatroom/" + room_id, "Disconnect", accessor.getMessageHeaders());
+				"/sub/chatroom/" + room_id, "Disconnect", accessor.getMessageHeaders());
 	}
 
-	public void enter(Long room_id, String session_id, ChatEnterDto dto) {
+	public void sendEnter(ChatEnterDto dto, SimpMessageHeaderAccessor headerAccessor)
+			throws JsonProcessingException {
+		Long room_id = dto.getChatroom_id();
+
+		String session_id = headerAccessor.getSessionId();
+
+
 		Boolean is_valid = chatroomService.findChatroomById(room_id);
 		if (!is_valid) {
 			disconnectSession(room_id, session_id);

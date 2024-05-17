@@ -1,7 +1,6 @@
 package com.dife.api.config;
 
 import com.dife.api.redis.RedisPublisher;
-import com.dife.api.redis.RedisSubscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +9,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -42,7 +40,7 @@ public class RedisConfig {
 
 	@Bean
 	public ChannelTopic topic() {
-		return new ChannelTopic("chat");
+		return new ChannelTopic("chatroom");
 	}
 
 	@Bean
@@ -50,16 +48,16 @@ public class RedisConfig {
 		return new RedisPublisher(redisTemplate(), topic);
 	}
 
-	@Bean
-	public MessageListenerAdapter messageListener() {
-		return new MessageListenerAdapter(new RedisSubscriber());
-	}
+	//	@Bean
+	//	public MessageListenerAdapter messageListener() {
+	//		return new MessageListenerAdapter(new RedisSubscriber());
+	//	}
+	//
 
 	@Bean
-	public RedisMessageListenerContainer redisContainer() {
+	public RedisMessageListenerContainer redisMessageListener() {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(lettuceConnectionFactory());
-		container.addMessageListener(messageListener(), topic());
 		return container;
 	}
 }
