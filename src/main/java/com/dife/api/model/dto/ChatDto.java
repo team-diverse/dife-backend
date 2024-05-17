@@ -9,6 +9,7 @@ import lombok.Setter;
 public class ChatDto {
 
 	private ChatType chatType;
+	private String password;
 	private String message;
 	private Long chatroom_id;
 	private String sender;

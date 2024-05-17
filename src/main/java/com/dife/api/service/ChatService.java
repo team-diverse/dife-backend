@@ -5,7 +5,6 @@ import com.dife.api.model.ChatType;
 import com.dife.api.model.Chatroom;
 import com.dife.api.model.ChatroomSetting;
 import com.dife.api.model.dto.ChatDto;
-import com.dife.api.model.dto.ChatEnterDto;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
@@ -49,7 +48,7 @@ public class ChatService {
 				"/sub/chatroom/" + room_id, "Disconnect", accessor.getMessageHeaders());
 	}
 
-	public void sendEnter(ChatEnterDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void sendEnter(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
 		Long room_id = dto.getChatroom_id();
 
