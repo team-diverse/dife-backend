@@ -90,8 +90,11 @@ public class ChatService {
 			Integer nCount = setting.getCount();
 			nCount++;
 			setting.setCount(nCount);
-			messagingTemplate.convertAndSend(
-					"/topic/chatroom/" + room_id, dto.getSender() + "님이 입장하셨습니다!");
+
+			headerAccessor.getSessionAttributes().put("session_id", session_id);
+			headerAccessor.getSessionAttributes().put("chatroom_id", room_id);
+
+			redisPublisher.publish(dto);
 		}
 		chatroomRepository.save(chatroom);
 	}
