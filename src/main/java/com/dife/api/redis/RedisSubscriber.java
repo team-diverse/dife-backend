@@ -28,8 +28,21 @@ public class RedisSubscriber implements MessageListener {
 			ObjectMapper objectMapper = new ObjectMapper();
 			ChatDto dto = objectMapper.readValue(publishMessage, ChatDto.class);
 
-			messagingTemplate.convertAndSend(
-					"/sub/chatroom/" + dto.getChatroom_id(), dto.getSender() + "님이 입장하셨습니다!");
+			if (dto.getChatType() == ChatType.ENTER) {
+				messagingTemplate.convertAndSend(
+						"/sub/chatroom/" + dto.getChatroom_id(), dto.getSender() + "님이 입장하셨습니다!");
+			}
+			if (dto.getChatType() == ChatType.CHAT) {
+				messagingTemplate.convertAndSend("/sub/chatroom/" + dto.getChatroom_id(), dto.getMessage());
+			}
+			if (dto.getChatType() == ChatType.EXIT) {
+				messagingTemplate.convertAndSend(
+						"/sub/chatroom/" + dto.getChatroom_id(), dto.getSender() + "님이 퇴장하셨습니다!");
+			}
+			if (dto.getChatType() == ChatType.NOTIFY) {
+				messagingTemplate.convertAndSend(
+						"/sub/chatroom/" + dto.getChatroom_id(), "해당 채팅방은 한명만 남은 채팅방입니다!");
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}

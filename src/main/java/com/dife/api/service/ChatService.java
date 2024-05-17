@@ -29,14 +29,15 @@ public class ChatService {
 	private final ChatRepository chatRepository;
 	private final RedisPublisher redisPublisher;
 
-	public void sendMessage(Long room_id, ChatDto dto, String session_id) {
+	public void sendMessage(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+			throws JsonProcessingException {
 
 		switch (dto.getChatType()) {
 			case CHAT:
-				chat(room_id, session_id, dto);
+				chat(dto, headerAccessor);
 				break;
 			case EXIT:
-				exit(room_id, session_id, dto);
+				exit(dto, headerAccessor);
 		}
 	}
 
@@ -91,7 +92,11 @@ public class ChatService {
 		chatroomRepository.save(chatroom);
 	}
 
-	public void chat(Long room_id, String session_id, ChatDto dto) {
+	public void chat(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+			throws JsonProcessingException {
+
+		Long room_id = dto.getChatroom_id();
+		String session_id = headerAccessor.getSessionId();
 		Boolean is_valid = chatroomService.findChatroomById(room_id);
 
 		if (!is_valid) {
@@ -107,20 +112,15 @@ public class ChatService {
 			return;
 		}
 
-		if (dto.getMessage().length() > 300) {
-			messagingTemplate.convertAndSend("/topic/chatroom/" + room_id, "메시지는 300자 이내로 입력하셔야 합니다.");
-		} else {
-			Chat chat = new Chat();
-			chat.setMessage(dto.getMessage());
-			chat.setChatroom(chatroom);
-			chat.setSender(dto.getSender());
+		redisPublisher.publish(dto);
 
-			chatRepository.save(chat);
-			messagingTemplate.convertAndSend("/topic/chatroom/" + room_id, dto.getMessage());
-		}
 	}
 
-	public void exit(Long room_id, String session_id, ChatDto dto) {
+	public void exit(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+			throws JsonProcessingException {
+
+		Long room_id = dto.getChatroom_id();
+		String session_id = headerAccessor.getSessionId();
 		Boolean is_valid = chatroomService.findChatroomById(room_id);
 		if (!is_valid) {
 			disconnectSession(room_id, session_id);
@@ -141,17 +141,21 @@ public class ChatService {
 		Integer nCount = setting.getCount();
 		nCount--;
 		setting.setCount(nCount);
-		messagingTemplate.convertAndSend(
-				"/topic/chatroom/" + chatroom.getId(), dto.getSender() + "님이 퇴장하셨습니다!");
-
-		if (nCount < 2) {
-			chatroomRepository.delete(chatroom);
-			disconnectSession(room_id, session_id);
-			return;
-		}
 
 		chatroom.setActiveSessions(activeSessions);
 		chatroomRepository.save(chatroom);
 		disconnectSession(room_id, session_id);
+		redisPublisher.publish(dto);
+
+		if (nCount < 2) {
+
+			ChatDto nDto = new ChatDto();
+			nDto.setChatroom_id(chatroom.getId());
+			nDto.setChatType(ChatType.NOTIFY);
+			nDto.setMessage("해당 채팅방은 한명만 남은 채팅방입니다!");
+			nDto.setSender(activeSessions.get(session_id));
+			log.info(activeSessions.get(session_id));
+			redisPublisher.publish(nDto);
+		}
 	}
 }

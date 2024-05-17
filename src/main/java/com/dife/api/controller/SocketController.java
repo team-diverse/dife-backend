@@ -1,7 +1,6 @@
 package com.dife.api.controller;
 
 import com.dife.api.model.dto.ChatDto;
-import com.dife.api.model.dto.ChatEnterDto;
 import com.dife.api.service.ChatService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +22,9 @@ public class SocketController {
 		chatService.sendEnter(dto, headerAccessor);
 	}
 
-	@MessageMapping("/chatroom/chat/{id}")
-	@SendTo("/topic/chatroom")
-	public void sendMessage(
-			@DestinationVariable("id") Long id, ChatDto dto, @Header("simpSessionId") String sessionId) {
-
-		chatService.sendMessage(id, dto, sessionId);
+	@MessageMapping("/chatroom/chat")
+	public void sendMessage(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+			throws JsonProcessingException {
+		chatService.sendMessage(dto, headerAccessor);
 	}
 }
