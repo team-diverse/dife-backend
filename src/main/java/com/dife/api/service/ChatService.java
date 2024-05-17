@@ -101,7 +101,7 @@ public class ChatService {
 		}
 
 		if (dto.getMessage().length() > 300) {
-			messagingTemplate.convertAndSendToUser(dto.getSender(),"/queue/" + dto.getSender(), "메시지는 300자 이내로 입력하셔야 합니다.");
+			messagingTemplate.convertAndSend("/topic/chatroom/" + room_id, "메시지는 300자 이내로 입력하셔야 합니다.");
 		} else {
 			Chat chat = new Chat();
 			chat.setMessage(dto.getMessage());
