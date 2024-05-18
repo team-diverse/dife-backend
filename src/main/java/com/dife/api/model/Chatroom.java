@@ -2,6 +2,7 @@ package com.dife.api.model;
 
 import jakarta.persistence.*;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,4 +31,7 @@ public class Chatroom extends BaseTimeEntity {
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "chatroom_setting_id")
 	private ChatroomSetting chatroom_setting;
+
+	@OneToMany(mappedBy = "chatroom")
+	private Set<Chat> chats;
 }

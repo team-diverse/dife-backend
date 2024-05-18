@@ -18,7 +18,9 @@ public class ChatroomSetting {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull private String description;
+	@NotNull
+	@Size(max = 60)
+	private String description;
 
 	private String profile_img_name;
 

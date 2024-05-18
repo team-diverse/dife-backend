@@ -36,7 +36,8 @@ public class ChatroomService {
 		if (name == null || name.isEmpty()) {
 			throw new ChatroomException("채팅방 이름은 필수사항입니다.");
 		}
-		chatroom.setName(name);
+		String trimmedName = name.trim();
+		chatroom.setName(trimmedName);
 		chatroom.setChatroomType(ChatroomType.GROUP);
 
 		ChatroomSetting setting = new ChatroomSetting();
@@ -44,6 +45,16 @@ public class ChatroomService {
 		if (description == null || description.isEmpty()) {
 			throw new ChatroomException("채팅방 한줄소개는 필수사항입니다.");
 		}
+
+		if (description.length() > 60) {
+			throw new ChatroomException("채팅방 한줄소개는 60자 이내입니다.");
+		}
+
+		String trimmedDescription = description.trim();
+		if (trimmedDescription.isEmpty()) {
+			throw new ChatroomException("유효하지 않은 한줄소개입니다. 공백만 존재하는 한줄 소개는 허용되지 않습니다.");
+		}
+
 		setting.setDescription(description);
 
 		chatroom.setChatroom_setting(setting);
@@ -88,14 +99,14 @@ public class ChatroomService {
 		}
 		setting.setTags(myTags);
 
-		if (max_count == null || max_count > 30) {
+		if (max_count > 30) {
 			throw new ChatroomException("채팅방 인원수 제한은 3~30명 입니다!");
 		}
 		setting.setMax_count(max_count);
 
 		Set<Language> myLanguages = new HashSet<>();
 		if (languages == null || languages.isEmpty()) {
-			throw new ChatroomException("채팅방 번역은 필수 입력사항입니다!");
+			throw new ChatroomException("채팅방 번역 언어 선택은 필수 입력사항입니다!");
 		}
 		for (String language : languages) {
 			Language nLanguage = new Language();
@@ -118,15 +129,14 @@ public class ChatroomService {
 			myPurposes.add(nPurpose);
 		}
 		setting.setPurposes(myPurposes);
-		if (is_public == null) {
-			throw new ChatroomException("공개/비공개 여부는 필수 입력사항입니다!");
-		}
 		setting.setIs_public(is_public);
 
-		if (password == null || !password.matches("^[0-9]{5}$")) {
-			throw new ChatroomException("비밀번호는 5자리 숫자여야 합니다!");
+		if (!is_public) {
+			if (password == null || !password.matches("^[0-9]{5}$")) {
+				throw new ChatroomException("비밀번호는 5자리 숫자여야 합니다!");
+			}
+			setting.setPassword(password);
 		}
-		setting.setPassword(password);
 
 		chatroomRepository.save(chatroom);
 		return chatroom;
