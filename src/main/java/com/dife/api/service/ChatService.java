@@ -7,7 +7,6 @@ import com.dife.api.model.ChatroomSetting;
 import com.dife.api.model.dto.ChatDto;
 import com.dife.api.model.dto.ChatEnterDto;
 import com.dife.api.redis.RedisPublisher;
-import com.dife.api.redis.RedisSubscriber;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
