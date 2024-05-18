@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/chats")
 @Slf4j
-public class ChatController {
+public class ChatroomController {
 
 	private final ChatroomService chatroomService;
 
