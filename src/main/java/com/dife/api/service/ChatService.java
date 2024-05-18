@@ -14,8 +14,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -31,10 +29,7 @@ public class ChatService {
 	private final ChatroomService chatroomService;
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
-	private final RedisMessageListenerContainer redisMessageListenerContainer;
-	private final RedisSubscriber redisSubscriber;
 	private final RedisPublisher redisPublisher;
-	private final ChannelTopic topic;
 
 	public void sendMessage(Long room_id, ChatDto dto, String session_id) {
 
@@ -60,7 +55,6 @@ public class ChatService {
 		Long room_id = dto.getChatroom_id();
 
 		String session_id = headerAccessor.getSessionId();
-
 
 		Boolean is_valid = chatroomService.findChatroomById(room_id);
 		if (!is_valid) {
