@@ -91,4 +91,11 @@ public class ChatroomController {
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new SingleChatroomRequestDto(chatroom));
 	}
+
+	@GetMapping("/{id}/chatlist")
+	public ResponseEntity<List<ChatlistDto>> getChats(@PathVariable(name = "id") Long id) {
+		List<ChatlistDto> chats = chatroomService.getChats(id);
+		return ResponseEntity.ok(chats);
+	}
+
 }
