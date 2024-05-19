@@ -13,6 +13,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @EnableRedisRepositories
 @Configuration
@@ -42,7 +43,7 @@ public class RedisConfig {
 
 	@Bean
 	public ChannelTopic topic() {
-		return new ChannelTopic("chat");
+		return new ChannelTopic("chatroom");
 	}
 
 	@Bean
@@ -51,15 +52,15 @@ public class RedisConfig {
 	}
 
 	@Bean
-	public MessageListenerAdapter messageListener() {
-		return new MessageListenerAdapter(new RedisSubscriber());
+	public MessageListenerAdapter messageListener(SimpMessagingTemplate messagingTemplate) {
+		return new MessageListenerAdapter(new RedisSubscriber(redisTemplate(), messagingTemplate));
 	}
 
 	@Bean
-	public RedisMessageListenerContainer redisContainer() {
+	public RedisMessageListenerContainer redisContainer(SimpMessagingTemplate messagingTemplate) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(lettuceConnectionFactory());
-		container.addMessageListener(messageListener(), topic());
+		container.addMessageListener(messageListener(messagingTemplate), topic());
 		return container;
 	}
 }
