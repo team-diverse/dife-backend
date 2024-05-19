@@ -33,4 +33,7 @@ public class Chatroom extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "chatroom")
 	private Set<Chat> chats;
+
+	@OneToMany(mappedBy = "chatroom")
+	private Set<ChatScrap> scraps;
 }
