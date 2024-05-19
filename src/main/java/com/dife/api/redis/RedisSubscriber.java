@@ -1,6 +1,5 @@
 package com.dife.api.redis;
 
-import com.dife.api.model.ChatType;
 import com.dife.api.model.dto.ChatDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -27,22 +26,14 @@ public class RedisSubscriber implements MessageListener {
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			ChatDto dto = objectMapper.readValue(publishMessage, ChatDto.class);
-
-			if (dto.getChatType() == ChatType.ENTER) {
-				messagingTemplate.convertAndSend(
-						"/sub/chatroom/" + dto.getChatroom_id(), dto.getSender() + "님이 입장하셨습니다!");
+			String destination = "/sub/chatroom/" + dto.getChatroom_id();
+			String nMessage = "";
+			switch (dto.getChatType()) {
+				case ENTER -> nMessage = dto.getSender() + "님이 입장하셨습니다!";
+				case CHAT -> nMessage = dto.getMessage();
+				case EXIT -> nMessage = dto.getSender() + "님이 퇴장하셨습니다!";
 			}
-			if (dto.getChatType() == ChatType.CHAT) {
-				messagingTemplate.convertAndSend("/sub/chatroom/" + dto.getChatroom_id(), dto.getMessage());
-			}
-			if (dto.getChatType() == ChatType.EXIT) {
-				messagingTemplate.convertAndSend(
-						"/sub/chatroom/" + dto.getChatroom_id(), dto.getSender() + "님이 퇴장하셨습니다!");
-			}
-			if (dto.getChatType() == ChatType.NOTIFY) {
-				messagingTemplate.convertAndSend(
-						"/sub/chatroom/" + dto.getChatroom_id(), "해당 채팅방은 한명만 남은 채팅방입니다!");
-			}
+			messagingTemplate.convertAndSend(destination, nMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
