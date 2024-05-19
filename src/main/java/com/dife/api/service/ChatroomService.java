@@ -64,6 +64,17 @@ public class ChatroomService {
 		return chatroom;
 	}
 
+	public Chatroom createSingleChatroom() {
+		Chatroom chatroom = new Chatroom();
+		ChatroomSetting setting = new ChatroomSetting();
+		chatroom.setChatroomType(ChatroomType.SINGLE);
+		setting.setMax_count(2);
+		chatroom.setChatroom_setting(setting);
+		chatroomRepository.save(chatroom);
+
+		return chatroom;
+	}
+
 	public Boolean findChatroomById(Long id) {
 
 		return chatroomRepository.existsById(id);

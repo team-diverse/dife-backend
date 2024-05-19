@@ -3,6 +3,7 @@ package com.dife.api.controller;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.GroupChatroomRequestDto;
 import com.dife.api.model.dto.GroupChatroomResponseDto;
+import com.dife.api.model.dto.SingleChatroomRequestDto;
 import com.dife.api.service.ChatroomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -72,5 +73,22 @@ public class ChatroomController {
 			@PathVariable(name = "id") Long id) {
 		Chatroom chatroom = chatroomService.getChatroom(id);
 		return ResponseEntity.status(HttpStatus.OK).body(new GroupChatroomResponseDto(chatroom));
+	}
+
+	@Operation(summary = "싱글 채팅방 생성", description = "사용자가 싱글 채팅방 생성")
+	@PostMapping("/single/")
+	@ApiResponse(
+			responseCode = "201",
+			description = "싱글 채팅방 성공 예시",
+			content = {
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = SingleChatroomRequestDto.class))
+			})
+	public ResponseEntity<SingleChatroomRequestDto> createSingleChatroom() {
+
+		Chatroom chatroom = chatroomService.createSingleChatroom();
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(new SingleChatroomRequestDto(chatroom));
 	}
 }
