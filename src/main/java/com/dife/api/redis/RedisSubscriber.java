@@ -1,6 +1,6 @@
 package com.dife.api.redis;
 
-import com.dife.api.model.dto.ChatEnterDto;
+import com.dife.api.model.dto.ChatDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +25,15 @@ public class RedisSubscriber implements MessageListener {
 			String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(messageBody);
 
 			ObjectMapper objectMapper = new ObjectMapper();
-			ChatEnterDto dto = objectMapper.readValue(publishMessage, ChatEnterDto.class);
-
-			messagingTemplate.convertAndSend(
-					"/sub/chatroom/" + dto.getChatroom_id(), dto.getSender() + "님이 입장하셨습니다!");
+			ChatDto dto = objectMapper.readValue(publishMessage, ChatDto.class);
+			String destination = "/sub/chatroom/" + dto.getChatroom_id();
+			String nMessage = "";
+			switch (dto.getChatType()) {
+				case ENTER -> nMessage = dto.getSender() + "님이 입장하셨습니다!";
+				case CHAT -> nMessage = dto.getMessage();
+				case EXIT -> nMessage = dto.getSender() + "님이 퇴장하셨습니다!";
+			}
+			messagingTemplate.convertAndSend(destination, nMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
