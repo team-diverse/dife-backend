@@ -1,7 +1,6 @@
 package com.dife.api.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Set;
@@ -18,7 +17,6 @@ public class ChatroomSetting {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull
 	@Size(max = 60)
 	private String description;
 
@@ -28,7 +26,7 @@ public class ChatroomSetting {
 	private Set<Tag> tags;
 
 	private Integer count = 0;
-	private Integer max_count = 0;
+	private Integer max_count = 30;
 
 	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<GroupPurpose> purposes;
