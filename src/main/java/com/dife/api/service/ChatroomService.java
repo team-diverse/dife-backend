@@ -85,6 +85,13 @@ public class ChatroomService {
 		return chatroom;
 	}
 
+	public List<ChatlistDto> getChats(Long id) {
+
+		List<Chat> chats = chatRepository.findChatsByChatroomId(id);
+
+		return chats.stream().map(ChatlistDto::new).collect(Collectors.toList());
+	}
+
 	public Chatroom registerDetail(
 			Set<String> tags,
 			Integer max_count,
