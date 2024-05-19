@@ -1,14 +1,13 @@
 package com.dife.api.controller;
 
 import com.dife.api.model.*;
-import com.dife.api.model.dto.GroupChatroomRequestDto;
-import com.dife.api.model.dto.GroupChatroomResponseDto;
-import com.dife.api.model.dto.SingleChatroomRequestDto;
+import com.dife.api.model.dto.*;
 import com.dife.api.service.ChatroomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,4 +97,9 @@ public class ChatroomController {
 		return ResponseEntity.ok(chats);
 	}
 
+	@GetMapping("/{id}/scraplist")
+	public ResponseEntity<List<ChatScraplistDto>> getScraps(@PathVariable(name = "id") Long id) {
+		List<ChatScraplistDto> scraps = chatroomService.getScraps(id);
+		return ResponseEntity.ok(scraps);
+	}
 }

@@ -2,12 +2,13 @@ package com.dife.api.service;
 
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
-import com.dife.api.repository.ChatroomRepository;
-import com.dife.api.repository.GroupPurposesRepository;
-import com.dife.api.repository.LanguageRepository;
-import com.dife.api.repository.TagRepository;
+import com.dife.api.model.dto.ChatScraplistDto;
+import com.dife.api.model.dto.ChatlistDto;
+import com.dife.api.repository.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class ChatroomService {
 	private final TagRepository tagRepository;
 	private final LanguageRepository languageRepository;
 	private final GroupPurposesRepository groupPurposesRepository;
+	private final ChatRepository chatRepository;
+	private final ChatScrapRepository chatScrapRepository;
 
 	private final FileService fileService;
 
@@ -90,6 +93,13 @@ public class ChatroomService {
 		List<Chat> chats = chatRepository.findChatsByChatroomId(id);
 
 		return chats.stream().map(ChatlistDto::new).collect(Collectors.toList());
+	}
+
+	public List<ChatScraplistDto> getScraps(Long id) {
+
+		List<ChatScrap> scraps = chatScrapRepository.findScrapsByChatroomId(id);
+
+		return scraps.stream().map(ChatScraplistDto::new).collect(Collectors.toList());
 	}
 
 	public Chatroom registerDetail(
