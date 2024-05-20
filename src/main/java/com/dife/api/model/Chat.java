@@ -30,5 +30,4 @@ public class Chat {
 	@JsonIgnore
 	private Chatroom chatroom;
 
-	private String sender;
 }
