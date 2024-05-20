@@ -25,7 +25,7 @@ public class Chat {
 	private String message;
 
 	@ManyToOne
-	@JoinColumn(name = "chatroom_id")
+	@JoinColumn(name = "chatroom_id", referencedColumnName = "id")
 	private Chatroom chatroom;
 
 	private String sender;
