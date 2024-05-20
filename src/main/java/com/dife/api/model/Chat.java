@@ -27,6 +27,4 @@ public class Chat {
 	@ManyToOne
 	@JoinColumn(name = "chatroom_id", referencedColumnName = "id")
 	private Chatroom chatroom;
-
-	private String sender;
 }

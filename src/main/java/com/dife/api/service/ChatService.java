@@ -78,10 +78,10 @@ public class ChatService {
 			return;
 		}
 
-		Map<String, String> activeSessions = chatroom.getActiveSessions();
+		Map<String, Long> activeSessions = chatroom.getActiveSessions();
 
 		if (!activeSessions.containsKey(session_id)) {
-			activeSessions.put(session_id, dto.getSender());
+			activeSessions.put(session_id, dto.getSender_id());
 			chatroom.setActiveSessions(activeSessions);
 			Integer nCount = setting.getCount();
 			setting.setCount(nCount + 1);
@@ -111,7 +111,6 @@ public class ChatService {
 			Chat chat = new Chat();
 			chat.setMessage(dto.getMessage());
 			chat.setChatroom(chatroom);
-			chat.setSender(dto.getSender());
 
 			chatRepository.save(chat);
 			redisPublisher.publish(dto);
@@ -133,7 +132,7 @@ public class ChatService {
 			Bookmark bookmark = new Bookmark();
 			bookmark.setMessage(dto.getMessage());
 			bookmark.setChatroom(chatroom);
-			bookmark.setSender(dto.getSender());
+			bookmark.setMember(chatroom.getMember());
 
 			bookmarkRepository.save(bookmark);
 		}
@@ -152,7 +151,7 @@ public class ChatService {
 
 		Chatroom chatroom = chatroomService.getChatroom(room_id);
 
-		Map<String, String> activeSessions = chatroom.getActiveSessions();
+		Map<String, Long> activeSessions = chatroom.getActiveSessions();
 		activeSessions.remove(session_id);
 
 		ChatroomSetting setting = chatroom.getChatroom_setting();

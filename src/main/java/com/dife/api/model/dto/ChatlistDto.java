@@ -13,11 +13,11 @@ import lombok.Setter;
 public class ChatlistDto {
 	private Long id;
 	private String message;
-	private String sender;
+	private Long sender_id;
 
 	public ChatlistDto(Chat chat) {
 		this.id = chat.getId();
 		this.message = chat.getMessage();
-		this.sender = chat.getSender();
+		this.sender_id = chat.getChatroom().getMember().getId();
 	}
 }

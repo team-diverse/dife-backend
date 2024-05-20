@@ -12,19 +12,19 @@ public class ChatResponseDto {
 	private String message;
 	private Long chatroom_id;
 	private Long chat_id;
-	private String sender;
+	private Long sender_id;
 
 	public ChatResponseDto(Chat chat) {
 		this.chatroom_id = chat.getChatroom().getId();
 		this.chat_id = chat.getId();
 		this.message = chat.getMessage();
-		this.sender = chat.getSender();
+		this.sender_id = chat.getChatroom().getMember().getId();
 	}
 
 	public ChatResponseDto(Bookmark bookmark) {
 		this.chatroom_id = bookmark.getChatroom().getId();
 		this.chat_id = bookmark.getId();
 		this.message = bookmark.getMessage();
-		this.sender = bookmark.getSender();
+		this.sender_id = bookmark.getChatroom().getMember().getId();
 	}
 }
