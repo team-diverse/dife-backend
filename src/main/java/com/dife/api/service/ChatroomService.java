@@ -2,12 +2,9 @@ package com.dife.api.service;
 
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
-import com.dife.api.model.dto.ChatDto;
 import com.dife.api.repository.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,26 +22,26 @@ public class ChatroomService {
 	private final GroupPurposesRepository groupPurposesRepository;
 	private final ChatRepository chatRepository;
 
+	private final BookmarkRepository bookmarkRepository;
+	private final MemberService memberService;
+
 	private final FileService fileService;
 
-	public Chatroom createChatroom(String name, String description, ChatroomType type) {
-		if (type == ChatroomType.GROUP) {
-			return createGroupChatroom(name, description);
-		} else {
-			return createSingleChatroom();
-		}
-	}
+	public Chatroom createGroupChatroom(String name, String description, String memberEmail) {
 
-	public Chatroom createGroupChatroom(String name, String description) {
+		Member member = memberService.getMember(memberEmail);
 
-		Chatroom chatroom = new Chatroom();
-		if (chatroomRepository.existsByName(name)) {
+		String trimmedName = name.trim();
+		if (chatroomRepository.existsByName(trimmedName)) {
 			throw new ChatroomDuplicateException();
 		}
-		if (name == null || name.isEmpty()) {
+		if (trimmedName.isEmpty()) {
 			throw new ChatroomException("채팅방 이름은 필수사항입니다.");
 		}
-		String trimmedName = name.trim();
+
+		Chatroom chatroom = new Chatroom();
+		chatroom.setMember(member);
+
 		chatroom.setName(trimmedName);
 		chatroom.setChatroomType(ChatroomType.GROUP);
 
@@ -72,43 +69,6 @@ public class ChatroomService {
 		return chatroom;
 	}
 
-	public Chatroom createSingleChatroom() {
-		Chatroom chatroom = new Chatroom();
-		ChatroomSetting setting = new ChatroomSetting();
-		chatroom.setChatroomType(ChatroomType.SINGLE);
-		setting.setMax_count(2);
-		chatroom.setChatroom_setting(setting);
-		chatroomRepository.save(chatroom);
-
-		return chatroom;
-	}
-
-	public Boolean findChatroomById(Long id) {
-
-		return chatroomRepository.existsById(id);
-	}
-
-	public Chatroom getChatroom(Long id) {
-		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
-		return chatroom;
-	}
-
-	public List<ChatDto> getChats(Long id) {
-
-		List<Chat> chats = chatRepository.findChatsByChatroomId(id);
-
-		return chats.stream().map(chat -> new ChatDto(chat)).collect(Collectors.toList());
-	}
-
-	public Chat getChat(Long room_id, Long chat_id) {
-		Chat chat =
-				chatRepository
-						.findByChatroomIdAndId(room_id, chat_id)
-						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
-
-		return chat;
-	}
-
 	public Chatroom registerDetail(
 			Set<String> tags,
 			Integer max_count,
@@ -116,8 +76,12 @@ public class ChatroomService {
 			Set<String> purposes,
 			Boolean is_public,
 			String password,
-			Long id) {
+			Long id,
+			String memberEmail) {
+
 		Chatroom chatroom = getChatroom(id);
+		if (!chatroom.getMember().getEmail().equals(memberEmail))
+			throw new MemberException("작성한 사용자가 아닙니다!");
 
 		ChatroomSetting setting = chatroom.getChatroom_setting();
 
@@ -175,6 +139,37 @@ public class ChatroomService {
 
 		chatroomRepository.save(chatroom);
 		return chatroom;
+	}
+
+	public Chatroom createSingleChatroom() {
+		Chatroom chatroom = new Chatroom();
+		ChatroomSetting setting = new ChatroomSetting();
+		chatroom.setChatroomType(ChatroomType.SINGLE);
+		setting.setMax_count(2);
+		chatroom.setChatroom_setting(setting);
+		chatroomRepository.save(chatroom);
+
+		return chatroom;
+	}
+
+	public Boolean findChatroomById(Long id) {
+
+		return chatroomRepository.existsById(id);
+	}
+
+
+	public Chatroom getChatroom(Long id) {
+		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
+		return chatroom;
+	}
+
+	public Chat getChat(Long room_id, Long chat_id) {
+		Chat chat =
+				chatRepository
+						.findByChatroomIdAndId(room_id, chat_id)
+						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
+
+		return chat;
 	}
 
 	public Boolean isFull(Chatroom chatroom) {
