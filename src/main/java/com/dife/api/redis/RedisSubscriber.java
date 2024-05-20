@@ -29,9 +29,9 @@ public class RedisSubscriber implements MessageListener {
 			String destination = "/sub/chatroom/" + dto.getChatroom_id();
 			String nMessage = "";
 			switch (dto.getChatType()) {
-				case ENTER -> nMessage = dto.getSender() + "님이 입장하셨습니다!";
+				case ENTER -> nMessage = dto.getUsername() + "님이 입장하셨습니다!";
 				case CHAT -> nMessage = dto.getMessage();
-				case EXIT -> nMessage = dto.getSender() + "님이 퇴장하셨습니다!";
+				case EXIT -> nMessage = dto.getUsername() + "님이 퇴장하셨습니다!";
 			}
 			messagingTemplate.convertAndSend(destination, nMessage);
 		} catch (Exception e) {
