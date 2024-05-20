@@ -30,6 +30,14 @@ public class ChatroomService {
 
 	private final FileService fileService;
 
+	public Chatroom createChatroom(String name, String description, ChatroomType type) {
+		if (type == ChatroomType.GROUP) {
+			return createGroupChatroom(name, description);
+		} else {
+			return createSingleChatroom();
+		}
+	}
+
 	public Chatroom createGroupChatroom(String name, String description) {
 
 		Chatroom chatroom = new Chatroom();
