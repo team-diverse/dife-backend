@@ -28,4 +28,6 @@ public class Connect extends BaseTimeEntity {
 	@NotNull
 	@Enumerated(EnumType.STRING)
 	private ConnectStatus status;
+
+	@OneToOne private Chatroom chatroom;
 }

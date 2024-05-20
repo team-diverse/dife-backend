@@ -3,6 +3,7 @@ package com.dife.api.service;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.*;
+import com.dife.api.model.Chatroom;
 import com.dife.api.model.Connect;
 import com.dife.api.model.ConnectStatus;
 import com.dife.api.model.Member;
@@ -25,6 +26,7 @@ public class ConnectService {
 	private final MemberRepository memberRepository;
 
 	private final ModelMapper modelMapper;
+	private final ChatroomService chatroomService;
 
 	@Transactional(readOnly = true)
 	public List<ConnectResponseDto> getConnects(String currentMemberEmail) {
@@ -90,6 +92,9 @@ public class ConnectService {
 				connectRepository
 						.findByFromMemberAndToMember(otherMember, currentMember)
 						.orElseThrow(ConnectNotFoundException::new);
+
+		Chatroom chatroom = chatroomService.createSingleChatroom();
+		connect.setChatroom(chatroom);
 		connect.setStatus(ConnectStatus.ACCEPTED);
 	}
 

@@ -1,5 +1,6 @@
 package com.dife.api.model.dto;
 
+import com.dife.api.model.Chatroom;
 import com.dife.api.model.ConnectStatus;
 import com.dife.api.model.Member;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,4 +36,6 @@ public class ConnectResponseDto {
 
 	@Schema(description = "커넥트 요청 생성 일시")
 	private LocalDateTime created;
+
+	private Chatroom chatroom;
 }
