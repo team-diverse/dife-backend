@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -136,5 +137,13 @@ public class MemberController {
 			responseMap.put("message", "메일 발송 실패");
 			return new ResponseEntity<HashMap>(responseMap, HttpStatus.CONFLICT);
 		}
+	}
+
+	@GetMapping("/random")
+	public ResponseEntity<List<MemberResponseDto>> getRandomMembers(
+			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
+		List<MemberResponseDto> MemberResponseDtos =
+				memberService.getRandomMembers(count, auth.getName());
+		return ResponseEntity.ok(MemberResponseDtos);
 	}
 }

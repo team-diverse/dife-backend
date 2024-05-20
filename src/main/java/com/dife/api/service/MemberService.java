@@ -8,9 +8,10 @@ import com.dife.api.repository.HobbyRepository;
 import com.dife.api.repository.LanguageRepository;
 import com.dife.api.repository.MemberRepository;
 import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,13 +27,14 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class MemberService {
 
-	@Autowired private final MemberRepository memberRepository;
+	private final MemberRepository memberRepository;
 	private final LanguageRepository languageRepository;
 	private final HobbyRepository hobbyRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final EmailValidator emailValidator;
 	private final JavaMailSender javaMailSender;
 	private final FileService fileService;
+	private final ModelMapper modelMapper;
 
 	public Member registerEmailAndPassword(RegisterEmailAndPasswordRequestDto dto) {
 		if (!emailValidator.isValidEmail(dto.getEmail())) {
@@ -183,5 +185,25 @@ public class MemberService {
 						+ "안전한 인터넷 환경에서 항상 비밀번호를 관리하세요.");
 		javaMailSender.send(simpleMailMessage);
 		return true;
+	}
+
+	public List<MemberResponseDto> getRandomMembers(int count, String email) {
+		List<Member> validMembers =
+				memberRepository.findAll().stream()
+						.filter(member -> !member.getEmail().equals(email))
+						.collect(Collectors.toList());
+
+		if (validMembers.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		Collections.shuffle(validMembers);
+		List<Member> randomMembers = validMembers.stream().limit(count).toList();
+
+		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
+		for (Member member : randomMembers) {
+			memberResponseDtos.add(modelMapper.map(member, MemberResponseDto.class));
+		}
+		return memberResponseDtos;
 	}
 }
