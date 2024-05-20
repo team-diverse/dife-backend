@@ -2,9 +2,13 @@ package com.dife.api.service;
 
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
+import com.dife.api.model.dto.ChatDto;
 import com.dife.api.repository.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -157,10 +161,29 @@ public class ChatroomService {
 		return chatroomRepository.existsById(id);
 	}
 
-
 	public Chatroom getChatroom(Long id) {
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
 		return chatroom;
+	}
+
+	public Chatroom getGroupChatroom(Long id) {
+
+		Chatroom chatroom =
+				chatroomRepository
+						.findByIdAndChatroomType(id, ChatroomType.GROUP)
+						.orElseThrow(ChatroomNotFoundException::new);
+
+		if (!chatroom.getChatroom_setting().getIs_public())
+			throw new ChatroomException("비공개 채팅방입니다! 접근 불가합니다!");
+
+		return chatroom;
+	}
+
+	public List<ChatDto> getChats(Long id) {
+
+		List<Chat> chats = chatRepository.findChatsByChatroomId(id);
+
+		return chats.stream().map(ChatDto::new).collect(Collectors.toList());
 	}
 
 	public Chat getChat(Long room_id, Long chat_id) {
