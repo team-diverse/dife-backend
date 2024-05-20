@@ -29,5 +29,8 @@ public class Chat {
 	@JoinColumn(name = "chatroom_id")
 	@JsonIgnore
 	private Chatroom chatroom;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1309942 (feat/chat-security-4: 채팅 시큐리티 적용 준비)
 }
