@@ -85,12 +85,22 @@ public class MemberController {
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages") Set<String> languages,
 			@RequestParam(name = "profile_img", required = false) MultipartFile profile_img,
-			@RequestParam(name = "verification_file") MultipartFile verification_file,
+			@RequestParam(name = "verification_file", required = false) MultipartFile verification_file,
+			@RequestParam(name = "is_public") Boolean is_public,
 			@PathVariable(name = "id") Long id) {
 
 		Member member =
 				memberService.registerDetail(
-						username, is_korean, bio, mbti, hobbies, languages, id, profile_img, verification_file);
+						username,
+						is_korean,
+						bio,
+						mbti,
+						hobbies,
+						languages,
+						is_public,
+						id,
+						profile_img,
+						verification_file);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new MemberResponseDto(member));
 	}
 

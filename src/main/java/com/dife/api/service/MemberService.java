@@ -70,6 +70,7 @@ public class MemberService {
 			MbtiCategory mbti,
 			Set<String> hobbies,
 			Set<String> languages,
+			Boolean is_public,
 			Long id,
 			MultipartFile profile_img,
 			MultipartFile verification_file) {
@@ -89,7 +90,6 @@ public class MemberService {
 		} else {
 			throw new RegisterException("재학생 인증은 필수 사항입니다!");
 		}
-
 		member.setUsername(username);
 		member.setIs_korean(is_korean);
 		member.setBio(bio);
@@ -134,7 +134,7 @@ public class MemberService {
 		}
 
 		member.setLanguages(mylanguages);
-
+		member.setIs_public(is_public);
 		memberRepository.save(member);
 
 		return member;

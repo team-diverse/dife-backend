@@ -76,8 +76,6 @@ public class JWTFilter extends OncePerRequestFilter {
 				|| servletPath.equals("/api/members/change-password")
 				|| servletPath.equals("/api/members/login")
 				|| servletPath.startsWith("/swagger-ui")
-				|| servletPath.startsWith("/api/chat")
-				|| servletPath.startsWith("/ws")
 				|| servletPath.equals("/api/v1/api-docs");
 	}
 }
