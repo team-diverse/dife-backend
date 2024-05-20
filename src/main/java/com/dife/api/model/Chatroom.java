@@ -1,5 +1,6 @@
 package com.dife.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +26,7 @@ public class Chatroom extends BaseTimeEntity {
 
 	private ChatroomType chatroomType;
 
-	@Transient private Map<String, String> activeSessions = new ConcurrentHashMap<>();
+	@Transient private Map<String, Long> activeSessions = new ConcurrentHashMap<>();
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "chatroom_setting_id")
@@ -35,5 +36,8 @@ public class Chatroom extends BaseTimeEntity {
 	private Set<Chat> chats;
 
 	@OneToMany(mappedBy = "chatroom")
-	private Set<Bookmark> bookmarks;
+
+	@ManyToOne
+	@JoinColumn(name = "member_id")
+	private Member member;
 }
