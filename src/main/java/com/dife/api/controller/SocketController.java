@@ -28,8 +28,8 @@ public class SocketController {
 		chatService.sendMessage(dto, headerAccessor);
 	}
 
-	@MessageMapping("/chatroom/scrap")
-	public void scrapMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
-		chatService.scrapMessage(dto, headerAccessor);
+	@MessageMapping("/chatroom/bookmark")
+	public void bookmarkMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
+		chatService.bookmarkMessage(dto, headerAccessor);
 	}
 }
