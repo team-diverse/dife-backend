@@ -14,6 +14,7 @@ public class ChatDto {
 
 	private String message;
 	private Long chatroom_id;
+	private Long chat_id;
 	private String sender;
 
 	public ChatDto(Chat chat) {
