@@ -34,7 +34,7 @@ public class ChatroomSetting {
 	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Language> languages;
 
-	private Boolean is_public;
+	private Boolean is_public = true;
 
 	@Size(min = 5, max = 5, message = "비밀번호는 정확히 5자 이어야 합니다.")
 	@Pattern(regexp = "^[0-9]{5}$", message = "비밀번호는 숫자 5자로 구성되어야 합니다.")

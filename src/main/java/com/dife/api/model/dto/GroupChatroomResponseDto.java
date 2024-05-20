@@ -47,11 +47,11 @@ public class GroupChatroomResponseDto {
 	@Schema(description = "그룹 채팅방 공개/비공개 여부", example = "true")
 	private Boolean is_public;
 
-	@Schema(description = "그룹 채팅방 비밀번호", example = "00000")
-	private String password;
-
 	@Schema(description = "채팅방 생성 일시")
 	private LocalDateTime created;
+
+	@Schema(description = "채팅방 생성 회원 닉네임", example = "sooya")
+	private String username = "username";
 
 	public GroupChatroomResponseDto(Chatroom chatroom) {
 		this.success = true;
@@ -83,7 +83,10 @@ public class GroupChatroomResponseDto {
 							.collect(Collectors.toSet());
 		}
 		this.is_public = chatroom.getChatroom_setting().getIs_public();
-		this.password = chatroom.getChatroom_setting().getPassword();
 		this.created = chatroom.getCreated();
+
+		if (chatroom.getMember().getIs_public()) {
+			this.username = chatroom.getMember().getUsername();
+		}
 	}
 }

@@ -162,12 +162,30 @@ public class ChatroomService {
 		return chatroomRepository.existsById(id);
 	}
 
+	public List<GroupChatroomlistDto> getGroupChatrooms() {
+
+		List<Chatroom> chatrooms = chatroomRepository.findByChatroomType(ChatroomType.GROUP);
+
+		return chatrooms.stream().map(GroupChatroomlistDto::new).collect(Collectors.toList());
+	}
 
 	public Chatroom getChatroom(Long id) {
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
 		return chatroom;
 	}
 
+	public Chatroom getGroupChatroom(Long id) {
+
+		Chatroom chatroom =
+				chatroomRepository
+						.findByIdAndChatroomType(id, ChatroomType.GROUP)
+						.orElseThrow(ChatroomNotFoundException::new);
+
+		if (!chatroom.getChatroom_setting().getIs_public())
+			throw new ChatroomException("비공개 채팅방입니다! 접근 불가합니다!");
+
+		return chatroom;
+	}
 
 	public List<ChatlistDto> getChats(Long id) {
 
