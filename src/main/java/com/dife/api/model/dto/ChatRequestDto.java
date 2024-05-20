@@ -16,5 +16,5 @@ public class ChatRequestDto {
 	private String password;
 	private String message;
 	private Long chatroom_id;
-	private Long member_id;
+	private String username;
 }

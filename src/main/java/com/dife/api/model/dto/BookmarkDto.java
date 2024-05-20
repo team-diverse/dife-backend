@@ -11,10 +11,11 @@ public class BookmarkDto {
 	private String message;
 	private Long bookmark_id;
 	private String sender;
+	private Long sender_id;
 
 	public BookmarkDto(Bookmark bookmark) {
 		this.bookmark_id = bookmark.getId();
 		this.message = bookmark.getMessage();
-		this.sender = bookmark.getSender();
+		this.sender_id = bookmark.getMember().getId();
 	}
 }
