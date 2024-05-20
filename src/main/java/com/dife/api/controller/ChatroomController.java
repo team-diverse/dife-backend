@@ -91,15 +91,31 @@ public class ChatroomController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(new SingleChatroomRequestDto(chatroom));
 	}
 
-	@GetMapping("/{id}/chatlist")
-	public ResponseEntity<List<ChatlistDto>> getChats(@PathVariable(name = "id") Long id) {
-		List<ChatlistDto> chats = chatroomService.getChats(id);
+	@GetMapping("/chatlist/")
+	public ResponseEntity<List<ChatlistDto>> getChats(@RequestParam(name = "room_id") Long room_id) {
+		List<ChatlistDto> chats = chatroomService.getChats(room_id);
 		return ResponseEntity.ok(chats);
 	}
 
-	@GetMapping("/{id}/scraplist")
-	public ResponseEntity<List<ChatScraplistDto>> getScraps(@PathVariable(name = "id") Long id) {
-		List<ChatScraplistDto> scraps = chatroomService.getScraps(id);
+	@GetMapping("/chatlist")
+	public ResponseEntity<ChatResponseDto> getChat(
+			@RequestParam(name = "room_id") Long room_id, @RequestParam(name = "chat_id") Long chat_id) {
+		Chat chat = chatroomService.getChat(room_id, chat_id);
+		return ResponseEntity.ok(new ChatResponseDto(chat));
+	}
+
+	@GetMapping("/scraplist/")
+	public ResponseEntity<List<ChatScraplistDto>> getScraps(
+			@RequestParam(name = "room_id") Long room_id) {
+		List<ChatScraplistDto> scraps = chatroomService.getScraps(room_id);
 		return ResponseEntity.ok(scraps);
+	}
+
+	@GetMapping("/scraplist")
+	public ResponseEntity<ChatResponseDto> getScrap(
+			@RequestParam(name = "room_id") Long room_id,
+			@RequestParam(name = "scrap_id") Long scrap_id) {
+		ChatScrap chatScrap = chatroomService.getScrap(room_id, scrap_id);
+		return ResponseEntity.ok(new ChatResponseDto(chatScrap));
 	}
 }
