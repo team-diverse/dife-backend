@@ -3,8 +3,8 @@ package com.dife.api.service;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.ChatDto;
 import com.dife.api.redis.RedisPublisher;
+import com.dife.api.repository.BookmarkRepository;
 import com.dife.api.repository.ChatRepository;
-import com.dife.api.repository.ChatScrapRepository;
 import com.dife.api.repository.ChatroomRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class ChatService {
 	private final ChatroomRepository chatroomRepository;
 	private final RedisPublisher redisPublisher;
 	private final ChatRepository chatRepository;
-	private final ChatScrapRepository chatScrapRepository;
+	private final BookmarkRepository bookmarkRepository;
 
 	public void sendMessage(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
@@ -118,7 +118,7 @@ public class ChatService {
 		}
 	}
 
-	public void scrapMessage(ChatDto dto, SimpMessageHeaderAccessor headerAccessor) {
+	public void bookmarkMessage(ChatDto dto, SimpMessageHeaderAccessor headerAccessor) {
 		Long room_id = dto.getChatroom_id();
 		String session_id = headerAccessor.getSessionId();
 		Boolean is_valid = chatroomService.findChatroomById(room_id);
@@ -130,12 +130,12 @@ public class ChatService {
 		}
 		if (dto.getMessage().length() <= 300) {
 
-			ChatScrap chatscrap = new ChatScrap();
-			chatscrap.setMessage(dto.getMessage());
-			chatscrap.setChatroom(chatroom);
-			chatscrap.setSender(dto.getSender());
+			Bookmark bookmark = new Bookmark();
+			bookmark.setMessage(dto.getMessage());
+			bookmark.setChatroom(chatroom);
+			bookmark.setSender(dto.getSender());
 
-			chatScrapRepository.save(chatscrap);
+			bookmarkRepository.save(bookmark);
 		}
 	}
 

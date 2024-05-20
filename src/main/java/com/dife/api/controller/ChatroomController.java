@@ -104,18 +104,18 @@ public class ChatroomController {
 		return ResponseEntity.ok(new ChatResponseDto(chat));
 	}
 
-	@GetMapping("/scraplist/")
-	public ResponseEntity<List<ChatScraplistDto>> getScraps(
+	@GetMapping("/bookmarklist/")
+	public ResponseEntity<List<BookmarklistDto>> getBookmarks(
 			@RequestParam(name = "room_id") Long room_id) {
-		List<ChatScraplistDto> scraps = chatroomService.getScraps(room_id);
+		List<BookmarklistDto> scraps = chatroomService.getBookmarks(room_id);
 		return ResponseEntity.ok(scraps);
 	}
 
-	@GetMapping("/scraplist")
-	public ResponseEntity<ChatResponseDto> getScrap(
+	@GetMapping("/bookmarklist")
+	public ResponseEntity<ChatResponseDto> getBookmark(
 			@RequestParam(name = "room_id") Long room_id,
-			@RequestParam(name = "scrap_id") Long scrap_id) {
-		ChatScrap chatScrap = chatroomService.getScrap(room_id, scrap_id);
-		return ResponseEntity.ok(new ChatResponseDto(chatScrap));
+			@RequestParam(name = "bookmark_id") Long bookmark_id) {
+		Bookmark bookmark = chatroomService.getBookmark(room_id, bookmark_id);
+		return ResponseEntity.ok(new ChatResponseDto(bookmark));
 	}
 }

@@ -2,7 +2,7 @@ package com.dife.api.service;
 
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
-import com.dife.api.model.dto.ChatScraplistDto;
+import com.dife.api.model.dto.BookmarklistDto;
 import com.dife.api.model.dto.ChatlistDto;
 import com.dife.api.repository.*;
 import java.util.HashSet;
@@ -26,7 +26,7 @@ public class ChatroomService {
 	private final LanguageRepository languageRepository;
 	private final GroupPurposesRepository groupPurposesRepository;
 	private final ChatRepository chatRepository;
-	private final ChatScrapRepository chatScrapRepository;
+	private final BookmarkRepository bookmarkRepository;
 
 	private final FileService fileService;
 
@@ -104,19 +104,19 @@ public class ChatroomService {
 		return chat;
 	}
 
-	public List<ChatScraplistDto> getScraps(Long id) {
+	public List<BookmarklistDto> getBookmarks(Long id) {
 
-		List<ChatScrap> scraps = chatScrapRepository.findScrapsByChatroomId(id);
+		List<Bookmark> scraps = bookmarkRepository.findScrapsByChatroomId(id);
 
-		return scraps.stream().map(ChatScraplistDto::new).collect(Collectors.toList());
+		return scraps.stream().map(BookmarklistDto::new).collect(Collectors.toList());
 	}
 
-	public ChatScrap getScrap(Long room_id, Long scrap_id) {
-		ChatScrap chatScrap =
-				chatScrapRepository
-						.findByChatroomIdAndId(room_id, scrap_id)
+	public Bookmark getBookmark(Long room_id, Long bookmark_id) {
+		Bookmark bookmark =
+				bookmarkRepository
+						.findByChatroomIdAndId(room_id, bookmark_id)
 						.orElseThrow(() -> new ChatroomException("존재하지 않는 스크랩입니다!"));
-		return chatScrap;
+		return bookmark;
 	}
 
 	public Chatroom registerDetail(

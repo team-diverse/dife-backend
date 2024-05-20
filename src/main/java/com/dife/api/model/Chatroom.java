@@ -35,5 +35,5 @@ public class Chatroom extends BaseTimeEntity {
 	private Set<Chat> chats;
 
 	@OneToMany(mappedBy = "chatroom")
-	private Set<ChatScrap> scraps;
+	private Set<Bookmark> scraps;
 }

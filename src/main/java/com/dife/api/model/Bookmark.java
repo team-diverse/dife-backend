@@ -13,8 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "chatscrap")
-public class ChatScrap {
+@Table(name = "bookmark")
+public class Bookmark {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
