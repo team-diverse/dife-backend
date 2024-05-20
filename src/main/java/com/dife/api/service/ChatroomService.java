@@ -104,11 +104,28 @@ public class ChatroomService {
 		return chats.stream().map(chat -> new ChatDto(chat)).collect(Collectors.toList());
 	}
 
+	public Chat getChat(Long room_id, Long chat_id) {
+		Chat chat =
+				chatRepository
+						.findByChatroomIdAndId(room_id, chat_id)
+						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
+
+		return chat;
+	}
+
 	public List<ChatScraplistDto> getScraps(Long id) {
 
 		List<ChatScrap> scraps = chatScrapRepository.findScrapsByChatroomId(id);
 
 		return scraps.stream().map(ChatScraplistDto::new).collect(Collectors.toList());
+	}
+
+	public ChatScrap getScrap(Long room_id, Long scrap_id) {
+		ChatScrap chatScrap =
+				chatScrapRepository
+						.findByChatroomIdAndId(room_id, scrap_id)
+						.orElseThrow(() -> new ChatroomException("존재하지 않는 스크랩입니다!"));
+		return chatScrap;
 	}
 
 	public Chatroom registerDetail(

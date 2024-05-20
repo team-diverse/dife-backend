@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,5 +73,44 @@ public class ChatroomController {
 	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(@PathVariable(name = "id") Long id) {
 		Chatroom chatroom = chatroomService.getChatroom(id);
 		return ResponseEntity.status(HttpStatus.OK).body(new ChatroomResponseDto(chatroom));
+	}
+
+	@Operation(summary = "싱글 채팅방 생성", description = "사용자가 싱글 채팅방 생성")
+	@PostMapping("/single/")
+	@ApiResponse(
+			responseCode = "201",
+			description = "싱글 채팅방 성공 예시",
+			content = {
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = ChatroomResponseDto.class))
+			})
+	public ResponseEntity<ChatroomResponseDto> createSingleChatroom() {
+
+		Chatroom chatroom = chatroomService.createSingleChatroom();
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ChatroomResponseDto(chatroom));
+	}
+
+	@GetMapping("/chatlist")
+	public ResponseEntity<ChatResponseDto> getChat(
+			@RequestParam(name = "room_id") Long room_id, @RequestParam(name = "chat_id") Long chat_id) {
+		Chat chat = chatroomService.getChat(room_id, chat_id);
+		return ResponseEntity.ok(new ChatResponseDto(chat));
+	}
+
+	@GetMapping("/scraplist/")
+	public ResponseEntity<List<ChatScraplistDto>> getScraps(
+			@RequestParam(name = "room_id") Long room_id) {
+		List<ChatScraplistDto> scraps = chatroomService.getScraps(room_id);
+		return ResponseEntity.ok(scraps);
+	}
+
+	@GetMapping("/scraplist")
+	public ResponseEntity<ChatResponseDto> getScrap(
+			@RequestParam(name = "room_id") Long room_id,
+			@RequestParam(name = "scrap_id") Long scrap_id) {
+		ChatScrap chatScrap = chatroomService.getScrap(room_id, scrap_id);
+		return ResponseEntity.ok(new ChatResponseDto(chatScrap));
 	}
 }
