@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,9 +37,10 @@ public class ChatroomController {
 			})
 	public ResponseEntity<GroupChatroomRequestDto> createGroupChatroom(
 			@RequestParam(name = "name", required = false) String name,
-			@RequestParam(name = "description") String description) {
+			@RequestParam(name = "description") String description,
+			Authentication auth) {
 
-		Chatroom chatroom = chatroomService.createGroupChatroom(name, description);
+		Chatroom chatroom = chatroomService.createGroupChatroom(name, description, auth.getName());
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomRequestDto(chatroom));
 	}
@@ -59,18 +61,25 @@ public class ChatroomController {
 			@RequestParam(name = "purposes") Set<String> purposes,
 			@RequestParam(name = "is_public") Boolean is_public,
 			@RequestParam(name = "password", required = false) String password,
-			@PathVariable(name = "id") Long id) {
+			@PathVariable(name = "id") Long id,
+			Authentication auth) {
 
 		Chatroom chatroom =
 				chatroomService.registerDetail(
-						tags, max_count, languages, purposes, is_public, password, id);
+						tags, max_count, languages, purposes, is_public, password, id, auth.getName());
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomResponseDto(chatroom));
+	}
+
+	@GetMapping("/")
+	public ResponseEntity<List<GroupChatroomlistDto>> getGroupChatrooms() {
+		List<GroupChatroomlistDto> chatrooms = chatroomService.getGroupChatrooms();
+		return ResponseEntity.status(HttpStatus.OK).body(chatrooms);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<GroupChatroomResponseDto> getGroupChatroom(
 			@PathVariable(name = "id") Long id) {
-		Chatroom chatroom = chatroomService.getChatroom(id);
+		Chatroom chatroom = chatroomService.getGroupChatroom(id);
 		return ResponseEntity.status(HttpStatus.OK).body(new GroupChatroomResponseDto(chatroom));
 	}
 

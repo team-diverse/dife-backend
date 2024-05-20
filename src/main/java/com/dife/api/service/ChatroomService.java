@@ -4,6 +4,7 @@ import com.dife.api.exception.*;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.BookmarklistDto;
 import com.dife.api.model.dto.ChatlistDto;
+import com.dife.api.model.dto.GroupChatroomlistDto;
 import com.dife.api.repository.*;
 import java.util.HashSet;
 import java.util.List;
@@ -27,19 +28,25 @@ public class ChatroomService {
 	private final GroupPurposesRepository groupPurposesRepository;
 	private final ChatRepository chatRepository;
 	private final BookmarkRepository bookmarkRepository;
+	private final MemberService memberService;
 
 	private final FileService fileService;
 
-	public Chatroom createGroupChatroom(String name, String description) {
+	public Chatroom createGroupChatroom(String name, String description, String memberEmail) {
 
-		Chatroom chatroom = new Chatroom();
-		if (chatroomRepository.existsByName(name)) {
+		Member member = memberService.getMember(memberEmail);
+
+		String trimmedName = name.trim();
+		if (chatroomRepository.existsByName(trimmedName)) {
 			throw new ChatroomDuplicateException();
 		}
-		if (name == null || name.isEmpty()) {
+		if (trimmedName.isEmpty()) {
 			throw new ChatroomException("채팅방 이름은 필수사항입니다.");
 		}
-		String trimmedName = name.trim();
+
+		Chatroom chatroom = new Chatroom();
+		chatroom.setMember(member);
+
 		chatroom.setName(trimmedName);
 		chatroom.setChatroomType(ChatroomType.GROUP);
 
@@ -67,58 +74,6 @@ public class ChatroomService {
 		return chatroom;
 	}
 
-	public Chatroom createSingleChatroom() {
-		Chatroom chatroom = new Chatroom();
-		ChatroomSetting setting = new ChatroomSetting();
-		chatroom.setChatroomType(ChatroomType.SINGLE);
-		setting.setMax_count(2);
-		chatroom.setChatroom_setting(setting);
-		chatroomRepository.save(chatroom);
-
-		return chatroom;
-	}
-
-	public Boolean findChatroomById(Long id) {
-
-		return chatroomRepository.existsById(id);
-	}
-
-	public Chatroom getChatroom(Long id) {
-		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
-		return chatroom;
-	}
-
-	public List<ChatlistDto> getChats(Long id) {
-
-		List<Chat> chats = chatRepository.findChatsByChatroomId(id);
-
-		return chats.stream().map(ChatlistDto::new).collect(Collectors.toList());
-	}
-
-	public Chat getChat(Long room_id, Long chat_id) {
-		Chat chat =
-				chatRepository
-						.findByChatroomIdAndId(room_id, chat_id)
-						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
-
-		return chat;
-	}
-
-	public List<BookmarklistDto> getBookmarks(Long id) {
-
-		List<Bookmark> scraps = bookmarkRepository.findScrapsByChatroomId(id);
-
-		return scraps.stream().map(BookmarklistDto::new).collect(Collectors.toList());
-	}
-
-	public Bookmark getBookmark(Long room_id, Long bookmark_id) {
-		Bookmark bookmark =
-				bookmarkRepository
-						.findByChatroomIdAndId(room_id, bookmark_id)
-						.orElseThrow(() -> new ChatroomException("존재하지 않는 스크랩입니다!"));
-		return bookmark;
-	}
-
 	public Chatroom registerDetail(
 			Set<String> tags,
 			Integer max_count,
@@ -126,8 +81,12 @@ public class ChatroomService {
 			Set<String> purposes,
 			Boolean is_public,
 			String password,
-			Long id) {
+			Long id,
+			String memberEmail) {
+
 		Chatroom chatroom = getChatroom(id);
+		if (!chatroom.getMember().getEmail().equals(memberEmail))
+			throw new MemberException("작성한 사용자가 아닙니다!");
 
 		ChatroomSetting setting = chatroom.getChatroom_setting();
 
@@ -185,6 +144,60 @@ public class ChatroomService {
 
 		chatroomRepository.save(chatroom);
 		return chatroom;
+	}
+
+	public Chatroom createSingleChatroom() {
+		Chatroom chatroom = new Chatroom();
+		ChatroomSetting setting = new ChatroomSetting();
+		chatroom.setChatroomType(ChatroomType.SINGLE);
+		setting.setMax_count(2);
+		chatroom.setChatroom_setting(setting);
+		chatroomRepository.save(chatroom);
+
+		return chatroom;
+	}
+
+	public Boolean findChatroomById(Long id) {
+
+		return chatroomRepository.existsById(id);
+	}
+
+
+	public Chatroom getChatroom(Long id) {
+		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
+		return chatroom;
+	}
+
+
+	public List<ChatlistDto> getChats(Long id) {
+
+		List<Chat> chats = chatRepository.findChatsByChatroomId(id);
+
+		return chats.stream().map(ChatlistDto::new).collect(Collectors.toList());
+	}
+
+	public Chat getChat(Long room_id, Long chat_id) {
+		Chat chat =
+				chatRepository
+						.findByChatroomIdAndId(room_id, chat_id)
+						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
+
+		return chat;
+	}
+
+	public List<BookmarklistDto> getBookmarks(Long id) {
+
+		List<Bookmark> scraps = bookmarkRepository.findScrapsByChatroomId(id);
+
+		return scraps.stream().map(BookmarklistDto::new).collect(Collectors.toList());
+	}
+
+	public Bookmark getBookmark(Long room_id, Long bookmark_id) {
+		Bookmark bookmark =
+				bookmarkRepository
+						.findByChatroomIdAndId(room_id, bookmark_id)
+						.orElseThrow(() -> new ChatroomException("존재하지 않는 스크랩입니다!"));
+		return bookmark;
 	}
 
 	public Boolean isFull(Chatroom chatroom) {
