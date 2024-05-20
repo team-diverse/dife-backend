@@ -11,12 +11,12 @@ public class BookmarkDto {
 	private String message;
 	private Long chatroom_id;
 	private Long chat_id;
-	private String sender;
+	private Long sender_id;
 
 	public BookmarkDto(Bookmark bookmark) {
 		this.chatroom_id = bookmark.getChatroom().getId();
 		this.chat_id = bookmark.getId();
 		this.message = bookmark.getMessage();
-		this.sender = bookmark.getSender();
+		this.sender_id = bookmark.getMember().getId();
 	}
 }

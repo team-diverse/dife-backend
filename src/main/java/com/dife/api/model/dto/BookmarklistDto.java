@@ -13,11 +13,11 @@ import lombok.Setter;
 public class BookmarklistDto {
 	private Long id;
 	private String message;
-	private String sender;
+	private Long sender_id;
 
-	public BookmarklistDto(Bookmark scrap) {
-		this.id = scrap.getId();
-		this.message = scrap.getMessage();
-		this.sender = scrap.getSender();
+	public BookmarklistDto(Bookmark bookmark) {
+		this.id = bookmark.getId();
+		this.message = bookmark.getMessage();
+		this.sender_id = bookmark.getChatroom().getMember().getId();
 	}
 }
