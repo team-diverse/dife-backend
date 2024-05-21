@@ -20,6 +20,7 @@ public class ChatDto {
 	public ChatDto(Chat chat) {
 		this.message = chat.getMessage();
 		this.chatroom_id = chat.getChatroom().getId();
+		this.chat_id = chat.getId();
 		this.sender = chat.getSender();
 	}
 }
