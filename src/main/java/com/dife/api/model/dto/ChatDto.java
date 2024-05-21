@@ -15,16 +15,10 @@ public class ChatDto {
 	private String message;
 	private Long chatroom_id;
 	private Long chat_id;
-<<<<<<< HEAD
-	private String sender;
 
 	public ChatDto(Chat chat) {
 		this.message = chat.getMessage();
 		this.chatroom_id = chat.getChatroom().getId();
 		this.chat_id = chat.getId();
-		this.sender = chat.getSender();
 	}
-=======
-	private Long sender_id;
->>>>>>> 1309942 (feat/chat-security-4: 채팅 시큐리티 적용 준비)
 }
