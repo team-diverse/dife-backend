@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,6 @@ public class ChatroomService {
 	private final LanguageRepository languageRepository;
 	private final GroupPurposesRepository groupPurposesRepository;
 	private final ChatRepository chatRepository;
-
-	private final BookmarkRepository bookmarkRepository;
 	private final MemberService memberService;
 
 	private final FileService fileService;
@@ -163,19 +160,6 @@ public class ChatroomService {
 
 	public Chatroom getChatroom(Long id) {
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
-		return chatroom;
-	}
-
-	public Chatroom getGroupChatroom(Long id) {
-
-		Chatroom chatroom =
-				chatroomRepository
-						.findByIdAndChatroomType(id, ChatroomType.GROUP)
-						.orElseThrow(ChatroomNotFoundException::new);
-
-		if (!chatroom.getChatroom_setting().getIs_public())
-			throw new ChatroomException("비공개 채팅방입니다! 접근 불가합니다!");
-
 		return chatroom;
 	}
 
