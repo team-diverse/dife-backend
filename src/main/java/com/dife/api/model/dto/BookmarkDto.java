@@ -9,13 +9,11 @@ import lombok.Setter;
 public class BookmarkDto {
 
 	private String message;
-	private Long chatroom_id;
-	private Long chat_id;
+	private Long bookmark_id;
 	private String sender;
 
 	public BookmarkDto(Bookmark bookmark) {
-		this.chatroom_id = bookmark.getChatroom().getId();
-		this.chat_id = bookmark.getId();
+		this.bookmark_id = bookmark.getId();
 		this.message = bookmark.getMessage();
 		this.sender = bookmark.getSender();
 	}
