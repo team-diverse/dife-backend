@@ -39,19 +39,19 @@ public class BookmarkService {
 		return bookmark;
 	}
 
-	public List<BookmarkDto> getBookmarks(Long id) {
+	public List<BookmarkDto> getBookmarks(String email) {
 
-		List<Bookmark> bookmarks = bookmarkRepository.findScrapsByChatroomId(id);
+		List<Bookmark> bookmarks = bookmarkRepository.findBookmarksByMemberEmail(email);
 
 		return bookmarks.stream()
 				.map(bookmark -> new BookmarkDto(bookmark))
 				.collect(Collectors.toList());
 	}
 
-	public Bookmark getBookmark(Long room_id, Long bookmark_id) {
+	public Bookmark getBookmark(Long id, String email) {
 		Bookmark bookmark =
 				bookmarkRepository
-						.findByChatroomIdAndId(room_id, bookmark_id)
+						.findByMemberEmailAndId(id, email)
 						.orElseThrow(() -> new BookmarkNotFoundException());
 		return bookmark;
 	}

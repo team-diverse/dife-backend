@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -32,17 +29,15 @@ public class BookmarkController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<BookmarkDto>> getBookmarks(
-			@RequestParam(name = "room_id") Long room_id) {
-		List<BookmarkDto> bookmarks = bookmarkService.getBookmarks(room_id);
+	public ResponseEntity<List<BookmarkDto>> getBookmarks(Authentication auth) {
+		List<BookmarkDto> bookmarks = bookmarkService.getBookmarks(auth.getName());
 		return ResponseEntity.ok(bookmarks);
 	}
 
 	@GetMapping("/detail")
 	public ResponseEntity<BookmarkDto> getBookmark(
-			@RequestParam(name = "room_id") Long room_id,
-			@RequestParam(name = "bookmark_id") Long bookmark_id) {
-		Bookmark bookmark = bookmarkService.getBookmark(room_id, bookmark_id);
+			@PathVariable(name = "id") Long id, Authentication auth) {
+		Bookmark bookmark = bookmarkService.getBookmark(id, auth.getName());
 		return ResponseEntity.ok(new BookmarkDto(bookmark));
 	}
 }
