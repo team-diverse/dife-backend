@@ -1,5 +1,6 @@
 package com.dife.api.controller;
 
+import com.dife.api.model.Chat;
 import com.dife.api.model.dto.ChatDto;
 import com.dife.api.service.ChatroomService;
 import java.util.List;
@@ -23,5 +24,12 @@ public class ChatController {
 	public ResponseEntity<List<ChatDto>> getChats(@RequestParam(name = "room_id") Long room_id) {
 		List<ChatDto> chats = chatroomService.getChats(room_id);
 		return ResponseEntity.ok(chats);
+	}
+
+	@GetMapping("/detail")
+	public ResponseEntity<ChatDto> getChat(
+			@RequestParam(name = "room_id") Long room_id, @RequestParam(name = "chat_id") Long chat_id) {
+		Chat chat = chatroomService.getChat(room_id, chat_id);
+		return ResponseEntity.ok(new ChatDto(chat));
 	}
 }

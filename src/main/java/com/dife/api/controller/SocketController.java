@@ -27,9 +27,4 @@ public class SocketController {
 			throws JsonProcessingException, InterruptedException {
 		chatService.sendMessage(dto, headerAccessor);
 	}
-
-	@MessageMapping("/chatroom/bookmark")
-	public void bookmarkMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
-		chatService.bookmarkMessage(dto, headerAccessor);
-	}
 }
