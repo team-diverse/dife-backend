@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,34 +71,5 @@ public class ChatroomController {
 	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(@PathVariable(name = "id") Long id) {
 		Chatroom chatroom = chatroomService.getChatroom(id);
 		return ResponseEntity.status(HttpStatus.OK).body(new ChatroomResponseDto(chatroom));
-	}
-
-	@Operation(summary = "싱글 채팅방 생성", description = "사용자가 싱글 채팅방 생성")
-	@PostMapping("/single/")
-	@ApiResponse(
-			responseCode = "201",
-			description = "싱글 채팅방 성공 예시",
-			content = {
-				@Content(
-						mediaType = "application/json",
-						schema = @Schema(implementation = ChatroomResponseDto.class))
-			})
-	public ResponseEntity<ChatroomResponseDto> createSingleChatroom() {
-
-		Chatroom chatroom = chatroomService.createSingleChatroom();
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(new ChatroomResponseDto(chatroom));
-	}
-
-	@GetMapping("/{id}/chatlist")
-	public ResponseEntity<List<ChatlistDto>> getChats(@PathVariable(name = "id") Long id) {
-		List<ChatlistDto> chats = chatroomService.getChats(id);
-		return ResponseEntity.ok(chats);
-	}
-
-	@GetMapping("/{id}/scraplist")
-	public ResponseEntity<List<ChatScraplistDto>> getScraps(@PathVariable(name = "id") Long id) {
-		List<ChatScraplistDto> scraps = chatroomService.getScraps(id);
-		return ResponseEntity.ok(scraps);
 	}
 }
