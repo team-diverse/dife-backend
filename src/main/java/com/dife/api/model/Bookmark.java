@@ -25,10 +25,6 @@ public class Bookmark {
 	private String message;
 
 	@ManyToOne
-	@JoinColumn(name = "chatroom_id")
-	private Chatroom chatroom;
-
-	@ManyToOne
 	@JoinColumn(name = "member_id")
 	private Member member;
 }

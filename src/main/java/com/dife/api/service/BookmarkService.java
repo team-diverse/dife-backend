@@ -3,7 +3,6 @@ package com.dife.api.service;
 import com.dife.api.exception.BookmarkNotFoundException;
 import com.dife.api.model.Bookmark;
 import com.dife.api.model.Chat;
-import com.dife.api.model.Chatroom;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.BookmarkDto;
 import com.dife.api.repository.BookmarkRepository;
@@ -27,13 +26,11 @@ public class BookmarkService {
 	public Bookmark createBookmark(Long room_id, Long chat_id, String memberEmail) {
 
 		Member member = memberService.getMember(memberEmail);
-		Chatroom chatroom = chatroomService.getChatroom(room_id);
 		Chat chat = chatroomService.getChat(room_id, chat_id);
 
 		Bookmark bookmark = new Bookmark();
 		bookmark.setMessage(chat.getMessage());
 		bookmark.setMember(member);
-		bookmark.setChatroom(chatroom);
 		bookmarkRepository.save(bookmark);
 
 		return bookmark;
