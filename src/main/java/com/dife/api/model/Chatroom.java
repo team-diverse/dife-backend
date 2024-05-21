@@ -35,9 +35,5 @@ public class Chatroom extends BaseTimeEntity {
 	@OneToMany(mappedBy = "chatroom", fetch = FetchType.LAZY)
 	private Set<Chat> chats;
 
-	@OneToMany(mappedBy = "chatroom")
-
-	@ManyToOne
-	@JoinColumn(name = "member_id")
-	private Member member;
+	@ManyToOne @JsonIgnore private Member member;
 }

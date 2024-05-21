@@ -64,9 +64,11 @@ public class ChatroomController {
 			Authentication auth) {
 
 		Chatroom chatroom =
-				chatroomService.registerDetail(tags, max_count, languages, purposes, is_public, password, id, auth.getName());
+				chatroomService.registerDetail(
+						tags, max_count, languages, purposes, is_public, password, id, auth.getName());
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ChatroomResponseDto(chatroom));
 	}
+
 	@GetMapping("/{id}")
 	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(@PathVariable(name = "id") Long id) {
 		Chatroom chatroom = chatroomService.getChatroom(id);
