@@ -7,8 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-
-import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,27 +88,5 @@ public class ChatroomController {
 		Chatroom chatroom = chatroomService.createSingleChatroom();
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ChatroomResponseDto(chatroom));
-	}
-
-	@GetMapping("/chatlist")
-	public ResponseEntity<ChatResponseDto> getChat(
-			@RequestParam(name = "room_id") Long room_id, @RequestParam(name = "chat_id") Long chat_id) {
-		Chat chat = chatroomService.getChat(room_id, chat_id);
-		return ResponseEntity.ok(new ChatResponseDto(chat));
-	}
-
-	@GetMapping("/bookmarklist/")
-	public ResponseEntity<List<BookmarklistDto>> getBookmarks(
-			@RequestParam(name = "room_id") Long room_id) {
-		List<BookmarklistDto> scraps = chatroomService.getBookmarks(room_id);
-		return ResponseEntity.ok(scraps);
-	}
-
-	@GetMapping("/bookmarklist")
-	public ResponseEntity<ChatResponseDto> getBookmark(
-			@RequestParam(name = "room_id") Long room_id,
-			@RequestParam(name = "bookmark_id") Long bookmark_id) {
-		Bookmark bookmark = chatroomService.getBookmark(room_id, bookmark_id);
-		return ResponseEntity.ok(new ChatResponseDto(bookmark));
 	}
 }
