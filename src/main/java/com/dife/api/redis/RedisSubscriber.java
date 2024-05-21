@@ -1,6 +1,6 @@
 package com.dife.api.redis;
 
-import com.dife.api.model.dto.ChatDto;
+import com.dife.api.model.dto.ChatRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class RedisSubscriber implements MessageListener {
 			String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(messageBody);
 
 			ObjectMapper objectMapper = new ObjectMapper();
-			ChatDto dto = objectMapper.readValue(publishMessage, ChatDto.class);
+			ChatRequestDto dto = objectMapper.readValue(publishMessage, ChatRequestDto.class);
 			String destination = "/sub/chatroom/" + dto.getChatroom_id();
 			String nMessage = "";
 			switch (dto.getChatType()) {

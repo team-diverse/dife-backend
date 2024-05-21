@@ -1,6 +1,6 @@
 package com.dife.api.controller;
 
-import com.dife.api.model.dto.ChatDto;
+import com.dife.api.model.dto.ChatRequestDto;
 import com.dife.api.service.ChatService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -17,19 +17,19 @@ public class SocketController {
 	private final ChatService chatService;
 
 	@MessageMapping("/chatroom/enter")
-	public void sendEnter(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void sendEnter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
 		chatService.sendEnter(dto, headerAccessor);
 	}
 
 	@MessageMapping("/chatroom/chat")
-	public void sendMessage(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
 		chatService.sendMessage(dto, headerAccessor);
 	}
 
 	@MessageMapping("/chatroom/scrap")
-	public void scrapMessage(ChatDto dto, SimpMessageHeaderAccessor headerAccessor) {
+	public void scrapMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
 		chatService.scrapMessage(dto, headerAccessor);
 	}
 }
