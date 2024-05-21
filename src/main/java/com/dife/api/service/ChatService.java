@@ -76,10 +76,10 @@ public class ChatService {
 			return;
 		}
 
-		Map<String, Long> activeSessions = chatroom.getActiveSessions();
+		Map<String, String> activeSessions = chatroom.getActiveSessions();
 
 		if (!activeSessions.containsKey(session_id)) {
-			activeSessions.put(session_id, dto.getMember_id());
+			activeSessions.put(session_id, dto.getUsername());
 			chatroom.setActiveSessions(activeSessions);
 			Integer nCount = setting.getCount();
 			setting.setCount(nCount + 1);
@@ -128,7 +128,7 @@ public class ChatService {
 
 		Chatroom chatroom = chatroomService.getChatroom(room_id);
 
-		Map<String, Long> activeSessions = chatroom.getActiveSessions();
+		Map<String, String> activeSessions = chatroom.getActiveSessions();
 		activeSessions.remove(session_id);
 
 		ChatroomSetting setting = chatroom.getChatroom_setting();

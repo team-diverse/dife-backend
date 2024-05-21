@@ -26,7 +26,7 @@ public class Chatroom extends BaseTimeEntity {
 
 	private ChatroomType chatroomType;
 
-	@Transient private Map<String, Long> activeSessions = new ConcurrentHashMap<>();
+	@Transient private Map<String, String> activeSessions = new ConcurrentHashMap<>();
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "chatroom_setting_id")
