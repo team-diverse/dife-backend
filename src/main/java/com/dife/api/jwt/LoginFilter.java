@@ -1,10 +1,9 @@
 package com.dife.api.jwt;
 
-import static org.springframework.http.HttpStatus.CREATED;
-
 import com.dife.api.ExceptionResonse;
 import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.model.dto.LoginSuccessDto;
+import com.dife.api.model.dto.RefreshLoginSuccessDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -87,13 +85,22 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		GrantedAuthority auth = iterator.next();
 		String role = auth.getAuthority();
 
-		String token = jwtUtil.createAccessJwt(email, role, 60 * 60 * 1000L);
-		ResponseEntity<LoginSuccessDto> responseEntity =
-				ResponseEntity.status(CREATED)
-						.body(new LoginSuccessDto(token, id, is_verified, verification_file_id));
+		String token =
+				jwtUtil.createAccessJwt(email, role, is_verified, verification_file_id, 5 * 60 * 1000L);
+		Object responseDto;
 
-		String responseBody = new ObjectMapper().writeValueAsString(responseEntity.getBody());
+		if (is_verified && verification_file_id != null) {
+			token =
+					jwtUtil.createRefreshJwt(
+							email, role, is_verified, verification_file_id, 90 * 24 * 60 * 60 * 1000L);
+			responseDto = new RefreshLoginSuccessDto(token, id, is_verified, verification_file_id);
+		} else {
+			responseDto = new LoginSuccessDto(token, id, is_verified, verification_file_id);
+		}
+
+		String responseBody = new ObjectMapper().writeValueAsString(responseDto);
 		response.getWriter().write(responseBody);
+		response.setStatus(HttpServletResponse.SC_CREATED);
 		response.addHeader("Authorization", "Bearer " + token);
 	}
 
