@@ -76,7 +76,8 @@ public class SwaggerConfig {
 																													new Schema<String>()
 																															.example(
 																																	new LoginSuccessDto(
-																																			"AccessToken/RefreshToken",
+																																			"AccessToken",
+																																			"RefreshToken",
 																																			1L,
 																																			Boolean.TRUE,
 																																			"학생증.jpg")))))))));

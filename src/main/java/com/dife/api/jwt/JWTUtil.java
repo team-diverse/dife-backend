@@ -70,6 +70,7 @@ public class JWTUtil {
 
 	public Boolean getIsVerified(String token) {
 		return Jwts.parser()
+				.clockSkewSeconds(50 * 60 * 1000)
 				.verifyWith(secretKey)
 				.build()
 				.parseSignedClaims(token)
@@ -79,21 +80,12 @@ public class JWTUtil {
 
 	public String getVerificationFileId(String token) {
 		return Jwts.parser()
+				.clockSkewSeconds(50 * 60 * 1000)
 				.verifyWith(secretKey)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload()
 				.get("verification_file_id", String.class);
-	}
-
-	public Boolean isExpired(String token) {
-		return Jwts.parser()
-				.verifyWith(secretKey)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload()
-				.getExpiration()
-				.before(new Date());
 	}
 
 	public String resolveToken(HttpServletRequest request) {

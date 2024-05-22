@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
@@ -71,13 +70,6 @@ public class JWTUtilTest {
 				jwtUtil.createAccessJwt("user@example.com", role, true, "학생증.jpg", 1000L * 60 * 60);
 
 		assertEquals(role, jwtUtil.getRole(token));
-	}
-
-	@Test
-	public void isExpired_ShouldReturnExpiredJwtException_WhenTokenExpired() {
-		String token = jwtUtil.createAccessJwt("user@example.com", "user", true, "학생증.jpg", -1000L);
-
-		assertThrows(ExpiredJwtException.class, () -> jwtUtil.isExpired(token));
 	}
 
 	@Nested

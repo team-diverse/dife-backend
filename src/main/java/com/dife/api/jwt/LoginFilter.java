@@ -3,7 +3,6 @@ package com.dife.api.jwt;
 import com.dife.api.ExceptionResonse;
 import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.model.dto.LoginSuccessDto;
-import com.dife.api.model.dto.RefreshLoginSuccessDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -25,6 +24,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 	private final AuthenticationManager authenticationManager;
 	private final JWTUtil jwtUtil;
+	private static final long TOKEN_VALIDITY_DURATION = 90 * 24 * 60 * 60 * 1000L;
 
 	public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
 		this.authenticationManager = authenticationManager;
@@ -87,16 +87,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 		String token =
 				jwtUtil.createAccessJwt(email, role, is_verified, verification_file_id, 5 * 60 * 1000L);
-		Object responseDto;
 
-		if (is_verified && verification_file_id != null) {
-			token =
+		Boolean is_verified_byToken = jwtUtil.getIsVerified(token);
+		String verification_file_id_byToken_byToken = jwtUtil.getVerificationFileId(token);
+
+		String refreshToken;
+		Object responseDto;
+		if (is_verified_byToken && verification_file_id_byToken_byToken != null) {
+			refreshToken =
 					jwtUtil.createRefreshJwt(
-							email, role, is_verified, verification_file_id, 90 * 24 * 60 * 60 * 1000L);
-			responseDto = new RefreshLoginSuccessDto(token, id, is_verified, verification_file_id);
-		} else {
-			responseDto = new LoginSuccessDto(token, id, is_verified, verification_file_id);
-		}
+							email,
+							role,
+							is_verified_byToken,
+							verification_file_id_byToken_byToken,
+							TOKEN_VALIDITY_DURATION);
+			responseDto = new LoginSuccessDto(token, refreshToken, id, is_verified, verification_file_id);
+
+		} else responseDto = new LoginSuccessDto(token, null, id, is_verified, verification_file_id);
 
 		String responseBody = new ObjectMapper().writeValueAsString(responseDto);
 		response.getWriter().write(responseBody);

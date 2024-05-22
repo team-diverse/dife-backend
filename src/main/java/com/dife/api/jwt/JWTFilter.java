@@ -1,12 +1,8 @@
 package com.dife.api.jwt;
 
-import static org.springframework.http.HttpStatus.CREATED;
-
-import com.dife.api.exception.MemberNullException;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.repository.MemberRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -17,7 +13,6 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -68,23 +63,9 @@ public class JWTFilter extends OncePerRequestFilter {
 	}
 
 	private void handleExpiredToken(ExpiredJwtException e, HttpServletResponse response)
-			throws IOException, MemberNullException {
+			throws IOException {
 		String email = e.getClaims().get("email", String.class);
 		String role = e.getClaims().get("role", String.class);
-		Boolean is_verified = e.getClaims().get("is_verified", Boolean.class);
-		String verification_file_id = e.getClaims().get("verification_file_id", String.class);
-
-		if (is_verified && verification_file_id != null) {
-			String refreshToken =
-					jwtUtil.createRefreshJwt(
-							email, role, is_verified, verification_file_id, TOKEN_VALIDITY_DURATION);
-
-			ResponseEntity<String> responseEntity =
-					ResponseEntity.status(CREATED).body("{ \"refreshToken\": \"" + refreshToken + "\" }");
-
-			String responseBody = new ObjectMapper().writeValueAsString(responseEntity.getBody());
-			response.getWriter().write(responseBody);
-		}
 	}
 
 	private boolean isExemptPath(String servletPath) {
