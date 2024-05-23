@@ -34,40 +34,37 @@ public class JWTUtilTest {
 
 	@Test
 	public void createAccessJwt_ShouldContainClaims_WhenTokenIsCreated() {
-		String email = "user@example.com";
+		Long id = 1L;
 		String role = "user";
-		Boolean is_verified = true;
-		String verification_file_id = "학생증.jpg";
+		String type = "AccessToken";
+		String issuer = "dife";
 		Long duration = 1000L * 60 * 60;
 
-		String token =
-				jwtUtil.createAccessJwt(email, role, is_verified, verification_file_id, duration);
+		String token = jwtUtil.createJwt(1L, role, type, issuer, duration);
 		assertNotNull(token);
 
 		Claims claims =
 				Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
 
-		assertEquals(email, claims.get("email"));
+		assertEquals(id, Long.valueOf(claims.get("id", Integer.class)));
 		assertEquals(role, claims.get("role"));
-		assertEquals(is_verified, claims.get("is_verified"));
-		assertEquals(verification_file_id, claims.get("verification_file_id"));
+		assertEquals(type, claims.get("type"));
 		assertNotNull(claims.getIssuedAt());
 		assertNotNull(claims.getExpiration());
 	}
 
 	@Test
 	public void getEmail_ShouldReturnEmail_WhenTokenPassed() {
-		String email = "user@example.com";
-		String token = jwtUtil.createAccessJwt(email, "user", true, "학생증.jpg", 1000L * 60 * 60);
+		Long id = 1L;
+		String token = jwtUtil.createJwt(id, "user", "accessToken", "dife", 1000L * 60 * 60);
 
-		assertEquals(email, jwtUtil.getEmail(token));
+		assertEquals(id, jwtUtil.getId(token));
 	}
 
 	@Test
 	public void getRole_ShouldReturnRole_WhenTokenPassed() {
 		String role = "admin";
-		String token =
-				jwtUtil.createAccessJwt("user@example.com", role, true, "학생증.jpg", 1000L * 60 * 60);
+		String token = jwtUtil.createJwt(1L, role, "accessToken", "dife", 1000L * 60 * 60);
 
 		assertEquals(role, jwtUtil.getRole(token));
 	}
