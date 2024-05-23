@@ -1,6 +1,6 @@
 package com.dife.api.redis;
 
-import com.dife.api.model.dto.ChatDto;
+import com.dife.api.model.dto.ChatRequestDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ public class RedisPublisher {
 	private RedisTemplate<String, String> redisTemplate;
 	private ChannelTopic topic;
 
-	public void publish(ChatDto dto) throws JsonProcessingException {
+	public void publish(ChatRequestDto dto) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonMessage = mapper.writeValueAsString(dto);
 

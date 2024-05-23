@@ -1,9 +1,10 @@
 package com.dife.api.service;
 
 import com.dife.api.model.*;
-import com.dife.api.model.dto.ChatDto;
+import com.dife.api.model.dto.ChatRequestDto;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
+import com.dife.api.repository.ChatScrapRepository;
 import com.dife.api.repository.ChatroomRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
@@ -25,8 +26,9 @@ public class ChatService {
 	private final ChatroomRepository chatroomRepository;
 	private final RedisPublisher redisPublisher;
 	private final ChatRepository chatRepository;
+	private final ChatScrapRepository chatScrapRepository;
 
-	public void sendMessage(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
 		switch (dto.getChatType()) {
 			case CHAT:
@@ -45,7 +47,7 @@ public class ChatService {
 				"/sub/chatroom/" + room_id, "Disconnect", accessor.getMessageHeaders());
 	}
 
-	public void sendEnter(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void sendEnter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
 		Long room_id = dto.getChatroom_id();
 
@@ -93,7 +95,7 @@ public class ChatService {
 		chatroomRepository.save(chatroom);
 	}
 
-	public void chat(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void chat(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
 
 		Long room_id = dto.getChatroom_id();
@@ -116,7 +118,28 @@ public class ChatService {
 		}
 	}
 
-	public void exit(ChatDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void scrapMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
+		Long room_id = dto.getChatroom_id();
+		String session_id = headerAccessor.getSessionId();
+		Boolean is_valid = chatroomService.findChatroomById(room_id);
+		Chatroom chatroom = chatroomService.getChatroom(room_id);
+
+		if (!is_valid) {
+			disconnectSession(room_id, session_id);
+			return;
+		}
+		if (dto.getMessage().length() <= 300) {
+
+			ChatScrap chatscrap = new ChatScrap();
+			chatscrap.setMessage(dto.getMessage());
+			chatscrap.setChatroom(chatroom);
+			chatscrap.setSender(dto.getSender());
+
+			chatScrapRepository.save(chatscrap);
+		}
+	}
+
+	public void exit(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
 
 		Long room_id = dto.getChatroom_id();

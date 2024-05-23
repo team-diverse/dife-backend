@@ -1,6 +1,5 @@
 package com.dife.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,8 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "chat")
-public class Chat {
+@Table(name = "chatscrap")
+public class ChatScrap {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +24,8 @@ public class Chat {
 	@Size(max = 300)
 	private String message;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne
 	@JoinColumn(name = "chatroom_id")
-	@JsonIgnore
 	private Chatroom chatroom;
 
 	private String sender;

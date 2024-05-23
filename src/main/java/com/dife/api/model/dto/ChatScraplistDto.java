@@ -1,6 +1,6 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.Chat;
+import com.dife.api.model.ChatScrap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,15 +10,14 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatDto {
-
+public class ChatScraplistDto {
+	private Long id;
 	private String message;
-	private Long chatroom_id;
 	private String sender;
 
-	public ChatDto(Chat chat) {
-		this.message = chat.getMessage();
-		this.chatroom_id = chat.getChatroom().getId();
-		this.sender = chat.getSender();
+	public ChatScraplistDto(ChatScrap scrap) {
+		this.id = scrap.getId();
+		this.message = scrap.getMessage();
+		this.sender = scrap.getSender();
 	}
 }

@@ -1,8 +1,7 @@
 package com.dife.api.controller;
 
 import com.dife.api.model.*;
-import com.dife.api.model.dto.GroupChatroomRequestDto;
-import com.dife.api.model.dto.GroupChatroomResponseDto;
+import com.dife.api.model.dto.*;
 import com.dife.api.service.ChatroomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,13 +17,13 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/chats")
+@RequestMapping("/api/chatrooms")
 @Slf4j
 public class ChatroomController {
 
 	private final ChatroomService chatroomService;
 
-	@Operation(summary = "그룹 채팅방 생성", description = "사용자가 그룹 채팅방 생성")
+	@Operation(summary = "채팅방 생성", description = "사용자가 그룹 채팅방 생성")
 	@PostMapping(value = "/", consumes = "multipart/form-data")
 	@ApiResponse(
 			responseCode = "201",
@@ -32,15 +31,16 @@ public class ChatroomController {
 			content = {
 				@Content(
 						mediaType = "application/json",
-						schema = @Schema(implementation = GroupChatroomRequestDto.class))
+						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
-	public ResponseEntity<GroupChatroomRequestDto> createGroupChatroom(
+	public ResponseEntity<ChatroomResponseDto> createGroupChatroom(
 			@RequestParam(name = "name", required = false) String name,
-			@RequestParam(name = "description") String description) {
+			@RequestParam(name = "description", required = false) String description,
+			@RequestParam(name = "chatroom_type") ChatroomType type) {
 
-		Chatroom chatroom = chatroomService.createGroupChatroom(name, description);
+		Chatroom chatroom = chatroomService.createChatroom(name, description, type);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomRequestDto(chatroom));
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ChatroomResponseDto(chatroom));
 	}
 
 	@PutMapping(value = "/{id}", consumes = "multipart/form-data")
@@ -50,9 +50,9 @@ public class ChatroomController {
 			content = {
 				@Content(
 						mediaType = "application/json",
-						schema = @Schema(implementation = GroupChatroomResponseDto.class))
+						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
-	public ResponseEntity<GroupChatroomResponseDto> registerDetail(
+	public ResponseEntity<ChatroomResponseDto> registerDetail(
 			@RequestParam(name = "tags") Set<String> tags,
 			@RequestParam(name = "max_count") Integer max_count,
 			@RequestParam(name = "languages") Set<String> languages,
@@ -64,13 +64,12 @@ public class ChatroomController {
 		Chatroom chatroom =
 				chatroomService.registerDetail(
 						tags, max_count, languages, purposes, is_public, password, id);
-		return ResponseEntity.status(HttpStatus.CREATED).body(new GroupChatroomResponseDto(chatroom));
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ChatroomResponseDto(chatroom));
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<GroupChatroomResponseDto> getGroupChatroom(
-			@PathVariable(name = "id") Long id) {
+	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(@PathVariable(name = "id") Long id) {
 		Chatroom chatroom = chatroomService.getChatroom(id);
-		return ResponseEntity.status(HttpStatus.OK).body(new GroupChatroomResponseDto(chatroom));
+		return ResponseEntity.status(HttpStatus.OK).body(new ChatroomResponseDto(chatroom));
 	}
 }
