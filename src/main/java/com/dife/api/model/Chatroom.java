@@ -34,6 +34,6 @@ public class Chatroom extends BaseTimeEntity {
 	@OneToMany(mappedBy = "chatroom", fetch = FetchType.LAZY)
 	private Set<Chat> chats;
 
-	@OneToMany(mappedBy = "chatroom", fetch = FetchType.EAGER)
-	private Set<ChatScrap> scraps;
+	@OneToMany(mappedBy = "chatroom")
+	private Set<Bookmark> bookmarks;
 }

@@ -27,9 +27,4 @@ public class SocketController {
 			throws JsonProcessingException, InterruptedException {
 		chatService.sendMessage(dto, headerAccessor);
 	}
-
-	@MessageMapping("/chatroom/scrap")
-	public void scrapMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
-		chatService.scrapMessage(dto, headerAccessor);
-	}
 }

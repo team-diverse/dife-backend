@@ -3,7 +3,6 @@ package com.dife.api.service;
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.ChatDto;
-import com.dife.api.model.dto.ChatScraplistDto;
 import com.dife.api.repository.*;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +24,6 @@ public class ChatroomService {
 	private final LanguageRepository languageRepository;
 	private final GroupPurposesRepository groupPurposesRepository;
 	private final ChatRepository chatRepository;
-	private final ChatScrapRepository chatScrapRepository;
-	private final ModelMapper modelMapper;
 
 	private final FileService fileService;
 
@@ -104,11 +100,13 @@ public class ChatroomService {
 		return chats.stream().map(chat -> new ChatDto(chat)).collect(Collectors.toList());
 	}
 
-	public List<ChatScraplistDto> getScraps(Long id) {
+	public Chat getChat(Long room_id, Long chat_id) {
+		Chat chat =
+				chatRepository
+						.findByChatroomIdAndId(room_id, chat_id)
+						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
 
-		List<ChatScrap> scraps = chatScrapRepository.findScrapsByChatroomId(id);
-
-		return scraps.stream().map(ChatScraplistDto::new).collect(Collectors.toList());
+		return chat;
 	}
 
 	public Chatroom registerDetail(

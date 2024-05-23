@@ -4,7 +4,6 @@ import com.dife.api.model.*;
 import com.dife.api.model.dto.ChatRequestDto;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
-import com.dife.api.repository.ChatScrapRepository;
 import com.dife.api.repository.ChatroomRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
@@ -26,7 +25,6 @@ public class ChatService {
 	private final ChatroomRepository chatroomRepository;
 	private final RedisPublisher redisPublisher;
 	private final ChatRepository chatRepository;
-	private final ChatScrapRepository chatScrapRepository;
 
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
@@ -115,27 +113,6 @@ public class ChatService {
 
 			chatRepository.save(chat);
 			redisPublisher.publish(dto);
-		}
-	}
-
-	public void scrapMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
-		Long room_id = dto.getChatroom_id();
-		String session_id = headerAccessor.getSessionId();
-		Boolean is_valid = chatroomService.findChatroomById(room_id);
-		Chatroom chatroom = chatroomService.getChatroom(room_id);
-
-		if (!is_valid) {
-			disconnectSession(room_id, session_id);
-			return;
-		}
-		if (dto.getMessage().length() <= 300) {
-
-			ChatScrap chatscrap = new ChatScrap();
-			chatscrap.setMessage(dto.getMessage());
-			chatscrap.setChatroom(chatroom);
-			chatscrap.setSender(dto.getSender());
-
-			chatScrapRepository.save(chatscrap);
 		}
 	}
 

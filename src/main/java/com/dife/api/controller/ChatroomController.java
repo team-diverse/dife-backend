@@ -72,4 +72,21 @@ public class ChatroomController {
 		Chatroom chatroom = chatroomService.getChatroom(id);
 		return ResponseEntity.status(HttpStatus.OK).body(new ChatroomResponseDto(chatroom));
 	}
+
+	@Operation(summary = "싱글 채팅방 생성", description = "사용자가 싱글 채팅방 생성")
+	@PostMapping("/single/")
+	@ApiResponse(
+			responseCode = "201",
+			description = "싱글 채팅방 성공 예시",
+			content = {
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = ChatroomResponseDto.class))
+			})
+	public ResponseEntity<ChatroomResponseDto> createSingleChatroom() {
+
+		Chatroom chatroom = chatroomService.createSingleChatroom();
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ChatroomResponseDto(chatroom));
+	}
 }
