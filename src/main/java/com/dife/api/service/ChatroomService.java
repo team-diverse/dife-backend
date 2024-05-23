@@ -1,15 +1,19 @@
 package com.dife.api.service;
 
+import static java.util.stream.Collectors.toList;
+
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
-import com.dife.api.model.dto.ChatDto;
+import com.dife.api.model.dto.ChatGetRequestDto;
+import com.dife.api.model.dto.ChatResponseDto;
+import com.dife.api.model.dto.ChatsGetByChatroomRequestDto;
 import com.dife.api.repository.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,7 @@ public class ChatroomService {
 	private final GroupPurposesRepository groupPurposesRepository;
 	private final ChatRepository chatRepository;
 	private final MemberService memberService;
+	private final ModelMapper modelMapper;
 
 	private final FileService fileService;
 
@@ -163,20 +168,20 @@ public class ChatroomService {
 		return chatroom;
 	}
 
-	public List<ChatDto> getChats(Long id) {
+	public List<ChatResponseDto> getChats(ChatsGetByChatroomRequestDto requestDto) {
 
-		List<Chat> chats = chatRepository.findChatsByChatroomId(id);
+		List<Chat> chats = chatRepository.findChatsByChatroomId(requestDto.getChatroomId());
 
-		return chats.stream().map(ChatDto::new).collect(Collectors.toList());
+		return chats.stream().map(c -> modelMapper.map(c, ChatResponseDto.class)).collect(toList());
 	}
 
-	public Chat getChat(Long room_id, Long chat_id) {
+	public ChatResponseDto getChat(ChatGetRequestDto requestDto) {
 		Chat chat =
 				chatRepository
-						.findByChatroomIdAndId(room_id, chat_id)
+						.findByChatroomIdAndId(requestDto.getChatroomId(), requestDto.getChatId())
 						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
 
-		return chat;
+		return modelMapper.map(chat, ChatResponseDto.class);
 	}
 
 	public Boolean isFull(Chatroom chatroom) {

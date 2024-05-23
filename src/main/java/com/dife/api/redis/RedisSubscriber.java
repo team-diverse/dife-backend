@@ -26,7 +26,7 @@ public class RedisSubscriber implements MessageListener {
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			ChatRequestDto dto = objectMapper.readValue(publishMessage, ChatRequestDto.class);
-			String destination = "/sub/chatroom/" + dto.getChatroom_id();
+			String destination = "/sub/chatroom/" + dto.getChatroomId();
 			String nMessage = "";
 			switch (dto.getChatType()) {
 				case ENTER -> nMessage = dto.getUsername() + "님이 입장하셨습니다!";
