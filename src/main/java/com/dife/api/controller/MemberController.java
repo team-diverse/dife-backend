@@ -130,12 +130,12 @@ public class MemberController {
 		return memberService.login(dto);
 	}
 
-	@GetMapping("/check-refreshToken")
-	public ResponseEntity<Void> checkRefreshToken(
+	@GetMapping("/checktoken")
+	public ResponseEntity<Void> checkToken(
 			@RequestParam(name = "password") String password,
-			@RequestParam(name = "refreshToken") String refreshToken) {
+			@RequestParam(name = "token") String token) {
 
-		Boolean is_expired = memberService.is_expired_refreshToken(password, refreshToken);
+		Boolean is_expired = memberService.checkToken(password, token);
 		if (is_expired) return new ResponseEntity<>(NOT_FOUND);
 		return new ResponseEntity<>(OK);
 	}

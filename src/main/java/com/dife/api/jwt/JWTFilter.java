@@ -57,7 +57,12 @@ public class JWTFilter extends OncePerRequestFilter {
 				filterChain.doFilter(request, response);
 			}
 
-		} catch (MemberException | NullPointerException e) {
+			response.setStatus(UNAUTHORIZED.value());
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("text/plain; charset=UTF-8");
+			response.getWriter().write("만료된 토큰입니다! 다시 로그인하세요!");
+
+		} catch (MemberException | NullPointerException | ServletException e) {
 			response.setStatus(UNAUTHORIZED.value());
 			response.setCharacterEncoding("UTF-8");
 			response.setContentType("text/plain; charset=UTF-8");
@@ -67,6 +72,8 @@ public class JWTFilter extends OncePerRequestFilter {
 			response.setCharacterEncoding("UTF-8");
 			response.setContentType("text/plain; charset=UTF-8");
 			response.getWriter().write("만료된 토큰입니다! 다시 로그인하세요!");
+		} catch (IllegalStateException e) {
+			response.setStatus(UNAUTHORIZED.value());
 		}
 	}
 

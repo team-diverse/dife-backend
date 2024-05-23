@@ -47,7 +47,7 @@ public class MemberService {
 
 	private final AuthenticationManager authenticationManager;
 	private final JWTUtil jwtUtil;
-	private static final long ACCESS_TOKEN_VALIDITY_DURATION = 60 * 60 * 1000L;
+	private static final long ACCESS_TOKEN_VALIDITY_DURATION = 1000L;
 	private static final long REFRESH_TOKEN_VALIDITY_DURATION = 90 * 24 * 60 * 1000L;
 
 	@Value("${DIFE_PASSWORD}")
@@ -159,9 +159,9 @@ public class MemberService {
 		return member;
 	}
 
-	public Boolean is_expired_refreshToken(String password, String refreshToken) {
+	public Boolean checkToken(String password, String token) {
 
-		if (!Objects.equals(password, difePassword) || jwtUtil.isExpired(refreshToken)) return true;
+		if (!Objects.equals(password, difePassword) || jwtUtil.isExpired(token)) return true;
 		return false;
 	}
 
