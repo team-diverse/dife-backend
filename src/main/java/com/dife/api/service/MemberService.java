@@ -1,7 +1,10 @@
 package com.dife.api.service;
 
+import static org.springframework.http.HttpStatus.CREATED;
+
 import com.dife.api.config.EmailValidator;
 import com.dife.api.exception.*;
+import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.HobbyRepository;
@@ -12,8 +15,14 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +44,14 @@ public class MemberService {
 	private final JavaMailSender javaMailSender;
 	private final FileService fileService;
 	private final ModelMapper modelMapper;
+
+	private final AuthenticationManager authenticationManager;
+	private final JWTUtil jwtUtil;
+	private static final long ACCESS_TOKEN_VALIDITY_DURATION = 60 * 60 * 1000L;
+	private static final long REFRESH_TOKEN_VALIDITY_DURATION = 90 * 24 * 60 * 1000L;
+
+	@Value("${DIFE_PASSWORD}")
+	private String difePassword;
 
 	public Member registerEmailAndPassword(RegisterEmailAndPasswordRequestDto dto) {
 		if (!emailValidator.isValidEmail(dto.getEmail())) {
@@ -140,6 +157,51 @@ public class MemberService {
 		memberRepository.save(member);
 
 		return member;
+	}
+
+	public Boolean is_expired_refreshToken(String password, String refreshToken) {
+
+		if (!Objects.equals(password, difePassword) || jwtUtil.isExpired(refreshToken)) return true;
+		return false;
+	}
+
+	public ResponseEntity<LoginSuccessDto> login(LoginDto dto) {
+
+		String email = dto.getEmail();
+		String password = dto.getPassword();
+		if (email == null || email.isEmpty()) {
+			throw new MemberException("이메일은 로그인 필수사항입니다!");
+		}
+		if (password == null || password.isEmpty()) {
+			throw new MemberException("비밀번호는 로그인 필수사항입니다!");
+		}
+
+		UsernamePasswordAuthenticationToken authToken =
+				new UsernamePasswordAuthenticationToken(email, password, null);
+		Authentication authentication = authenticationManager.authenticate(authToken);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+		Long member_id = customUserDetails.getId();
+		String member_role = "USER";
+
+		Boolean is_verified = customUserDetails.getIsVerified();
+		String verification_file_id = customUserDetails.getVerificationFileId();
+
+		String accessToken =
+				jwtUtil.createJwt(
+						member_id, member_role, "accessToken", "dife", ACCESS_TOKEN_VALIDITY_DURATION);
+		String refreshToken =
+				jwtUtil.createJwt(
+						member_id, member_role, "refreshToken", "dife", REFRESH_TOKEN_VALIDITY_DURATION);
+
+		ResponseEntity<LoginSuccessDto> responseEntity =
+				ResponseEntity.status(CREATED)
+						.body(
+								new LoginSuccessDto(
+										member_id, accessToken, refreshToken, is_verified, verification_file_id));
+
+		return responseEntity;
 	}
 
 	public Member getMember(String email) {

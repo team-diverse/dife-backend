@@ -1,5 +1,8 @@
 package com.dife.api.controller;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
+
 import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.*;
@@ -119,6 +122,22 @@ public class MemberController {
 		Member currentMember = memberService.getMember(auth.getName());
 		MemberResponseDto memberResponseDto = new MemberResponseDto(currentMember);
 		return ResponseEntity.ok(memberResponseDto);
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<LoginSuccessDto> login(@RequestBody LoginDto dto) {
+
+		return memberService.login(dto);
+	}
+
+	@GetMapping("/check-refreshToken")
+	public ResponseEntity<Void> checkRefreshToken(
+			@RequestParam(name = "password") String password,
+			@RequestParam(name = "refreshToken") String refreshToken) {
+
+		Boolean is_expired = memberService.is_expired_refreshToken(password, refreshToken);
+		if (is_expired) return new ResponseEntity<>(NOT_FOUND);
+		return new ResponseEntity<>(OK);
 	}
 
 	@PutMapping("/change-password")
