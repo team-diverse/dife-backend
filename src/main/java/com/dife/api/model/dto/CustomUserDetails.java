@@ -3,16 +3,16 @@ package com.dife.api.model.dto;
 import com.dife.api.model.Member;
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
+@Component
+@AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
 	private final Member member;
-
-	public CustomUserDetails(Member member) {
-		this.member = member;
-	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
