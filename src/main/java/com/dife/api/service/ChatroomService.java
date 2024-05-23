@@ -27,6 +27,7 @@ public class ChatroomService {
 	private final TagRepository tagRepository;
 	private final LanguageRepository languageRepository;
 	private final GroupPurposesRepository groupPurposesRepository;
+	private final MemberRepository memberRepository;
 	private final ChatRepository chatRepository;
 	private final MemberService memberService;
 	private final ModelMapper modelMapper;
@@ -158,30 +159,39 @@ public class ChatroomService {
 		return chatroom;
 	}
 
-	public Boolean findChatroomById(Long id) {
+	public Boolean isChatroomMember(Long chatroomId, String memberEmail) {
 
-		return chatroomRepository.existsById(id);
+		return chatroomRepository.existsByMemberEmailAndId(memberEmail, chatroomId);
 	}
 
 	public Chatroom getChatroom(Long id) {
+
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
 		return chatroom;
 	}
 
-	public List<ChatResponseDto> getChats(ChatsGetByChatroomRequestDto requestDto) {
+	public List<ChatResponseDto> getChats(
+			ChatsGetByChatroomRequestDto requestDto, String memberEmail) {
 
-		List<Chat> chats = chatRepository.findChatsByChatroomId(requestDto.getChatroomId());
+		if (isChatroomMember(requestDto.getChatroomId(), memberEmail)) {
+			List<Chat> chats = chatRepository.findChatsByChatroomId(requestDto.getChatroomId());
 
-		return chats.stream().map(c -> modelMapper.map(c, ChatResponseDto.class)).collect(toList());
+			return chats.stream().map(c -> modelMapper.map(c, ChatResponseDto.class)).collect(toList());
+		}
+		throw new ChatroomException("채팅방 소속 회원만이 채팅을 불러올 수 없습니다!");
 	}
 
-	public ChatResponseDto getChat(ChatGetRequestDto requestDto) {
-		Chat chat =
-				chatRepository
-						.findByChatroomIdAndId(requestDto.getChatroomId(), requestDto.getChatId())
-						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
+	public ChatResponseDto getChat(ChatGetRequestDto requestDto, String memberEmail) {
 
-		return modelMapper.map(chat, ChatResponseDto.class);
+		if (isChatroomMember(requestDto.getChatroomId(), memberEmail)) {
+			Chat chat =
+					chatRepository
+							.findByChatroomIdAndId(requestDto.getChatroomId(), requestDto.getChatId())
+							.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
+
+			return modelMapper.map(chat, ChatResponseDto.class);
+		}
+		throw new ChatroomException("채팅방 소속 회원만이 채팅을 불러올 수 없습니다!");
 	}
 
 	public Boolean isFull(Chatroom chatroom) {
