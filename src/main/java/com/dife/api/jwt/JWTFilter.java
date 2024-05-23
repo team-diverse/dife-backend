@@ -1,16 +1,18 @@
 package com.dife.api.jwt;
 
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+
+import com.dife.api.exception.MemberException;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,9 +23,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
-	private static final String AUTH_HEADER = "Authorization";
-	private static final String BEARER_TOKEN_PREFIX = "Bearer ";
-	private static final long TOKEN_VALIDITY_DURATION = 90 * 24 * 60 * 60 * 1000L;
 
 	private final JWTUtil jwtUtil;
 	private final MemberRepository memberRepository;
@@ -39,40 +38,42 @@ public class JWTFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 			return;
 		}
-
-		String token = jwtUtil.resolveToken(request);
-
 		try {
-			String email = jwtUtil.getEmail(token);
-			memberRepository.findByEmail(email).ifPresent(this::authenticateUser);
-			filterChain.doFilter(request, response);
-		} catch (ExpiredJwtException e) {
-			handleExpiredToken(e, response);
-			filterChain.doFilter(request, response);
-		} catch (JwtException | IllegalArgumentException | NoSuchElementException e) {
-			filterChain.doFilter(request, response);
+			String token = jwtUtil.resolveToken(request);
+
+			if (!jwtUtil.isExpired(token)) {
+				Long id = jwtUtil.getId(token);
+				Member member =
+						memberRepository.findById(id).orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
+
+				if (member.getVerification_file_id() != null && !member.getIs_verified())
+					throw new MemberException("인증받지 않은 회원입니다!");
+
+				CustomUserDetails customUserDetails = new CustomUserDetails(member);
+				Authentication authentication =
+						new UsernamePasswordAuthenticationToken(
+								customUserDetails, null, customUserDetails.getAuthorities());
+				SecurityContextHolder.getContext().setAuthentication(authentication);
+				filterChain.doFilter(request, response);
+			}
+
+		} catch (MemberException | NullPointerException e) {
+			response.setStatus(UNAUTHORIZED.value());
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("text/plain; charset=UTF-8");
+			response.getWriter().write("인증이 필요한 회원입니다!");
+		} catch (IllegalArgumentException | ExpiredJwtException | MalformedJwtException e) {
+			response.setStatus(UNAUTHORIZED.value());
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("text/plain; charset=UTF-8");
+			response.getWriter().write("만료된 토큰입니다! 다시 로그인하세요!");
 		}
-	}
-
-	private void authenticateUser(Member member) {
-		CustomUserDetails customUserDetails = new CustomUserDetails(member);
-		Authentication authentication =
-				new UsernamePasswordAuthenticationToken(
-						customUserDetails, null, customUserDetails.getAuthorities());
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-	}
-
-	private void handleExpiredToken(ExpiredJwtException e, HttpServletResponse response)
-			throws IOException {
-		String email = e.getClaims().get("email", String.class);
-		String role = e.getClaims().get("role", String.class);
 	}
 
 	private boolean isExemptPath(String servletPath) {
 		return servletPath.startsWith("/api/members/register")
 				|| servletPath.equals("/api/members/change-password")
 				|| servletPath.equals("/api/members/login")
-				|| servletPath.startsWith("/swagger-ui")
-				|| servletPath.equals("/api/v1/api-docs");
+				|| servletPath.equals("/api/members/check-refreshToken");
 	}
 }
