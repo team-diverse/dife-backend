@@ -31,7 +31,7 @@ public class Chatroom extends BaseTimeEntity {
 	@JoinColumn(name = "chatroom_setting_id")
 	private ChatroomSetting chatroom_setting;
 
-	@OneToMany(mappedBy = "chatroom", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "chatroom", fetch = FetchType.LAZY)
 	private Set<Chat> chats;
 
 	@OneToMany(mappedBy = "chatroom", fetch = FetchType.EAGER)
