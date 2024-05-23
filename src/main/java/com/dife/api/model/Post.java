@@ -19,13 +19,13 @@ public class Post extends BaseTimeEntity {
 
 	@NotNull private String content;
 
+	@NotNull private Boolean is_public;
+
 	@NotNull
 	@Enumerated(EnumType.STRING)
 	private BoardCategory boardType;
 
 	private Integer viewCount;
-
-	@NotNull private Boolean is_public;
 
 	@ManyToOne
 	@JoinColumn(name = "member_id")
