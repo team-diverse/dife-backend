@@ -1,7 +1,8 @@
 package com.dife.api.controller;
 
-import com.dife.api.model.Bookmark;
-import com.dife.api.model.dto.BookmarkDto;
+import com.dife.api.model.dto.BookmarkPostRequestDto;
+import com.dife.api.model.dto.BookmarkResponseDto;
+import com.dife.api.model.dto.BookmarksGetByChatroomRequestDto;
 import com.dife.api.service.BookmarkService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,37 +13,27 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/bookmark")
+@RequestMapping("/api/bookmarks")
 @Slf4j
 public class BookmarkController {
 
 	private final BookmarkService bookmarkService;
 
-	@PostMapping
-	public ResponseEntity<BookmarkDto> createBookmark(
-			@RequestParam(name = "room_id") Long room_id,
-			@RequestParam(name = "chat_id") Long chat_id,
-			Authentication auth) {
-		Bookmark bookmark = bookmarkService.createBookmark(room_id, chat_id, auth.getName());
-		return ResponseEntity.ok(new BookmarkDto(bookmark));
+	@PostMapping("/")
+	public ResponseEntity<BookmarkResponseDto> createBookmark(
+			BookmarkPostRequestDto requestDto, Authentication auth) {
+		BookmarkResponseDto responseDto = bookmarkService.createBookmark(requestDto, auth.getName());
+		return ResponseEntity.ok(responseDto);
 	}
 
-	@GetMapping
-	public ResponseEntity<List<BookmarkDto>> getBookmarks(
-			@RequestParam(name = "room_id") Long room_id) {
-		List<BookmarkDto> bookmarks = bookmarkService.getBookmarks(room_id);
+	@GetMapping("/")
+	public ResponseEntity<List<BookmarkResponseDto>> getBookmarks(
+			BookmarksGetByChatroomRequestDto requestDto, Authentication authentication) {
+		List<BookmarkResponseDto> bookmarks =
+				bookmarkService.getBookmarks(requestDto, authentication.getName());
 		return ResponseEntity.ok(bookmarks);
-	}
-
-	@GetMapping("/detail")
-	public ResponseEntity<BookmarkDto> getBookmark(
-			@RequestParam(name = "room_id") Long room_id,
-			@RequestParam(name = "bookmark_id") Long bookmark_id) {
-		Bookmark bookmark = bookmarkService.getBookmark(room_id, bookmark_id);
-		return ResponseEntity.ok(new BookmarkDto(bookmark));
 	}
 }

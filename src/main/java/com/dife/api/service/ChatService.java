@@ -1,5 +1,6 @@
 package com.dife.api.service;
 
+import com.dife.api.exception.ChatroomNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.redis.RedisPublisher;
@@ -55,7 +56,9 @@ public class ChatService {
 		if (!is_valid) {
 			disconnectSession(chatroom_id, session_id);
 		}
-		return chatroomService.getChatroom(chatroom_id);
+		return chatroomRepository
+				.findById(chatroom_id)
+				.orElseThrow(() -> new ChatroomNotFoundException());
 	}
 
 	public void enter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
@@ -66,7 +69,7 @@ public class ChatService {
 		String session_id = headerAccessor.getSessionId();
 		Boolean validGroupChatroom =
 				(chatroom.getChatroomType() == ChatroomType.GROUP
-						&& !chatroom.getChatroom_setting().getIs_public()
+						&& !chatroom.getChatroom_setting().getIsPublic()
 						&& chatroomService.isWrongPassword(chatroom, dto.getPassword()));
 
 		ChatroomSetting setting = chatroom.getChatroom_setting();
