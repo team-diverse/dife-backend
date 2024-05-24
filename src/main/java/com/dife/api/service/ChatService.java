@@ -69,10 +69,10 @@ public class ChatService {
 		String session_id = headerAccessor.getSessionId();
 		Boolean validGroupChatroom =
 				(chatroom.getChatroomType() == ChatroomType.GROUP
-						&& !chatroom.getChatroom_setting().getIsPublic()
+						&& !chatroom.getChatroomSetting().getIsPublic()
 						&& chatroomService.isWrongPassword(chatroom, dto.getPassword()));
 
-		ChatroomSetting setting = chatroom.getChatroom_setting();
+		ChatroomSetting setting = chatroom.getChatroomSetting();
 
 		if (chatroomService.isFull(chatroom)) {
 			disconnectSession(chatroom_id, session_id);
@@ -91,7 +91,7 @@ public class ChatService {
 			chatroom.setActiveSessions(activeSessions);
 			Integer nCount = setting.getCount();
 			setting.setCount(nCount + 1);
-			chatroom.setChatroom_setting(setting);
+			chatroom.setChatroomSetting(setting);
 
 			headerAccessor.getSessionAttributes().put("session_id", session_id);
 			headerAccessor.getSessionAttributes().put("chatroom_id", chatroom_id);
@@ -126,12 +126,12 @@ public class ChatService {
 		Map<String, String> activeSessions = chatroom.getActiveSessions();
 		activeSessions.remove(session_id);
 
-		ChatroomSetting setting = chatroom.getChatroom_setting();
+		ChatroomSetting setting = chatroom.getChatroomSetting();
 		Integer nCount = setting.getCount();
 		nCount--;
 		setting.setCount(nCount);
 
-		chatroom.setChatroom_setting(setting);
+		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
 		disconnectSession(chatroom_id, session_id);
 		redisPublisher.publish(dto);

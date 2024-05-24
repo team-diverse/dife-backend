@@ -40,20 +40,19 @@ public class MapperConfig {
 				.addMappings(
 						mapper -> {
 							mapper.map(
-									src -> src.getChatroom_setting().getProfileImgName(),
+									src -> src.getChatroomSetting().getProfileImgName(),
 									ChatroomResponseDto::setProfileImgName);
 							mapper.map(
-									src -> src.getChatroom_setting().getDescription(),
+									src -> src.getChatroomSetting().getDescription(),
 									ChatroomResponseDto::setDescription);
+							mapper.map(src -> src.getChatroomSetting().getCount(), ChatroomResponseDto::setCount);
 							mapper.map(
-									src -> src.getChatroom_setting().getCount(), ChatroomResponseDto::setCount);
+									src -> src.getChatroomSetting().getMaxCount(), ChatroomResponseDto::setMaxCount);
 							mapper.map(
-									src -> src.getChatroom_setting().getMaxCount(), ChatroomResponseDto::setMaxCount);
-							mapper.map(
-									src -> src.getChatroom_setting().getIsPublic(), ChatroomResponseDto::setIsPublic);
+									src -> src.getChatroomSetting().getIsPublic(), ChatroomResponseDto::setIsPublic);
 							mapper.map(
 									src ->
-											Optional.ofNullable(src.getChatroom_setting().getTags())
+											Optional.ofNullable(src.getChatroomSetting().getTags())
 													.orElse(Collections.emptySet())
 													.stream()
 													.map(Tag::getName)
@@ -62,7 +61,7 @@ public class MapperConfig {
 
 							mapper.map(
 									src ->
-											Optional.ofNullable(src.getChatroom_setting().getLanguages())
+											Optional.ofNullable(src.getChatroomSetting().getLanguages())
 													.orElse(Collections.emptySet())
 													.stream()
 													.map(Language::getName)
@@ -71,14 +70,14 @@ public class MapperConfig {
 
 							mapper.map(
 									src ->
-											Optional.ofNullable(src.getChatroom_setting().getPurposes())
+											Optional.ofNullable(src.getChatroomSetting().getPurposes())
 													.orElse(Collections.emptySet())
 													.stream()
 													.map(GroupPurpose::getName)
 													.collect(Collectors.toSet()),
 									ChatroomResponseDto::setPurposes);
 							mapper.map(
-									src -> src.getChatroom_setting().getPassword(), ChatroomResponseDto::setPassword);
+									src -> src.getChatroomSetting().getPassword(), ChatroomResponseDto::setPassword);
 						});
 
 		return modelMapper;

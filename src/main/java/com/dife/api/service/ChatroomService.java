@@ -70,7 +70,7 @@ public class ChatroomService {
 			throw new ChatroomException("유효하지 않은 한줄소개입니다. 공백만 존재하는 한줄 소개는 허용되지 않습니다.");
 
 		setting.setDescription(trimmedDescription);
-		chatroom.setChatroom_setting(setting);
+		chatroom.setChatroomSetting(setting);
 
 		chatroomRepository.save(chatroom);
 
@@ -87,7 +87,7 @@ public class ChatroomService {
 		if (!chatroomRepository.existsByMemberAndId(member, chatroomId))
 			throw new MemberException("수정 권한이 있는 회원이 아닙니다!");
 
-		ChatroomSetting setting = chatroom.getChatroom_setting();
+		ChatroomSetting setting = chatroom.getChatroomSetting();
 
 		Set<Tag> myTags = setting.getTags();
 		for (String tagName : requestDto.getTags()) {
@@ -136,7 +136,7 @@ public class ChatroomService {
 			setting.setPassword(requestDto.getPassword());
 		}
 
-		chatroom.setChatroom_setting(setting);
+		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
 
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
@@ -164,7 +164,7 @@ public class ChatroomService {
 		memberSet.add(otherMember);
 		if (memberSet.size() > 1) setting.setMaxCount(2);
 		else setting.setMaxCount(1);
-		chatroom.setChatroom_setting(setting);
+		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
 
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
@@ -208,14 +208,14 @@ public class ChatroomService {
 	}
 
 	public Boolean isFull(Chatroom chatroom) {
-		ChatroomSetting setting = chatroom.getChatroom_setting();
+		ChatroomSetting setting = chatroom.getChatroomSetting();
 		Integer maxCount = setting.getMaxCount();
 		Integer nCount = setting.getCount();
 		return nCount >= maxCount;
 	}
 
 	public Boolean isWrongPassword(Chatroom chatroom, String given_password) {
-		ChatroomSetting setting = chatroom.getChatroom_setting();
+		ChatroomSetting setting = chatroom.getChatroomSetting();
 		String password = setting.getPassword();
 
 		return !password.equals(given_password);

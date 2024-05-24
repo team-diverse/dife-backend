@@ -33,7 +33,7 @@ public class Chatroom extends BaseTimeEntity {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "chatroom_setting_id")
-	private ChatroomSetting chatroom_setting;
+	private ChatroomSetting chatroomSetting;
 
 	@ManyToMany
 	@JoinTable(
