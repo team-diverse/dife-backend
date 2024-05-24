@@ -1,7 +1,7 @@
 package com.dife.api.service;
 
 import com.dife.api.model.*;
-import com.dife.api.model.dto.ChatRequestDto;
+import com.dife.api.model.dto.*;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
@@ -29,6 +29,8 @@ public class ChatService {
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
 		switch (dto.getChatType()) {
+			case ENTER:
+				enter(dto, headerAccessor);
 			case CHAT:
 				chat(dto, headerAccessor);
 				break;
@@ -37,56 +39,59 @@ public class ChatService {
 		}
 	}
 
-	public void disconnectSession(Long room_id, String session_id) {
+	public void disconnectSession(Long chatroom_id, String session_id) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		accessor.setSessionId(session_id);
-		accessor.setDestination("/sub/chatroom/" + room_id);
+		accessor.setDestination("/sub/chatroom/" + chatroom_id);
 		messagingTemplate.convertAndSend(
-				"/sub/chatroom/" + room_id, "Disconnect", accessor.getMessageHeaders());
+				"/sub/chatroom/" + chatroom_id, "Disconnect", accessor.getMessageHeaders());
 	}
 
-	public void sendEnter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
-			throws JsonProcessingException {
-		Long room_id = dto.getChatroom_id();
-
+	public Chatroom validChatroom(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
+		Long chatroom_id = dto.getChatroomId();
 		String session_id = headerAccessor.getSessionId();
 
-		Boolean is_valid = chatroomService.findChatroomById(room_id);
+		Boolean is_valid = chatroomRepository.existsById(chatroom_id);
 		if (!is_valid) {
-			disconnectSession(room_id, session_id);
-			return;
+			disconnectSession(chatroom_id, session_id);
 		}
-		if (dto.getChatType() != ChatType.ENTER) {
-			disconnectSession(room_id, session_id);
-			return;
-		}
+		return chatroomService.getChatroom(chatroom_id);
+	}
 
-		Chatroom chatroom = chatroomService.getChatroom(room_id);
+	public void enter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+			throws JsonProcessingException {
+
+		Chatroom chatroom = validChatroom(dto, headerAccessor);
+		Long chatroom_id = chatroom.getId();
+		String session_id = headerAccessor.getSessionId();
+		Boolean validGroupChatroom =
+				(chatroom.getChatroomType() == ChatroomType.GROUP
+						&& !chatroom.getChatroom_setting().getIs_public()
+						&& chatroomService.isWrongPassword(chatroom, dto.getPassword()));
+
 		ChatroomSetting setting = chatroom.getChatroom_setting();
 
 		if (chatroomService.isFull(chatroom)) {
-			disconnectSession(room_id, session_id);
+			disconnectSession(chatroom_id, session_id);
 			return;
 		}
 
-		if (chatroom.getChatroomType() == ChatroomType.GROUP
-				&& !setting.getIs_public()
-				&& chatroomService.isWrongPassword(chatroom, dto.getPassword())) {
-			disconnectSession(room_id, session_id);
+		if (validGroupChatroom) {
+			disconnectSession(chatroom_id, session_id);
 			return;
 		}
 
 		Map<String, String> activeSessions = chatroom.getActiveSessions();
 
 		if (!activeSessions.containsKey(session_id)) {
-			activeSessions.put(session_id, dto.getSender());
+			activeSessions.put(session_id, dto.getUsername());
 			chatroom.setActiveSessions(activeSessions);
 			Integer nCount = setting.getCount();
 			setting.setCount(nCount + 1);
 			chatroom.setChatroom_setting(setting);
 
 			headerAccessor.getSessionAttributes().put("session_id", session_id);
-			headerAccessor.getSessionAttributes().put("chatroom_id", room_id);
+			headerAccessor.getSessionAttributes().put("chatroom_id", chatroom_id);
 
 			redisPublisher.publish(dto);
 		}
@@ -96,20 +101,12 @@ public class ChatService {
 	public void chat(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
 
-		Long room_id = dto.getChatroom_id();
-		String session_id = headerAccessor.getSessionId();
-		Boolean is_valid = chatroomService.findChatroomById(room_id);
-		Chatroom chatroom = chatroomService.getChatroom(room_id);
+		Chatroom chatroom = validChatroom(dto, headerAccessor);
 
-		if (!is_valid) {
-			disconnectSession(room_id, session_id);
-			return;
-		}
 		if (dto.getMessage().length() <= 300) {
 			Chat chat = new Chat();
 			chat.setMessage(dto.getMessage());
 			chat.setChatroom(chatroom);
-			chat.setSender(dto.getSender());
 
 			chatRepository.save(chat);
 			redisPublisher.publish(dto);
@@ -119,15 +116,9 @@ public class ChatService {
 	public void exit(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
 
-		Long room_id = dto.getChatroom_id();
+		Chatroom chatroom = validChatroom(dto, headerAccessor);
+		Long chatroom_id = dto.getChatroomId();
 		String session_id = headerAccessor.getSessionId();
-		Boolean is_valid = chatroomService.findChatroomById(room_id);
-		if (!is_valid) {
-			disconnectSession(room_id, session_id);
-			return;
-		}
-
-		Chatroom chatroom = chatroomService.getChatroom(room_id);
 
 		Map<String, String> activeSessions = chatroom.getActiveSessions();
 		activeSessions.remove(session_id);
@@ -139,7 +130,7 @@ public class ChatService {
 
 		chatroom.setChatroom_setting(setting);
 		chatroomRepository.save(chatroom);
-		disconnectSession(room_id, session_id);
+		disconnectSession(chatroom_id, session_id);
 		redisPublisher.publish(dto);
 		Thread.sleep(1000);
 
@@ -147,9 +138,9 @@ public class ChatService {
 
 			StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
 			accessor.setSessionId(session_id);
-			accessor.setDestination("/sub/chatroom/" + room_id);
+			accessor.setDestination("/sub/chatroom/" + chatroom_id);
 			messagingTemplate.convertAndSend(
-					"/sub/chatroom/" + room_id, "해당 채팅방은 한 명만 남은 채팅방입니다!", accessor.getMessageHeaders());
+					"/sub/chatroom/" + chatroom_id, "해당 채팅방은 한 명만 남은 채팅방입니다!", accessor.getMessageHeaders());
 		}
 	}
 }

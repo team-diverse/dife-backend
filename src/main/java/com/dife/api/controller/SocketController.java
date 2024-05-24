@@ -18,8 +18,8 @@ public class SocketController {
 
 	@MessageMapping("/chatroom/enter")
 	public void sendEnter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
-			throws JsonProcessingException {
-		chatService.sendEnter(dto, headerAccessor);
+			throws JsonProcessingException, InterruptedException {
+		chatService.sendMessage(dto, headerAccessor);
 	}
 
 	@MessageMapping("/chatroom/chat")

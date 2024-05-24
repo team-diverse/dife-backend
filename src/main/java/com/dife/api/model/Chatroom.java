@@ -1,5 +1,6 @@
 package com.dife.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,5 @@ public class Chatroom extends BaseTimeEntity {
 	@OneToMany(mappedBy = "chatroom", fetch = FetchType.LAZY)
 	private Set<Chat> chats;
 
-	@OneToMany(mappedBy = "chatroom")
-	private Set<Bookmark> bookmarks;
+	@ManyToOne @JsonIgnore private Member member;
 }

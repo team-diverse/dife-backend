@@ -1,35 +1,40 @@
 package com.dife.api.controller;
 
-import com.dife.api.model.Chat;
-import com.dife.api.model.dto.ChatDto;
+import static org.springframework.http.HttpStatus.OK;
+
+import com.dife.api.model.dto.ChatGetRequestDto;
+import com.dife.api.model.dto.ChatResponseDto;
+import com.dife.api.model.dto.ChatsGetByChatroomRequestDto;
 import com.dife.api.service.ChatroomService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/chat")
+@RequestMapping("/api/chats")
 @Slf4j
 public class ChatController {
 
 	private final ChatroomService chatroomService;
 
 	@GetMapping
-	public ResponseEntity<List<ChatDto>> getChats(@RequestParam(name = "room_id") Long room_id) {
-		List<ChatDto> chats = chatroomService.getChats(room_id);
-		return ResponseEntity.ok(chats);
+	public ResponseEntity<List<ChatResponseDto>> getChats(
+			@Valid ChatsGetByChatroomRequestDto requestDto, Authentication authentication) {
+		List<ChatResponseDto> chats = chatroomService.getChats(requestDto, authentication.getName());
+		return ResponseEntity.status(OK).body(chats);
 	}
 
-	@GetMapping("/detail")
-	public ResponseEntity<ChatDto> getChat(
-			@RequestParam(name = "room_id") Long room_id, @RequestParam(name = "chat_id") Long chat_id) {
-		Chat chat = chatroomService.getChat(room_id, chat_id);
-		return ResponseEntity.ok(new ChatDto(chat));
+	@GetMapping
+	public ResponseEntity<ChatResponseDto> getChat(
+			@Valid ChatGetRequestDto requestDto, Authentication authentication) {
+		ChatResponseDto responseDto = chatroomService.getChat(requestDto, authentication.getName());
+		return ResponseEntity.ok(responseDto);
 	}
 }

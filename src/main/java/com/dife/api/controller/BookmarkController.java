@@ -7,6 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +26,8 @@ public class BookmarkController {
 	public ResponseEntity<BookmarkDto> createBookmark(
 			@RequestParam(name = "room_id") Long room_id,
 			@RequestParam(name = "chat_id") Long chat_id,
-			@RequestParam("sender") String sender) {
-		Bookmark bookmark = bookmarkService.createBookmark(room_id, chat_id, sender);
+			Authentication auth) {
+		Bookmark bookmark = bookmarkService.createBookmark(room_id, chat_id, auth.getName());
 		return ResponseEntity.ok(new BookmarkDto(bookmark));
 	}
 

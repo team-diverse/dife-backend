@@ -29,6 +29,4 @@ public class Chat {
 	@JoinColumn(name = "chatroom_id")
 	@JsonIgnore
 	private Chatroom chatroom;
-
-	private String sender;
 }

@@ -69,4 +69,10 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	@OneToMany(mappedBy = "toMember")
 	private Set<Connect> received;
+
+	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
+	private Set<Chatroom> chatrooms;
+
+	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
+	private Set<Bookmark> bookmarks;
 }

@@ -1,11 +1,14 @@
 package com.dife.api.service;
 
 import com.dife.api.exception.BookmarkNotFoundException;
+import com.dife.api.exception.ChatroomException;
 import com.dife.api.model.Bookmark;
 import com.dife.api.model.Chat;
 import com.dife.api.model.Chatroom;
+import com.dife.api.model.Member;
 import com.dife.api.model.dto.BookmarkDto;
 import com.dife.api.repository.BookmarkRepository;
+import com.dife.api.repository.ChatRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -21,15 +24,21 @@ public class BookmarkService {
 
 	private final BookmarkRepository bookmarkRepository;
 	private final ChatroomService chatroomService;
+	private final ChatRepository chatRepository;
+	private final MemberService memberService;
 
-	public Bookmark createBookmark(Long room_id, Long chat_id, String sender) {
+	public Bookmark createBookmark(Long room_id, Long chat_id, String memberEmail) {
 
+		Member member = memberService.getMember(memberEmail);
 		Chatroom chatroom = chatroomService.getChatroom(room_id);
-		Chat chat = chatroomService.getChat(room_id, chat_id);
+		Chat chat =
+				chatRepository
+						.findByChatroomIdAndId(room_id, chat_id)
+						.orElseThrow(() -> new ChatroomException("유효하지 않은 채팅입니다!"));
 
 		Bookmark bookmark = new Bookmark();
 		bookmark.setMessage(chat.getMessage());
-		bookmark.setSender(sender);
+		bookmark.setMember(member);
 		bookmark.setChatroom(chatroom);
 		bookmarkRepository.save(bookmark);
 

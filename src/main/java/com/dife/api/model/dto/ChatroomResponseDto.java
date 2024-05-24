@@ -52,6 +52,9 @@ public class ChatroomResponseDto {
 	@Schema(description = "채팅방 생성 일시")
 	private LocalDateTime created;
 
+	@Schema(description = "채팅방 생성 회원 닉네임", example = "sooya")
+	private String username = "username";
+
 	public ChatroomResponseDto(Chatroom chatroom) {
 
 		this.chatroomType = chatroom.getChatroomType();
@@ -82,7 +85,10 @@ public class ChatroomResponseDto {
 							.collect(Collectors.toSet());
 		}
 		this.is_public = chatroom.getChatroom_setting().getIs_public();
-		this.password = chatroom.getChatroom_setting().getPassword();
 		this.created = chatroom.getCreated();
+
+		if (chatroom.getMember().getIs_public()) {
+			this.username = chatroom.getMember().getUsername();
+		}
 	}
 }

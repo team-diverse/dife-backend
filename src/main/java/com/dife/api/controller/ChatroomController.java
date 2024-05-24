@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,10 +36,10 @@ public class ChatroomController {
 			})
 	public ResponseEntity<ChatroomResponseDto> createGroupChatroom(
 			@RequestParam(name = "name", required = false) String name,
-			@RequestParam(name = "description", required = false) String description,
-			@RequestParam(name = "chatroom_type") ChatroomType type) {
+			@RequestParam(name = "description") String description,
+			Authentication auth) {
 
-		Chatroom chatroom = chatroomService.createChatroom(name, description, type);
+		Chatroom chatroom = chatroomService.createGroupChatroom(name, description, auth.getName());
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ChatroomResponseDto(chatroom));
 	}
@@ -59,11 +60,12 @@ public class ChatroomController {
 			@RequestParam(name = "purposes") Set<String> purposes,
 			@RequestParam(name = "is_public") Boolean is_public,
 			@RequestParam(name = "password", required = false) String password,
-			@PathVariable(name = "id") Long id) {
+			@PathVariable(name = "id") Long id,
+			Authentication auth) {
 
 		Chatroom chatroom =
 				chatroomService.registerDetail(
-						tags, max_count, languages, purposes, is_public, password, id);
+						tags, max_count, languages, purposes, is_public, password, id, auth.getName());
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ChatroomResponseDto(chatroom));
 	}
 
