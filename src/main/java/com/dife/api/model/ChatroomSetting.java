@@ -3,6 +3,7 @@ package com.dife.api.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,25 +19,25 @@ public class ChatroomSetting {
 	private Long id;
 
 	@Size(max = 60)
-	private String description;
+	private String description = "";
 
-	private String profile_img_name;
+	private String profileImgName = "";
 
-	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private Set<Tag> tags;
+	@OneToMany(mappedBy = "chatroom_setting", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private Set<Tag> tags = new HashSet<>();
 
 	private Integer count = 0;
-	private Integer max_count = 30;
+	private Integer maxCount = 30;
 
-	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private Set<GroupPurpose> purposes;
+	@OneToMany(mappedBy = "chatroom_setting", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private Set<GroupPurpose> purposes = new HashSet<>();
 
-	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private Set<Language> languages;
+	@OneToMany(mappedBy = "chatroom_setting", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private Set<Language> languages = new HashSet<>();
 
-	private Boolean is_public = true;
+	private Boolean isPublic = true;
 
 	@Size(min = 5, max = 5, message = "비밀번호는 정확히 5자 이어야 합니다.")
 	@Pattern(regexp = "^[0-9]{5}$", message = "비밀번호는 숫자 5자로 구성되어야 합니다.")
-	private String password;
+	private String password = "00000";
 }
