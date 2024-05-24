@@ -31,7 +31,7 @@ public class ChatController {
 		return ResponseEntity.status(OK).body(chats);
 	}
 
-	@GetMapping
+	@GetMapping("/")
 	public ResponseEntity<ChatResponseDto> getChat(
 			@Valid ChatGetRequestDto requestDto, Authentication authentication) {
 		ChatResponseDto responseDto = chatroomService.getChat(requestDto, authentication.getName());
