@@ -4,16 +4,15 @@ import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
-import com.dife.api.model.dto.ChatGetRequestDto;
-import com.dife.api.model.dto.ChatResponseDto;
-import com.dife.api.model.dto.ChatsGetByChatroomRequestDto;
+import com.dife.api.model.dto.*;
 import com.dife.api.repository.*;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,174 +28,188 @@ public class ChatroomService {
 	private final GroupPurposesRepository groupPurposesRepository;
 	private final MemberRepository memberRepository;
 	private final ChatRepository chatRepository;
-	private final MemberService memberService;
+
 	private final ModelMapper modelMapper;
+
+	@Autowired
+	@Qualifier("chatroomModelMapper")
+	private ModelMapper chatroomModelMapper;
 
 	private final FileService fileService;
 
-	public Chatroom createGroupChatroom(String name, String description, String memberEmail) {
-
-		Member member = memberService.getMember(memberEmail);
-
-		String trimmedName = name.trim();
-		if (chatroomRepository.existsByName(trimmedName)) {
-			throw new ChatroomDuplicateException();
+	public ChatroomResponseDto createChatroom(ChatroomPostRequestDto requestDto, String memberEmail) {
+		switch (requestDto.getChatroomType()) {
+			case GROUP:
+				return createGroupChatroom(requestDto, memberEmail);
+			case SINGLE:
+				return createSingleChatroom(requestDto, memberEmail);
 		}
-		if (trimmedName.isEmpty()) {
-			throw new ChatroomException("채팅방 이름은 필수사항입니다.");
-		}
+		throw new ChatroomException("유효한 채팅방 생성 접근이 아닙니다!");
+	}
+
+	public ChatroomResponseDto createGroupChatroom(
+			ChatroomPostRequestDto requestDto, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		String trimmedName = requestDto.getName().trim();
+		if (chatroomRepository.existsByName(trimmedName)) throw new ChatroomDuplicateException();
+		if (trimmedName.isEmpty()) throw new ChatroomException("채팅방 이름은 필수사항입니다.");
 
 		Chatroom chatroom = new Chatroom();
-		chatroom.setMember(member);
+
+		chatroom.getMembers().add(member);
 
 		chatroom.setName(trimmedName);
 		chatroom.setChatroomType(ChatroomType.GROUP);
 
 		ChatroomSetting setting = new ChatroomSetting();
-
-		if (description == null || description.isEmpty()) {
-			throw new ChatroomException("채팅방 한줄소개는 필수사항입니다.");
-		}
-
-		if (description.length() > 60) {
-			throw new ChatroomException("채팅방 한줄소개는 60자 이내입니다.");
-		}
-
-		String trimmedDescription = description.trim();
-		if (trimmedDescription.isEmpty()) {
+		String trimmedDescription = requestDto.getDescription().trim();
+		if (trimmedDescription.isEmpty())
 			throw new ChatroomException("유효하지 않은 한줄소개입니다. 공백만 존재하는 한줄 소개는 허용되지 않습니다.");
-		}
 
-		setting.setDescription(description);
-
+		setting.setDescription(trimmedDescription);
 		chatroom.setChatroom_setting(setting);
 
 		chatroomRepository.save(chatroom);
 
-		return chatroom;
+		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public Chatroom registerDetail(
-			Set<String> tags,
-			Integer max_count,
-			Set<String> languages,
-			Set<String> purposes,
-			Boolean is_public,
-			String password,
-			Long id,
-			String memberEmail) {
+	public ChatroomResponseDto registerDetail(
+			GroupChatroomPutRequestDto requestDto, Long chatroomId, String memberEmail) {
 
-		Chatroom chatroom = getChatroom(id);
-		if (!chatroom.getMember().getEmail().equals(memberEmail))
-			throw new MemberException("작성한 사용자가 아닙니다!");
+		Chatroom chatroom =
+				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		if (!chatroomRepository.existsByMemberAndId(member, chatroomId))
+			throw new MemberException("수정 권한이 있는 회원이 아닙니다!");
 
 		ChatroomSetting setting = chatroom.getChatroom_setting();
 
-		Set<Tag> myTags = new HashSet<>();
-		if (tags == null || tags.isEmpty()) {
-			throw new ChatroomException("채팅방 태그는 필수 입력사항입니다!");
-		}
-		for (String tag : tags) {
-			Tag nTag = new Tag();
-			nTag.setChatroom_setting(setting);
-			nTag.setName(tag);
-			tagRepository.save(nTag);
-			myTags.add(nTag);
+		Set<Tag> myTags = setting.getTags();
+		for (String tagName : requestDto.getTags()) {
+			if (!tagRepository.existsTagByNameAndChatroomSetting(tagName, setting)) {
+				Tag nTag = new Tag();
+				nTag.setName(tagName);
+				nTag.setChatroom_setting(setting);
+				tagRepository.save(nTag);
+				myTags.add(nTag);
+			}
 		}
 		setting.setTags(myTags);
+		if (requestDto.getMaxCount() > 30 || requestDto.getMaxCount() < 3)
+			throw new ChatroomException("그룹 채팅방 인원은 3명 이상 30명 이하여야 합니다!");
+		setting.setMaxCount(requestDto.getMaxCount());
 
-		if (max_count > 30) {
-			throw new ChatroomException("채팅방 인원수 제한은 3~30명 입니다!");
-		}
-		setting.setMax_count(max_count);
-
-		Set<Language> myLanguages = new HashSet<>();
-		if (languages == null || languages.isEmpty()) {
-			throw new ChatroomException("채팅방 번역 언어 선택은 필수 입력사항입니다!");
-		}
-		for (String language : languages) {
-			Language nLanguage = new Language();
-			nLanguage.setName(language);
-			nLanguage.setChatroom_setting(setting);
-			languageRepository.save(nLanguage);
-			myLanguages.add(nLanguage);
+		Set<Language> myLanguages = setting.getLanguages();
+		for (String languageName : requestDto.getLanguages()) {
+			if (!languageRepository.existsLanguageByNameAndChatroomSetting(languageName, setting)) {
+				Language nLanguage = new Language();
+				nLanguage.setName(languageName);
+				nLanguage.setChatroom_setting(setting);
+				languageRepository.save(nLanguage);
+				myLanguages.add(nLanguage);
+			}
 		}
 		setting.setLanguages(myLanguages);
 
-		Set<GroupPurpose> myPurposes = new HashSet<>();
-		if (purposes == null || purposes.isEmpty()) {
-			throw new ChatroomException("채팅방 목적은 필수 입력사항입니다!");
-		}
-		for (String purpose : purposes) {
-			GroupPurpose nPurpose = new GroupPurpose();
-			nPurpose.setName(purpose);
-			nPurpose.setChatroom_setting(setting);
-			groupPurposesRepository.save(nPurpose);
-			myPurposes.add(nPurpose);
-		}
-		setting.setPurposes(myPurposes);
-		setting.setIs_public(is_public);
-
-		if (!is_public) {
-			if (password == null || !password.matches("^[0-9]{5}$")) {
-				throw new ChatroomException("비밀번호는 5자리 숫자여야 합니다!");
+		Set<GroupPurpose> myGroupPurposes = setting.getPurposes();
+		for (String groupPurposeName : requestDto.getPurposes()) {
+			if (!groupPurposesRepository.existsGroupPurposeByNameAndChatroomSetting(
+					groupPurposeName, setting)) {
+				GroupPurpose nPurpose = new GroupPurpose();
+				nPurpose.setName(groupPurposeName);
+				nPurpose.setChatroom_setting(setting);
+				groupPurposesRepository.save(nPurpose);
+				myGroupPurposes.add(nPurpose);
 			}
-			setting.setPassword(password);
+		}
+		setting.setPurposes(myGroupPurposes);
+
+		Boolean isPublic = requestDto.getIsPublic();
+		setting.setIsPublic(isPublic);
+
+		if (!isPublic) {
+			setting.setPassword(requestDto.getPassword());
 		}
 
-		chatroomRepository.save(chatroom);
-		return chatroom;
-	}
-
-	public Chatroom createSingleChatroom() {
-		Chatroom chatroom = new Chatroom();
-		ChatroomSetting setting = new ChatroomSetting();
-		chatroom.setChatroomType(ChatroomType.SINGLE);
-		setting.setMax_count(2);
 		chatroom.setChatroom_setting(setting);
 		chatroomRepository.save(chatroom);
 
-		return chatroom;
+		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public Boolean isChatroomMember(Long chatroomId, String memberEmail) {
+	public ChatroomResponseDto createSingleChatroom(
+			ChatroomPostRequestDto requestDto, String currentMemberEmail) {
 
-		return chatroomRepository.existsByMemberEmailAndId(memberEmail, chatroomId);
+		Member currentMember =
+				memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
+		Member otherMember =
+				memberRepository
+						.findById(requestDto.getMemberId())
+						.orElseThrow(MemberNotFoundException::new);
+
+		if (chatroomRepository.existsSingleChatroomByMembers(
+				currentMember, otherMember, ChatroomType.SINGLE))
+			throw new SingleChatroomCreateDuplicateException();
+
+		Chatroom chatroom = new Chatroom();
+		ChatroomSetting setting = new ChatroomSetting();
+		chatroom.setChatroomType(ChatroomType.SINGLE);
+		Set<Member> memberSet = chatroom.getMembers();
+		memberSet.add(currentMember);
+		memberSet.add(otherMember);
+		if (memberSet.size() > 1) setting.setMaxCount(2);
+		else setting.setMaxCount(1);
+		chatroom.setChatroom_setting(setting);
+		chatroomRepository.save(chatroom);
+
+		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public Chatroom getChatroom(Long id) {
+	public ChatroomResponseDto getChatroom(Long id) {
 
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
-		return chatroom;
+		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
 	public List<ChatResponseDto> getChats(
 			ChatsGetByChatroomRequestDto requestDto, String memberEmail) {
 
-		if (isChatroomMember(requestDto.getChatroomId(), memberEmail)) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		if (chatroomRepository.existsByMemberAndId(member, requestDto.getChatroomId())) {
 			List<Chat> chats = chatRepository.findChatsByChatroomId(requestDto.getChatroomId());
 
-			return chats.stream().map(c -> modelMapper.map(c, ChatResponseDto.class)).collect(toList());
+			return chats.stream()
+					.map(c -> chatroomModelMapper.map(c, ChatResponseDto.class))
+					.collect(toList());
 		}
-		throw new ChatroomException("채팅방 소속 회원만이 채팅을 불러올 수 없습니다!");
+		throw new ChatroomException("채팅방 소속 회원만이 채팅을 불러올 수 있습니다!");
 	}
 
 	public ChatResponseDto getChat(ChatGetRequestDto requestDto, String memberEmail) {
 
-		if (isChatroomMember(requestDto.getChatroomId(), memberEmail)) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		if (chatroomRepository.existsByMemberAndId(member, requestDto.getChatroomId())) {
 			Chat chat =
 					chatRepository
 							.findByChatroomIdAndId(requestDto.getChatroomId(), requestDto.getChatId())
 							.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
 
-			return modelMapper.map(chat, ChatResponseDto.class);
+			return chatroomModelMapper.map(chat, ChatResponseDto.class);
 		}
 		throw new ChatroomException("채팅방 소속 회원만이 채팅을 불러올 수 없습니다!");
 	}
 
 	public Boolean isFull(Chatroom chatroom) {
 		ChatroomSetting setting = chatroom.getChatroom_setting();
-		Integer maxCount = setting.getMax_count();
+		Integer maxCount = setting.getMaxCount();
 		Integer nCount = setting.getCount();
 		return nCount >= maxCount;
 	}
