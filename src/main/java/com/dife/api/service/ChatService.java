@@ -32,6 +32,7 @@ public class ChatService {
 		switch (dto.getChatType()) {
 			case ENTER:
 				enter(dto, headerAccessor);
+				break;
 			case CHAT:
 				chat(dto, headerAccessor);
 				break;
@@ -67,10 +68,10 @@ public class ChatService {
 		Chatroom chatroom = validChatroom(dto, headerAccessor);
 		Long chatroom_id = chatroom.getId();
 		String session_id = headerAccessor.getSessionId();
-		Boolean validGroupChatroom =
+		Boolean notValidGroupChatroom =
 				(chatroom.getChatroomType() == ChatroomType.GROUP
-						&& !chatroom.getChatroomSetting().getIsPublic()
-						&& chatroomService.isWrongPassword(chatroom, dto.getPassword()));
+						&& (!chatroom.getChatroomSetting().getIsPublic()
+								&& chatroomService.isWrongPassword(chatroom, dto.getPassword())));
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
@@ -79,7 +80,7 @@ public class ChatService {
 			return;
 		}
 
-		if (validGroupChatroom) {
+		if (notValidGroupChatroom) {
 			disconnectSession(chatroom_id, session_id);
 			return;
 		}
