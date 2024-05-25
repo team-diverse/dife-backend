@@ -22,11 +22,10 @@ public class JWTUtil {
 						secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
 	}
 
-	public String createJwt(Long id, String role, String type, String issuer, Long expiredMs) {
+	public String createJwt(Long id, String type, String issuer, Long expiredMs) {
 
 		return Jwts.builder()
 				.claim("id", id)
-				.claim("role", role)
 				.claim("type", type)
 				.claim("iss", issuer)
 				.issuedAt(new Date(System.currentTimeMillis()))

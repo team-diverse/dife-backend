@@ -35,19 +35,17 @@ public class JWTUtilTest {
 	@Test
 	public void createAccessJwt_ShouldContainClaims_WhenTokenIsCreated() {
 		Long id = 1L;
-		String role = "user";
 		String type = "AccessToken";
 		String issuer = "dife";
 		Long duration = 1000L * 60 * 60;
 
-		String token = jwtUtil.createJwt(1L, role, type, issuer, duration);
+		String token = jwtUtil.createJwt(1L, type, issuer, duration);
 		assertNotNull(token);
 
 		Claims claims =
 				Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
 
 		assertEquals(id, Long.valueOf(claims.get("id", Integer.class)));
-		assertEquals(role, claims.get("role"));
 		assertEquals(type, claims.get("type"));
 		assertNotNull(claims.getIssuedAt());
 		assertNotNull(claims.getExpiration());
@@ -56,17 +54,9 @@ public class JWTUtilTest {
 	@Test
 	public void getEmail_ShouldReturnEmail_WhenTokenPassed() {
 		Long id = 1L;
-		String token = jwtUtil.createJwt(id, "user", "accessToken", "dife", 1000L * 60 * 60);
+		String token = jwtUtil.createJwt(id, "accessToken", "dife", 1000L * 60 * 60);
 
 		assertEquals(id, jwtUtil.getId(token));
-	}
-
-	@Test
-	public void getRole_ShouldReturnRole_WhenTokenPassed() {
-		String role = "admin";
-		String token = jwtUtil.createJwt(1L, role, "accessToken", "dife", 1000L * 60 * 60);
-
-		assertEquals(role, jwtUtil.getRole(token));
 	}
 
 	@Nested

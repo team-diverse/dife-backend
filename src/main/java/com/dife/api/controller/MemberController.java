@@ -1,8 +1,8 @@
 package com.dife.api.controller;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
+import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.*;
@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberController {
 
 	private final MemberService memberService;
+	private final JWTUtil jwtUtil;
 
 	@PostMapping("/register")
 	@Operation(summary = "회원가입1 API", description = "이메일과 비밀번호를 사용하여 새 회원을 등록합니다.")
@@ -125,19 +127,19 @@ public class MemberController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<LoginSuccessDto> login(@RequestBody LoginDto dto) {
+	public ResponseEntity<LoginSuccessDto> login(@Valid @RequestBody LoginDto dto) {
 
 		return memberService.login(dto);
 	}
 
-	@GetMapping("/checktoken")
-	public ResponseEntity<Void> checkToken(
-			@RequestParam(name = "password") String password,
-			@RequestParam(name = "token") String token) {
+	@PostMapping("/refresh-token")
+	public ResponseEntity<Void> checkToken(RefreshTokenRequestDto requestDto) {
 
-		Boolean is_expired = memberService.checkToken(password, token);
-		if (is_expired) return new ResponseEntity<>(NOT_FOUND);
-		return new ResponseEntity<>(OK);
+		boolean isTokenExpired = jwtUtil.isExpired(requestDto.getToken());
+		if (isTokenExpired) {
+			return ResponseEntity.status(UNAUTHORIZED).build();
+		}
+		return ResponseEntity.ok().build();
 	}
 
 	@PutMapping("/change-password")
