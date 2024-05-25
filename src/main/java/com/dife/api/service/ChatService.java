@@ -10,11 +10,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +28,11 @@ public class ChatService {
 	private final ChatroomRepository chatroomRepository;
 	private final RedisPublisher redisPublisher;
 	private final ChatRepository chatRepository;
+	private final MemberRepository memberRepository;
 
+	@Autowired private final RedisLockChatServiceFacade chatServiceFacade;
+
+	@Transactional
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
 		switch (dto.getChatType()) {
@@ -85,7 +91,12 @@ public class ChatService {
 			return;
 		}
 
-		Map<String, String> activeSessions = chatroom.getActiveSessions();
+		if (setting.getCount() < setting.getMaxCount()) {
+			chatServiceFacade.increase(chatroomId, sessionId);
+		} else {
+			disconnectSession(chatroomId, sessionId);
+			return;
+		}
 
 		if (!activeSessions.containsKey(session_id)) {
 			activeSessions.put(session_id, dto.getUsername());
@@ -124,13 +135,12 @@ public class ChatService {
 		Long chatroom_id = dto.getChatroomId();
 		String session_id = headerAccessor.getSessionId();
 
-		Map<String, String> activeSessions = chatroom.getActiveSessions();
-		activeSessions.remove(session_id);
-
-		ChatroomSetting setting = chatroom.getChatroomSetting();
-		Integer nCount = setting.getCount();
-		nCount--;
-		setting.setCount(nCount);
+		if (setting.getCount() >= 1) {
+			chatServiceFacade.decrease(chatroom_id, session_id);
+		} else {
+			disconnectSession(chatroom_id, session_id);
+			return;
+		}
 
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
@@ -138,7 +148,7 @@ public class ChatService {
 		redisPublisher.publish(dto);
 		Thread.sleep(1000);
 
-		if (nCount < 2) {
+		if (setting.getCount() < 2) {
 
 			StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
 			accessor.setSessionId(session_id);
