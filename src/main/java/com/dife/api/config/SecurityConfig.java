@@ -63,7 +63,8 @@ public class SecurityConfig {
 											"/api/v1/api-docs/**",
 											"/api/members/register",
 											"/api/members/change-password",
-											"/api/members/login")
+											"/api/members/login",
+											"/ws/**")
 									.permitAll();
 							requests.requestMatchers("/api/**").authenticated();
 						})

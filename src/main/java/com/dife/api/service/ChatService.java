@@ -1,5 +1,6 @@
 package com.dife.api.service;
 
+import com.dife.api.exception.ChatroomNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.redis.RedisPublisher;
@@ -31,6 +32,7 @@ public class ChatService {
 		switch (dto.getChatType()) {
 			case ENTER:
 				enter(dto, headerAccessor);
+				break;
 			case CHAT:
 				chat(dto, headerAccessor);
 				break;
@@ -55,7 +57,9 @@ public class ChatService {
 		if (!is_valid) {
 			disconnectSession(chatroom_id, session_id);
 		}
-		return chatroomService.getChatroom(chatroom_id);
+		return chatroomRepository
+				.findById(chatroom_id)
+				.orElseThrow(() -> new ChatroomNotFoundException());
 	}
 
 	public void enter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
@@ -64,19 +68,19 @@ public class ChatService {
 		Chatroom chatroom = validChatroom(dto, headerAccessor);
 		Long chatroom_id = chatroom.getId();
 		String session_id = headerAccessor.getSessionId();
-		Boolean validGroupChatroom =
+		Boolean notValidGroupChatroom =
 				(chatroom.getChatroomType() == ChatroomType.GROUP
-						&& !chatroom.getChatroom_setting().getIs_public()
-						&& chatroomService.isWrongPassword(chatroom, dto.getPassword()));
+						&& (!chatroom.getChatroomSetting().getIsPublic()
+								&& chatroomService.isWrongPassword(chatroom, dto.getPassword())));
 
-		ChatroomSetting setting = chatroom.getChatroom_setting();
+		ChatroomSetting setting = chatroom.getChatroomSetting();
 
 		if (chatroomService.isFull(chatroom)) {
 			disconnectSession(chatroom_id, session_id);
 			return;
 		}
 
-		if (validGroupChatroom) {
+		if (notValidGroupChatroom) {
 			disconnectSession(chatroom_id, session_id);
 			return;
 		}
@@ -88,7 +92,7 @@ public class ChatService {
 			chatroom.setActiveSessions(activeSessions);
 			Integer nCount = setting.getCount();
 			setting.setCount(nCount + 1);
-			chatroom.setChatroom_setting(setting);
+			chatroom.setChatroomSetting(setting);
 
 			headerAccessor.getSessionAttributes().put("session_id", session_id);
 			headerAccessor.getSessionAttributes().put("chatroom_id", chatroom_id);
@@ -123,12 +127,12 @@ public class ChatService {
 		Map<String, String> activeSessions = chatroom.getActiveSessions();
 		activeSessions.remove(session_id);
 
-		ChatroomSetting setting = chatroom.getChatroom_setting();
+		ChatroomSetting setting = chatroom.getChatroomSetting();
 		Integer nCount = setting.getCount();
 		nCount--;
 		setting.setCount(nCount);
 
-		chatroom.setChatroom_setting(setting);
+		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
 		disconnectSession(chatroom_id, session_id);
 		redisPublisher.publish(dto);
