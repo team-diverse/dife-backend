@@ -13,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,7 @@ public class ChatroomService {
 	private final MemberRepository memberRepository;
 	private final ChatRepository chatRepository;
 
+	private final SimpMessageSendingOperations messagingTemplate;
 	private final ModelMapper modelMapper;
 
 	@Autowired
@@ -180,8 +184,7 @@ public class ChatroomService {
 		Set<Member> memberSet = chatroom.getMembers();
 		memberSet.add(currentMember);
 		memberSet.add(otherMember);
-		if (memberSet.size() > 1) setting.setMaxCount(2);
-		else setting.setMaxCount(1);
+		setting.setMaxCount(memberSet.size() > 1 ? 2 : 1);
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
 
@@ -225,17 +228,41 @@ public class ChatroomService {
 		throw new ChatroomException("채팅방 소속 회원만이 채팅을 불러올 수 없습니다!");
 	}
 
-	public Boolean isFull(Chatroom chatroom) {
-		ChatroomSetting setting = chatroom.getChatroomSetting();
-		Integer maxCount = setting.getMaxCount();
-		Integer nCount = setting.getCount();
-		return nCount >= maxCount;
-	}
-
 	public Boolean isWrongPassword(Chatroom chatroom, String given_password) {
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 		String password = setting.getPassword();
 
 		return !password.equals(given_password);
+	}
+
+	public void disconnectSession(Long chatroom_id, String session_id) {
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
+		accessor.setSessionId(session_id);
+		accessor.setDestination("/sub/chatroom/" + chatroom_id);
+		messagingTemplate.convertAndSend(
+				"/sub/chatroom/" + chatroom_id, "Disconnect", accessor.getMessageHeaders());
+	}
+
+	public void increase(Long chatroomId, String sessionId) {
+		Chatroom chatroom =
+				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
+		ChatroomSetting setting = chatroom.getChatroomSetting();
+		if (setting.getCount() >= setting.getMaxCount()) {
+			disconnectSession(chatroom.getId(), sessionId);
+			return;
+		}
+		setting.setCount(setting.getCount() + 1);
+		chatroom.setChatroomSetting(setting);
+		chatroomRepository.save(chatroom);
+	}
+
+	public void decrease(Long chatroomId, String sessionId) {
+		Chatroom chatroom =
+				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
+		ChatroomSetting setting = chatroom.getChatroomSetting();
+		if (setting.getCount() < 1) disconnectSession(chatroomId, sessionId);
+		setting.setCount(setting.getCount() - 1);
+		chatroom.setChatroomSetting(setting);
+		chatroomRepository.save(chatroom);
 	}
 }
