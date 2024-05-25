@@ -1,7 +1,5 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.Chatroom;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -18,8 +16,4 @@ public class ChatResponseDto {
 	@NotNull
 	@Size(max = 300)
 	private String message;
-
-	@NotNull
-	@JsonProperty("chatroom")
-	private Chatroom chatroom;
 }
