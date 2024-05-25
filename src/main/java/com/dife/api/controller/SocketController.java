@@ -16,12 +16,6 @@ public class SocketController {
 
 	private final ChatService chatService;
 
-	@MessageMapping("/chatroom/enter")
-	public void sendEnter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
-			throws JsonProcessingException, InterruptedException {
-		chatService.sendMessage(dto, headerAccessor);
-	}
-
 	@MessageMapping("/chatroom/chat")
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
