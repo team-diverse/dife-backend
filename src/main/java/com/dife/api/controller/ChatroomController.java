@@ -2,6 +2,7 @@ package com.dife.api.controller;
 
 import com.dife.api.model.dto.*;
 import com.dife.api.service.ChatroomService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,21 @@ import org.springframework.web.bind.annotation.*;
 public class ChatroomController implements SwaggerChatroomController {
 
 	private final ChatroomService chatroomService;
+
+	@GetMapping("/")
+	public ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
+			ChatroomTypeRequestDto requestDto, Authentication authentication) {
+		List<ChatroomResponseDto> responseDto =
+				chatroomService.getChatrooms(requestDto, authentication.getName());
+		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(
+			@PathVariable(name = "id") Long chatroomId) {
+		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId);
+		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+	}
 
 	@PostMapping("/")
 	public ResponseEntity<ChatroomResponseDto> createChatroom(
@@ -37,12 +53,5 @@ public class ChatroomController implements SwaggerChatroomController {
 		ChatroomResponseDto responseDto =
 				chatroomService.registerDetail(requestDto, chatroomId, auth.getName());
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
-	}
-
-	@GetMapping("/{id}")
-	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(
-			@PathVariable(name = "id") Long chatroomId) {
-		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
 	}
 }

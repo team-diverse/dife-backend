@@ -37,6 +37,24 @@ public class ChatroomService {
 
 	private final FileService fileService;
 
+	public List<ChatroomResponseDto> getChatrooms(
+			ChatroomTypeRequestDto requestDto, String memberEmail) {
+
+		List<Chatroom> chatrooms;
+
+		if (requestDto.getChatroomType() == ChatroomType.GROUP)
+			chatrooms = chatroomRepository.findAllByChatroomType(requestDto.getChatroomType());
+		else {
+			Member member =
+					memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+			chatrooms =
+					chatroomRepository.findAllByChatroomTypeAndMember(requestDto.getChatroomType(), member);
+		}
+		return chatrooms.stream()
+				.map(c -> modelMapper.map(c, ChatroomResponseDto.class))
+				.collect(toList());
+	}
+
 	public ChatroomResponseDto createChatroom(ChatroomPostRequestDto requestDto, String memberEmail) {
 		switch (requestDto.getChatroomType()) {
 			case GROUP:
