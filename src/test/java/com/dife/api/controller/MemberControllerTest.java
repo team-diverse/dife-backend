@@ -44,8 +44,7 @@ public class MemberControllerTest {
 	@Nested
 	class registerEmailAndPasswordMethod {
 		@Test
-		public void shouldReturn201_WhenEmailPasswordIsPassed()
-				throws Exception {
+		public void shouldReturn201_WhenEmailPasswordIsPassed() throws Exception {
 			RegisterEmailAndPasswordRequestDto requestDto =
 					new RegisterEmailAndPasswordRequestDto("email@example.com", "password123");
 			String reqBody = new ObjectMapper().writeValueAsString(requestDto);
@@ -60,13 +59,14 @@ public class MemberControllerTest {
 
 			mockMvc
 					.perform(
-							post("/api/members/register").contentType(MediaType.APPLICATION_JSON).content(reqBody))
+							post("/api/members/register")
+									.contentType(MediaType.APPLICATION_JSON)
+									.content(reqBody))
 					.andExpect(status().isCreated())
 					.andExpect(jsonPath("$.success").value(true))
 					.andExpect(jsonPath("$.member_id").value(member.getId()))
 					.andExpect(jsonPath("$.email").value("email@example.com"));
 		}
-
 
 		@Test
 		public void shouldReturn409_WhenEmailExists() throws Exception {
@@ -79,12 +79,11 @@ public class MemberControllerTest {
 
 			mockMvc
 					.perform(
-							post("/api/members/register").contentType(MediaType.APPLICATION_JSON).content(reqBody))
+							post("/api/members/register")
+									.contentType(MediaType.APPLICATION_JSON)
+									.content(reqBody))
 					.andExpect(status().isConflict())
 					.andExpect(jsonPath("$.success").value(false));
 		}
-
 	}
-
-
 }
