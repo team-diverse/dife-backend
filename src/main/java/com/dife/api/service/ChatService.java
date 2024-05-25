@@ -77,10 +77,6 @@ public class ChatService {
 		Chatroom chatroom = validChatroom(dto, headerAccessor);
 		Long chatroomId = chatroom.getId();
 		String sessionId = headerAccessor.getSessionId();
-		Boolean notValidGroupChatroom =
-				(chatroom.getChatroomType() == ChatroomType.GROUP
-						&& (!chatroom.getChatroomSetting().getIsPublic()
-								&& chatroomService.isWrongPassword(chatroom, dto.getPassword())));
 
 		Member member =
 				memberRepository.findById(dto.getMemberId()).orElseThrow(MemberNotFoundException::new);
@@ -88,7 +84,7 @@ public class ChatService {
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
-		if (notValidGroupChatroom) {
+		if (!isValidGroupChatroom(chatroom, setting.getPassword())) {
 			disconnectSession(chatroomId, sessionId);
 			return;
 		}
@@ -155,5 +151,18 @@ public class ChatService {
 			messagingTemplate.convertAndSend(
 					"/sub/chatroom/" + chatroom_id, "해당 채팅방은 한 명만 남은 채팅방입니다!", accessor.getMessageHeaders());
 		}
+	}
+
+	private boolean isValidGroupChatroom(Chatroom chatroom, String password) {
+		return isGroupChatroom(chatroom) && !isRestrictedGroupChatroom(chatroom, password);
+	}
+
+	private boolean isGroupChatroom(Chatroom chatroom) {
+		return chatroom.getChatroomType() == ChatroomType.GROUP;
+	}
+
+	private boolean isRestrictedGroupChatroom(Chatroom chatroom, String password) {
+		return !chatroom.getChatroomSetting().getIsPublic()
+				&& chatroomService.isWrongPassword(chatroom, password);
 	}
 }
