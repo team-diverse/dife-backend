@@ -20,17 +20,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class LocalRedisIT {
 
-    @Autowired
-    private RedisPublisher redisPublisher;
+	@Autowired private RedisPublisher redisPublisher;
 
-    @Test
-    void test() throws Exception {
-        ChatRequestDto chatRequestDto = new ChatRequestDto();
-        chatRequestDto.setChatroomId(1L);
-        chatRequestDto.setUsername("user1");
-        chatRequestDto.setChatType(ChatType.CHAT);
-        chatRequestDto.setMessage("Hello, Redis!");
+	@Test
+	void test() throws Exception {
+		ChatRequestDto chatRequestDto = new ChatRequestDto();
+		chatRequestDto.setChatroomId(1L);
+		chatRequestDto.setUsername("user1");
+		chatRequestDto.setChatType(ChatType.CHAT);
+		chatRequestDto.setMessage("Hello, Redis!");
 
-        redisPublisher.publish(chatRequestDto);
-    }
+		redisPublisher.publish(chatRequestDto);
+	}
 }

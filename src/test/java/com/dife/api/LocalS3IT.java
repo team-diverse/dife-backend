@@ -1,13 +1,19 @@
 package com.dife.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.dife.api.config.LocalRedisConfig;
 import com.dife.api.config.TestConfig;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -20,47 +26,44 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
 @ActiveProfiles("test")
 @Import({TestConfig.class})
 @ExtendWith(LocalRedisConfig.class)
 @Testcontainers
 public class LocalS3IT {
-    @Container
-    LocalStackContainer container = new LocalStackContainer(DockerImageName.parse("localstack/localstack"));
+	@Container
+	LocalStackContainer container =
+			new LocalStackContainer(DockerImageName.parse("localstack/localstack"));
 
-    @Test
-    void test() {
-        S3Client s3Client = S3Client.builder()
-                .endpointOverride(container.getEndpointOverride(LocalStackContainer.Service.S3))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(container.getAccessKey(), container.getSecretKey())
-                ))
-                .region(Region.of(container.getRegion()))
-                .build();
+	@Test
+	void test() {
+		S3Client s3Client =
+				S3Client.builder()
+						.endpointOverride(container.getEndpointOverride(LocalStackContainer.Service.S3))
+						.credentialsProvider(
+								StaticCredentialsProvider.create(
+										AwsBasicCredentials.create(container.getAccessKey(), container.getSecretKey())))
+						.region(Region.of(container.getRegion()))
+						.build();
 
-        String bucketName = "test-bucket";
-        s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
+		String bucketName = "test-bucket";
+		s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
 
-        String content = "Hello World";
-        String key = "s3-key";
-        s3Client.putObject(PutObjectRequest.builder().bucket(bucketName).key(key).build(),
-                software.amazon.awssdk.core.sync.RequestBody.fromString(content));
+		String content = "Hello World";
+		String key = "s3-key";
+		s3Client.putObject(
+				PutObjectRequest.builder().bucket(bucketName).key(key).build(),
+				software.amazon.awssdk.core.sync.RequestBody.fromString(content));
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-                s3Client.getObject(GetObjectRequest.builder().bucket(bucketName).key(key).build()),
-                StandardCharsets.UTF_8));
-        List<String> results = reader.lines().collect(Collectors.toList());
+		BufferedReader reader =
+				new BufferedReader(
+						new InputStreamReader(
+								s3Client.getObject(GetObjectRequest.builder().bucket(bucketName).key(key).build()),
+								StandardCharsets.UTF_8));
+		List<String> results = reader.lines().collect(Collectors.toList());
 
-        assertThat(results).hasSize(1);
-        assertThat(results.get(0)).isEqualTo(content);
-    }
+		assertThat(results).hasSize(1);
+		assertThat(results.get(0)).isEqualTo(content);
+	}
 }
