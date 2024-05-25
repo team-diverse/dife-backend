@@ -2,6 +2,7 @@ package com.dife.api.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -10,6 +11,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @TestConfiguration
+@Profile("test")
 public class LocalAWSConfig {
 	@Bean(initMethod = "start", destroyMethod = "stop")
 	public LocalStackContainer localStackContainer() {

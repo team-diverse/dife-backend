@@ -1,29 +1,36 @@
 package com.dife.api;
 
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.sync.RedisCommands;
-import org.junit.jupiter.api.Assertions;
+import com.dife.api.config.LocalRedisConfig;
+import com.dife.api.config.TestConfig;
+import com.dife.api.model.ChatType;
+import com.dife.api.model.dto.ChatRequestDto;
+import com.dife.api.redis.RedisPublisher;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.junit.jupiter.Container;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
+@ActiveProfiles("test")
+@SpringBootTest
+@Import(TestConfig.class)
+@ExtendWith(LocalRedisConfig.class)
 @Testcontainers
 public class LocalRedisIT {
-    @Container
-    LocalStackContainer container = new LocalStackContainer(DockerImageName.parse("redis:5.0.3-alpine"));
+
+    @Autowired
+    private RedisPublisher redisPublisher;
 
     @Test
-    void test() {
-        // Test code here
-        String redisURI = container.getRedisURI();
-        RedisClient client = RedisClient.create(redisURI);
-        try (StatefulRedisConnection<String, String> connection = client.connect()) {
-            RedisCommands<String, String> commands = connection.sync();
-            Assertions.assertEquals("PONG", commands.ping());
-        }
+    void test() throws Exception {
+        ChatRequestDto chatRequestDto = new ChatRequestDto();
+        chatRequestDto.setChatroomId(1L);
+        chatRequestDto.setUsername("user1");
+        chatRequestDto.setChatType(ChatType.CHAT);
+        chatRequestDto.setMessage("Hello, Redis!");
 
+        redisPublisher.publish(chatRequestDto);
     }
 }

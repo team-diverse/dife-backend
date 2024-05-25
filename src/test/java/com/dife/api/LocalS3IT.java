@@ -1,6 +1,13 @@
 package com.dife.api;
 
+import com.dife.api.config.LocalRedisConfig;
+import com.dife.api.config.TestConfig;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -21,6 +28,10 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
+@ActiveProfiles("test")
+@Import({TestConfig.class})
+@ExtendWith(LocalRedisConfig.class)
 @Testcontainers
 public class LocalS3IT {
     @Container

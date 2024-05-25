@@ -1,13 +1,23 @@
 package com.dife.api.config;
 
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 
-@TestConfiguration
-public class LocalRedisConfig {
-	@Bean(initMethod = "start", destroyMethod = "stop")
-	public LocalStackContainer redisContainer() {
-		return new LocalStackContainer("redis:5.0.3-alpine");
-	}
+public class LocalRedisConfig implements BeforeAllCallback {
+	private static final String REDIS_IMAGE = "redis:7.0.8-alpine";
+	private static final int REDIS_PORT = 6379;
+  	private GenericContainer redis;
+
+  @Override
+  public void beforeAll(ExtensionContext context) {
+    redis = new GenericContainer(DockerImageName.parse(REDIS_IMAGE))
+      .withExposedPorts(REDIS_PORT);
+    redis.start();
+    System.setProperty("spring.data.redis.host", redis.getHost());
+    System.setProperty("spring.data.redis.port", String.valueOf(redis.getMappedPort(REDIS_PORT
+    )));
+  }
+
 }
