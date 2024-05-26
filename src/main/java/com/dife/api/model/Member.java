@@ -77,4 +77,8 @@ public class Member extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
 	private Set<Bookmark> bookmarks;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "member")
+	private Set<Post> posts;
 }

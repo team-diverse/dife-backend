@@ -1,17 +1,17 @@
 package com.dife.api.service;
 
+import static java.util.stream.Collectors.toList;
+
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.BoardCategory;
 import com.dife.api.model.Member;
 import com.dife.api.model.Post;
-import com.dife.api.model.dto.BoardDto;
-import com.dife.api.model.dto.PostCreateRequestDto;
-import com.dife.api.model.dto.PostUpdateRequestDto;
+import com.dife.api.model.dto.*;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
 	private final PostRepository postRepository;
+	private final ModelMapper modelMapper;
 
-	public Post create(PostCreateRequestDto requestDto, Member currentMember) {
+	public PostResponseDto create(PostCreateRequestDto requestDto, Member currentMember) {
 
 		Post post = new Post();
 		post.setTitle(requestDto.getTitle());
@@ -32,27 +33,30 @@ public class PostService {
 		post.setBoardType(requestDto.getBoardType());
 		post.setMember(currentMember);
 
-		this.postRepository.save(post);
+		postRepository.save(post);
 
-		return post;
+		return modelMapper.map(post, PostResponseDto.class);
 	}
 
-	public List<BoardDto> getPostsByBoardType(BoardCategory boardType) {
-		List<Post> posts = postRepository.findPostsByBoardType(boardType);
+	@Transactional(readOnly = true)
+	public List<PostResponseDto> getPostsByBoardType(BoardRequestDto requestDto) {
+		BoardCategory boardCategory = requestDto.getBoardCategory();
+		List<Post> posts = postRepository.findPostsByBoardType(boardCategory);
 
-		return posts.stream().map(BoardDto::new).collect(Collectors.toList());
+		return posts.stream().map(c -> modelMapper.map(c, PostResponseDto.class)).collect(toList());
 	}
 
-	public Post getPost(Long id) {
+	@Transactional(readOnly = true)
+	public PostResponseDto getPost(Long id) {
 		Post post =
 				postRepository
 						.findById(id)
 						.orElseThrow(() -> new PostNotFoundException("해당 게시물이 존재하지 않습니다!"));
 
-		return post;
+		return modelMapper.map(post, PostResponseDto.class);
 	}
 
-	public Post updatePost(Long id, PostUpdateRequestDto dto, Member currentMember) {
+	public PostResponseDto updatePost(Long id, PostUpdateRequestDto dto, Member currentMember) {
 		Post post =
 				postRepository
 						.findByMemberAndId(currentMember, id)
@@ -62,8 +66,9 @@ public class PostService {
 		post.setTitle(dto.getTitle());
 		post.setContent(dto.getContent());
 		post.setIs_public(dto.getIs_public());
+		postRepository.save(post);
 
-		return postRepository.save(post);
+		return modelMapper.map(post, PostResponseDto.class);
 	}
 
 	public void deletePost(Long id, Member currentMember) {
