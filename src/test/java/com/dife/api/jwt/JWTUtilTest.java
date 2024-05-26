@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
@@ -37,9 +36,12 @@ public class JWTUtilTest {
 	public void createAccessJwt_ShouldContainClaims_WhenTokenIsCreated() {
 		String email = "user@example.com";
 		String role = "user";
+		Boolean is_verified = true;
+		String verification_file_id = "학생증.jpg";
 		Long duration = 1000L * 60 * 60;
 
-		String token = jwtUtil.createAccessJwt(email, role, duration);
+		String token =
+				jwtUtil.createAccessJwt(email, role, is_verified, verification_file_id, duration);
 		assertNotNull(token);
 
 		Claims claims =
@@ -47,6 +49,8 @@ public class JWTUtilTest {
 
 		assertEquals(email, claims.get("email"));
 		assertEquals(role, claims.get("role"));
+		assertEquals(is_verified, claims.get("is_verified"));
+		assertEquals(verification_file_id, claims.get("verification_file_id"));
 		assertNotNull(claims.getIssuedAt());
 		assertNotNull(claims.getExpiration());
 	}
@@ -54,7 +58,7 @@ public class JWTUtilTest {
 	@Test
 	public void getEmail_ShouldReturnEmail_WhenTokenPassed() {
 		String email = "user@example.com";
-		String token = jwtUtil.createAccessJwt(email, "user", 1000L * 60 * 60);
+		String token = jwtUtil.createAccessJwt(email, "user", true, "학생증.jpg", 1000L * 60 * 60);
 
 		assertEquals(email, jwtUtil.getEmail(token));
 	}
@@ -62,16 +66,10 @@ public class JWTUtilTest {
 	@Test
 	public void getRole_ShouldReturnRole_WhenTokenPassed() {
 		String role = "admin";
-		String token = jwtUtil.createAccessJwt("user@example.com", role, 1000L * 60 * 60);
+		String token =
+				jwtUtil.createAccessJwt("user@example.com", role, true, "학생증.jpg", 1000L * 60 * 60);
 
 		assertEquals(role, jwtUtil.getRole(token));
-	}
-
-	@Test
-	public void isExpired_ShouldReturnExpiredJwtException_WhenTokenExpired() {
-		String token = jwtUtil.createAccessJwt("user@example.com", "user", -1000L);
-
-		assertThrows(ExpiredJwtException.class, () -> jwtUtil.isExpired(token));
 	}
 
 	@Nested

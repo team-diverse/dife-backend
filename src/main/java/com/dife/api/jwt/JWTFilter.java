@@ -23,7 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JWTFilter extends OncePerRequestFilter {
 	private static final String AUTH_HEADER = "Authorization";
 	private static final String BEARER_TOKEN_PREFIX = "Bearer ";
-	private static final long TOKEN_VALIDITY_DURATION = 14 * 24 * 60 * 60 * 1000L;
+	private static final long TOKEN_VALIDITY_DURATION = 90 * 24 * 60 * 60 * 1000L;
 
 	private final JWTUtil jwtUtil;
 	private final MemberRepository memberRepository;
@@ -62,13 +62,10 @@ public class JWTFilter extends OncePerRequestFilter {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
-	private void handleExpiredToken(ExpiredJwtException e, HttpServletResponse response) {
+	private void handleExpiredToken(ExpiredJwtException e, HttpServletResponse response)
+			throws IOException {
 		String email = e.getClaims().get("email", String.class);
 		String role = e.getClaims().get("role", String.class);
-
-		String newToken = jwtUtil.createAccessJwt(email, role, TOKEN_VALIDITY_DURATION);
-
-		response.setHeader(AUTH_HEADER, BEARER_TOKEN_PREFIX + newToken);
 	}
 
 	private boolean isExemptPath(String servletPath) {

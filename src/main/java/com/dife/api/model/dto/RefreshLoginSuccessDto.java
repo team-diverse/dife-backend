@@ -7,9 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class LoginSuccessDto {
+public class RefreshLoginSuccessDto {
 
-	private final String accessToken;
 	private final String refreshToken;
 	private final Long member_id;
 	private final Boolean is_verified;

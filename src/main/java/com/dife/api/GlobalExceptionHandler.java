@@ -44,6 +44,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 
+	@ExceptionHandler(MemberNullException.class)
+	public ResponseEntity<ExceptionResonse> handleNullPointerException(
+			NullPointerException exception) {
+		return ResponseEntity.status(UNAUTHORIZED.value())
+				.body(new ExceptionResonse(false, exception.getMessage()));
+	}
+
 	@ExceptionHandler(ConnectDuplicateException.class)
 	public ResponseEntity<ExceptionResonse> handleConnectException(
 			ConnectDuplicateException exception) {
