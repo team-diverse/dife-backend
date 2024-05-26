@@ -46,7 +46,7 @@ public class MemberService {
 
 	private final AuthenticationManager authenticationManager;
 	private final JWTUtil jwtUtil;
-	private static final long ACCESS_TOKEN_VALIDITY_DURATION = 1000L;
+	private static final long ACCESS_TOKEN_VALIDITY_DURATION = 60 * 60 * 1000L;
 	private static final long REFRESH_TOKEN_VALIDITY_DURATION = 90 * 24 * 60 * 1000L;
 
 	public Member registerEmailAndPassword(RegisterEmailAndPasswordRequestDto dto) {
