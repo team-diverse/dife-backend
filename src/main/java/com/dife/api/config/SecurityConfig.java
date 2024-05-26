@@ -2,11 +2,10 @@ package com.dife.api.config;
 
 import com.dife.api.jwt.JWTFilter;
 import com.dife.api.jwt.JWTUtil;
-import com.dife.api.jwt.LoginFilter;
 import com.dife.api.repository.MemberRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,23 +17,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@Profile("!test")
+@AllArgsConstructor
 public class SecurityConfig {
 
-	private final AuthenticationConfiguration authenticationConfiguration;
-	private final MemberRepository memberRepository;
-
-	private final JWTUtil jwtUtil;
-
-	public SecurityConfig(
-			AuthenticationConfiguration authenticationConfiguration,
-			MemberRepository memberRepository,
-			JWTUtil jwtUtil) {
-
-		this.authenticationConfiguration = authenticationConfiguration;
-		this.memberRepository = memberRepository;
-		this.jwtUtil = jwtUtil;
-	}
+	private JWTUtil jwtUtil;
+	private MemberRepository memberRepository;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
@@ -45,13 +32,12 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+
 		return httpSecurity
 				.httpBasic(AbstractHttpConfigurer::disable)
 				.csrf(AbstractHttpConfigurer::disable)
-				.addFilterBefore(new JWTFilter(jwtUtil, memberRepository), LoginFilter.class)
-				.addFilterAt(
-						new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
-						UsernamePasswordAuthenticationFilter.class)
+				.addFilterBefore(
+						new JWTFilter(jwtUtil, memberRepository), UsernamePasswordAuthenticationFilter.class)
 				.sessionManagement(
 						sessionManagement ->
 								sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -62,6 +48,7 @@ public class SecurityConfig {
 											"/swagger-ui/**",
 											"/api/v1/api-docs/**",
 											"/api/members/register",
+											"/api/members/refresh-Token",
 											"/api/members/change-password",
 											"/api/members/login",
 											"/ws/**")

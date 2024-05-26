@@ -1,5 +1,6 @@
 package com.dife.api.jwt;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
@@ -21,41 +22,26 @@ public class JWTUtil {
 						secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
 	}
 
-	public String createAccessJwt(
-			String email, String role, Boolean is_verified, String verification_file_id, Long expiredMs) {
+	public String createJwt(Long id, String type, String issuer, Long expiredMs) {
 
 		return Jwts.builder()
-				.claim("email", email)
-				.claim("role", role)
-				.claim("is_verified", is_verified)
-				.claim("verification_file_id", verification_file_id)
+				.claim("id", id)
+				.claim("type", type)
+				.claim("iss", issuer)
 				.issuedAt(new Date(System.currentTimeMillis()))
 				.expiration(new Date(System.currentTimeMillis() + expiredMs))
 				.signWith(secretKey)
 				.compact();
 	}
 
-	public String createRefreshJwt(
-			String email, String role, Boolean is_verified, String verification_file_id, Long expiredMs) {
+	public Long getId(String token) {
 
-		return Jwts.builder()
-				.claim("email", email)
-				.claim("role", role)
-				.claim("is_verified", is_verified)
-				.claim("verification_file_id", verification_file_id)
-				.issuedAt(new Date(System.currentTimeMillis()))
-				.expiration(new Date(System.currentTimeMillis() + expiredMs))
-				.signWith(secretKey)
-				.compact();
-	}
-
-	public String getEmail(String token) {
 		return Jwts.parser()
 				.verifyWith(secretKey)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload()
-				.get("email", String.class);
+				.get("id", Long.class);
 	}
 
 	public String getRole(String token) {
@@ -68,24 +54,19 @@ public class JWTUtil {
 				.get("role", String.class);
 	}
 
-	public Boolean getIsVerified(String token) {
-		return Jwts.parser()
-				.clockSkewSeconds(50 * 60 * 1000)
-				.verifyWith(secretKey)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload()
-				.get("is_verified", Boolean.class);
-	}
+	public Boolean isExpired(String token) {
 
-	public String getVerificationFileId(String token) {
-		return Jwts.parser()
-				.clockSkewSeconds(50 * 60 * 1000)
-				.verifyWith(secretKey)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload()
-				.get("verification_file_id", String.class);
+		try {
+			return Jwts.parser()
+					.verifyWith(secretKey)
+					.build()
+					.parseSignedClaims(token)
+					.getPayload()
+					.getExpiration()
+					.before(new Date());
+		} catch (ExpiredJwtException e) {
+			return true;
+		}
 	}
 
 	public String resolveToken(HttpServletRequest request) {

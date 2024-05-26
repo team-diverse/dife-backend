@@ -9,10 +9,12 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
 @Entity
+@Component
 @Table(name = "member")
 public class Member extends BaseTimeEntity {
 
@@ -60,8 +62,6 @@ public class Member extends BaseTimeEntity {
 	private String bio;
 
 	private Boolean is_verified = false;
-
-	private String tokenId;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "fromMember")

@@ -1,7 +1,10 @@
 package com.dife.api.service;
 
+import static org.springframework.http.HttpStatus.CREATED;
+
 import com.dife.api.config.EmailValidator;
 import com.dife.api.exception.*;
+import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.HobbyRepository;
@@ -12,8 +15,13 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +43,11 @@ public class MemberService {
 	private final JavaMailSender javaMailSender;
 	private final FileService fileService;
 	private final ModelMapper modelMapper;
+
+	private final AuthenticationManager authenticationManager;
+	private final JWTUtil jwtUtil;
+	private static final long ACCESS_TOKEN_VALIDITY_DURATION = 60 * 60 * 1000L;
+	private static final long REFRESH_TOKEN_VALIDITY_DURATION = 90 * 24 * 60 * 1000L;
 
 	public Member registerEmailAndPassword(RegisterEmailAndPasswordRequestDto dto) {
 		if (!emailValidator.isValidEmail(dto.getEmail())) {
@@ -140,6 +153,31 @@ public class MemberService {
 		memberRepository.save(member);
 
 		return member;
+	}
+
+	public ResponseEntity<LoginSuccessDto> login(LoginDto dto) {
+
+		String email = dto.getEmail();
+		String password = dto.getPassword();
+
+		UsernamePasswordAuthenticationToken authToken =
+				new UsernamePasswordAuthenticationToken(email, password, null);
+		Authentication authentication = authenticationManager.authenticate(authToken);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+		Long memberId = customUserDetails.getId();
+
+		String accessToken =
+				jwtUtil.createJwt(memberId, "accessToken", "dife", ACCESS_TOKEN_VALIDITY_DURATION);
+		String refreshToken =
+				jwtUtil.createJwt(memberId, "refreshToken", "dife", REFRESH_TOKEN_VALIDITY_DURATION);
+
+		ResponseEntity<LoginSuccessDto> responseEntity =
+				ResponseEntity.status(CREATED)
+						.body(new LoginSuccessDto(memberId, accessToken, refreshToken));
+
+		return responseEntity;
 	}
 
 	public Member getMember(String email) {
