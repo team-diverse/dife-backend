@@ -11,6 +11,7 @@ import com.dife.api.GlobalExceptionHandler;
 import com.dife.api.exception.DuplicateMemberException;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.RegisterEmailAndPasswordRequestDto;
+import com.dife.api.model.dto.RegisterResponseDto;
 import com.dife.api.service.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,7 @@ public class MemberControllerTest {
 		@Test
 		public void shouldReturn201_WhenEmailPasswordIsPassed() throws Exception {
 			RegisterEmailAndPasswordRequestDto requestDto =
-					new RegisterEmailAndPasswordRequestDto("email@example.com", "password123");
+					new RegisterEmailAndPasswordRequestDto("email@gmail.com", "password123");
 			String reqBody = new ObjectMapper().writeValueAsString(requestDto);
 
 			Member member = new Member();
@@ -55,7 +56,7 @@ public class MemberControllerTest {
 			member.setPassword(requestDto.getPassword());
 
 			given(memberService.registerEmailAndPassword(any(RegisterEmailAndPasswordRequestDto.class)))
-					.willReturn(member);
+					.willReturn(new RegisterResponseDto(member.getEmail(), member.getId()));
 
 			mockMvc
 					.perform(
@@ -63,15 +64,14 @@ public class MemberControllerTest {
 									.contentType(MediaType.APPLICATION_JSON)
 									.content(reqBody))
 					.andExpect(status().isCreated())
-					.andExpect(jsonPath("$.success").value(true))
-					.andExpect(jsonPath("$.member_id").value(member.getId()))
-					.andExpect(jsonPath("$.email").value("email@example.com"));
+					.andExpect(jsonPath("$.email").value("email@gmail.com"))
+					.andExpect(jsonPath("$.memberId").value(1L));
 		}
 
 		@Test
 		public void shouldReturn409_WhenEmailExists() throws Exception {
 			RegisterEmailAndPasswordRequestDto requestDto =
-					new RegisterEmailAndPasswordRequestDto("email@example.com", "password123");
+					new RegisterEmailAndPasswordRequestDto("email@gmail.com", "password123");
 			String reqBody = new ObjectMapper().writeValueAsString(requestDto);
 
 			when(memberService.registerEmailAndPassword(any(RegisterEmailAndPasswordRequestDto.class)))
