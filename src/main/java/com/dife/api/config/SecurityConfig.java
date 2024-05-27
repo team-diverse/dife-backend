@@ -48,7 +48,7 @@ public class SecurityConfig {
 											"/swagger-ui/**",
 											"/api/v1/api-docs/**",
 											"/api/members/register",
-											"/api/members/refresh-Token",
+											"/api/members/refresh-token",
 											"/api/members/change-password",
 											"/api/members/login",
 											"/ws/**")
