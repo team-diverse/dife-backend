@@ -1,5 +1,6 @@
 package com.dife.api.controller;
 
+import com.dife.api.model.ChatroomType;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.ChatroomService;
 import java.util.List;
@@ -19,11 +20,11 @@ public class ChatroomController implements SwaggerChatroomController {
 
 	private final ChatroomService chatroomService;
 
-	@GetMapping("/")
+	@GetMapping
 	public ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
-			ChatroomTypeRequestDto requestDto, Authentication authentication) {
+			ChatroomType chatroomType, Authentication authentication) {
 		List<ChatroomResponseDto> responseDto =
-				chatroomService.getChatrooms(requestDto, authentication.getName());
+				chatroomService.getChatrooms(chatroomType, authentication.getName());
 		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
 	}
 
@@ -34,9 +35,9 @@ public class ChatroomController implements SwaggerChatroomController {
 		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
 	}
 
-	@PostMapping("/")
+	@PostMapping(consumes = "application/json")
 	public ResponseEntity<ChatroomResponseDto> createChatroom(
-			ChatroomPostRequestDto requestDto, Authentication authentication) {
+			@RequestBody ChatroomPostRequestDto requestDto, Authentication authentication) {
 
 		ChatroomResponseDto responseDto =
 				chatroomService.createChatroom(requestDto, authentication.getName());
@@ -44,9 +45,9 @@ public class ChatroomController implements SwaggerChatroomController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 	}
 
-	@PutMapping("/{id}")
+	@PutMapping(value = "/{id}", consumes = "application/json")
 	public ResponseEntity<ChatroomResponseDto> registerDetail(
-			GroupChatroomPutRequestDto requestDto,
+			@RequestBody GroupChatroomPutRequestDto requestDto,
 			@PathVariable(name = "id") Long chatroomId,
 			Authentication auth) {
 

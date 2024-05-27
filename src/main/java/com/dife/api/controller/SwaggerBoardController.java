@@ -1,5 +1,6 @@
 package com.dife.api.controller;
 
+import com.dife.api.model.BoardCategory;
 import com.dife.api.model.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,20 +15,16 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Board API", description = "게시판 서비스 API")
 public interface SwaggerBoardController {
 
-	@Operation(summary = "게시판 API", description = "게시판 종류를 입력해 게시판을 조회합니다.")
+	@Operation(summary = "게시판 조회 API", description = "게시판 종류를 입력해 게시판을 조회합니다.")
 	@ApiResponse(responseCode = "200")
-	ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardRequestDto requestDto);
+	ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardCategory boardCategory);
 
 	@Operation(summary = "게시글 생성 API", description = "DTO를 작성해 게시글을 생성합니다.")
 	@ApiResponse(
 			responseCode = "201",
 			description = "게시글 생성 성공 예시",
-			content = {
-				@Content(
-						mediaType = "application/json",
-						schema = @Schema(implementation = PostResponseDto.class))
-			})
-	ResponseEntity<PostResponseDto> create(PostCreateRequestDto request, Authentication auth);
+			content = @Content(mediaType = "application/json"))
+	ResponseEntity<PostResponseDto> create(PostCreateRequestDto requestDto, Authentication auth);
 
 	@Operation(summary = "단일 게시글 조회 API", description = "게시글 ID를 이용해 게시글을 가져옵니다.")
 	@ApiResponse(
