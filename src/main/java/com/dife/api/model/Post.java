@@ -1,7 +1,6 @@
 package com.dife.api.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,17 +14,16 @@ public class Post extends BaseTimeEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull private String title;
+	private String title;
 
-	@NotNull private String content;
+	private String content;
 
-	@NotNull private Boolean is_public;
+	private Boolean isPublic;
 
-	@NotNull
 	@Enumerated(EnumType.STRING)
-	private BoardCategory boardType;
+	private BoardCategory boardType = BoardCategory.FREE;
 
-	private Integer viewCount;
+	private Integer viewCount = 0;
 
 	@ManyToOne
 	@JoinColumn(name = "member_id")

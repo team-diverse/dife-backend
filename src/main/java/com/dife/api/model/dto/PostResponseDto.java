@@ -16,13 +16,13 @@ public class PostResponseDto {
 
 	private Long id;
 
-	@NotNull private String title;
+	private String title;
 
-	@NotNull private String content;
+	private String content;
 
-	@NotNull private BoardCategory boardType;
+	private BoardCategory boardType;
 
-	@NotNull private Boolean is_public;
+	private Boolean isPublic;
 
 	private Integer viewCount;
 

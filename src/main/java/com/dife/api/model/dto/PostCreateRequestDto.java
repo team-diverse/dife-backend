@@ -1,23 +1,20 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.BoardCategory;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostCreateRequestDto {
 
-	@NotNull private String title;
+	private String title;
 
-	@NotNull private String content;
+	private String content;
 
-	@NotNull private Boolean is_public;
+	private Boolean isPublic;
 
-	@NotNull private BoardCategory boardType;
+	private BoardCategory boardType;
 }
