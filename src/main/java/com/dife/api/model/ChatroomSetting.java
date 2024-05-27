@@ -23,16 +23,16 @@ public class ChatroomSetting {
 
 	private String profileImgName = "";
 
-	@OneToMany(mappedBy = "chatroom_setting", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL)
 	private Set<Tag> tags = new HashSet<>();
 
 	private Integer count = 0;
 	private Integer maxCount = 30;
 
-	@OneToMany(mappedBy = "chatroom_setting", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL)
 	private Set<GroupPurpose> purposes = new HashSet<>();
 
-	@OneToMany(mappedBy = "chatroom_setting", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL)
 	private Set<Language> languages = new HashSet<>();
 
 	private Boolean isPublic = true;

@@ -1,20 +1,23 @@
 package com.dife.api.service;
 
 import com.dife.api.exception.ChatroomNotFoundException;
+import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
+import com.dife.api.repository.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +29,11 @@ public class ChatService {
 	private final ChatroomRepository chatroomRepository;
 	private final RedisPublisher redisPublisher;
 	private final ChatRepository chatRepository;
+	private final MemberRepository memberRepository;
 
+	@Autowired private final RedisLockChatServiceFacade chatServiceFacade;
+
+	@Transactional
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException, InterruptedException {
 		switch (dto.getChatType()) {
@@ -41,24 +48,26 @@ public class ChatService {
 		}
 	}
 
-	public void disconnectSession(Long chatroom_id, String session_id) {
+	public void disconnectSession(Long chatroomId, String sessionId) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-		accessor.setSessionId(session_id);
-		accessor.setDestination("/sub/chatroom/" + chatroom_id);
+		accessor.setSessionId(sessionId);
+		accessor.setDestination("/sub/chatroom/" + chatroomId);
 		messagingTemplate.convertAndSend(
-				"/sub/chatroom/" + chatroom_id, "Disconnect", accessor.getMessageHeaders());
+				"/sub/chatroom/" + chatroomId, "Disconnect", accessor.getMessageHeaders());
 	}
 
 	public Chatroom validChatroom(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
-		Long chatroom_id = dto.getChatroomId();
-		String session_id = headerAccessor.getSessionId();
+		Long chatroomId = dto.getChatroomId();
+		String sessionId = headerAccessor.getSessionId();
 
-		Boolean is_valid = chatroomRepository.existsById(chatroom_id);
+		Boolean is_valid =
+				(chatroomRepository.existsById(chatroomId)
+						&& memberRepository.existsById(dto.getMemberId()));
 		if (!is_valid) {
-			disconnectSession(chatroom_id, session_id);
+			disconnectSession(chatroomId, sessionId);
 		}
 		return chatroomRepository
-				.findById(chatroom_id)
+				.findById(chatroomId)
 				.orElseThrow(() -> new ChatroomNotFoundException());
 	}
 
@@ -66,39 +75,32 @@ public class ChatService {
 			throws JsonProcessingException {
 
 		Chatroom chatroom = validChatroom(dto, headerAccessor);
-		Long chatroom_id = chatroom.getId();
-		String session_id = headerAccessor.getSessionId();
-		Boolean notValidGroupChatroom =
-				(chatroom.getChatroomType() == ChatroomType.GROUP
-						&& (!chatroom.getChatroomSetting().getIsPublic()
-								&& chatroomService.isWrongPassword(chatroom, dto.getPassword())));
+		Long chatroomId = chatroom.getId();
+		String sessionId = headerAccessor.getSessionId();
+
+		Member member =
+				memberRepository.findById(dto.getMemberId()).orElseThrow(MemberNotFoundException::new);
+		String username = member.getUsername();
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
-		if (chatroomService.isFull(chatroom)) {
-			disconnectSession(chatroom_id, session_id);
+		if (!isValidGroupChatroom(chatroom, setting.getPassword())) {
+			disconnectSession(chatroomId, sessionId);
 			return;
 		}
 
-		if (notValidGroupChatroom) {
-			disconnectSession(chatroom_id, session_id);
+		if (setting.getCount() < setting.getMaxCount()) {
+			chatServiceFacade.increase(chatroomId, sessionId);
+		} else {
+			disconnectSession(chatroomId, sessionId);
 			return;
 		}
 
-		Map<String, String> activeSessions = chatroom.getActiveSessions();
+		chatroom.setChatroomSetting(setting);
+		headerAccessor.getSessionAttributes().put("username", username);
 
-		if (!activeSessions.containsKey(session_id)) {
-			activeSessions.put(session_id, dto.getUsername());
-			chatroom.setActiveSessions(activeSessions);
-			Integer nCount = setting.getCount();
-			setting.setCount(nCount + 1);
-			chatroom.setChatroomSetting(setting);
-
-			headerAccessor.getSessionAttributes().put("session_id", session_id);
-			headerAccessor.getSessionAttributes().put("chatroom_id", chatroom_id);
-
-			redisPublisher.publish(dto);
-		}
+		dto.setUsername(member.getUsername());
+		redisPublisher.publish(dto);
 		chatroomRepository.save(chatroom);
 	}
 
@@ -106,6 +108,7 @@ public class ChatService {
 			throws JsonProcessingException {
 
 		Chatroom chatroom = validChatroom(dto, headerAccessor);
+		String username = (String) headerAccessor.getSessionAttributes().get("username");
 
 		if (dto.getMessage().length() <= 300) {
 			Chat chat = new Chat();
@@ -113,6 +116,7 @@ public class ChatService {
 			chat.setChatroom(chatroom);
 
 			chatRepository.save(chat);
+			dto.setUsername(username);
 			redisPublisher.publish(dto);
 		}
 	}
@@ -121,24 +125,25 @@ public class ChatService {
 			throws JsonProcessingException, InterruptedException {
 
 		Chatroom chatroom = validChatroom(dto, headerAccessor);
+		ChatroomSetting setting = chatroom.getChatroomSetting();
 		Long chatroom_id = dto.getChatroomId();
 		String session_id = headerAccessor.getSessionId();
+		String username = (String) headerAccessor.getSessionAttributes().get("username");
 
-		Map<String, String> activeSessions = chatroom.getActiveSessions();
-		activeSessions.remove(session_id);
-
-		ChatroomSetting setting = chatroom.getChatroomSetting();
-		Integer nCount = setting.getCount();
-		nCount--;
-		setting.setCount(nCount);
+		if (setting.getCount() >= 1) {
+			chatServiceFacade.decrease(chatroom_id, session_id);
+		} else {
+			disconnectSession(chatroom_id, session_id);
+			return;
+		}
 
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
+		dto.setUsername(username);
 		disconnectSession(chatroom_id, session_id);
 		redisPublisher.publish(dto);
-		Thread.sleep(1000);
 
-		if (nCount < 2) {
+		if (setting.getCount() < 2) {
 
 			StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
 			accessor.setSessionId(session_id);
@@ -146,5 +151,18 @@ public class ChatService {
 			messagingTemplate.convertAndSend(
 					"/sub/chatroom/" + chatroom_id, "해당 채팅방은 한 명만 남은 채팅방입니다!", accessor.getMessageHeaders());
 		}
+	}
+
+	private boolean isValidGroupChatroom(Chatroom chatroom, String password) {
+		return isGroupChatroom(chatroom) && !isRestrictedGroupChatroom(chatroom, password);
+	}
+
+	private boolean isGroupChatroom(Chatroom chatroom) {
+		return chatroom.getChatroomType() == ChatroomType.GROUP;
+	}
+
+	private boolean isRestrictedGroupChatroom(Chatroom chatroom, String password) {
+		return !chatroom.getChatroomSetting().getIsPublic()
+				&& chatroomService.isWrongPassword(chatroom, password);
 	}
 }

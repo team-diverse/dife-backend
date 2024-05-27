@@ -29,12 +29,10 @@ public class Member extends BaseTimeEntity {
 	@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$", message = "비밀번호는 영문자와 숫자를 포함해야 합니다.")
 	private String password;
 
-	@Column(unique = true)
-	private String username;
+	private String username = "";
 
 	private String name;
 
-	@Column(unique = true)
 	private String student_id;
 
 	private String major;
@@ -71,7 +69,7 @@ public class Member extends BaseTimeEntity {
 	@OneToMany(mappedBy = "toMember")
 	private Set<Connect> received;
 
-	@ManyToMany(mappedBy = "members", fetch = FetchType.EAGER)
+	@ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
 	@JsonBackReference
 	private Set<Chatroom> chatrooms;
 

@@ -3,9 +3,7 @@ package com.dife.api.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,8 +26,6 @@ public class Chatroom extends BaseTimeEntity {
 	private String name = "";
 
 	private ChatroomType chatroomType = ChatroomType.GROUP;
-
-	@Transient private Map<String, String> activeSessions = new ConcurrentHashMap<>();
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "chatroom_setting_id")

@@ -22,14 +22,14 @@ public class BookmarkController {
 
 	private final BookmarkService bookmarkService;
 
-	@PostMapping("/")
+	@PostMapping
 	public ResponseEntity<BookmarkResponseDto> createBookmark(
 			BookmarkPostRequestDto requestDto, Authentication auth) {
 		BookmarkResponseDto responseDto = bookmarkService.createBookmark(requestDto, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@GetMapping("/")
+	@GetMapping
 	public ResponseEntity<List<BookmarkResponseDto>> getBookmarks(
 			BookmarksGetByChatroomRequestDto requestDto, Authentication authentication) {
 		List<BookmarkResponseDto> bookmarks =
