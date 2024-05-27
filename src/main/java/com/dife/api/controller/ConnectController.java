@@ -21,13 +21,13 @@ public class ConnectController implements SwaggerConnectController {
 
 	private final ConnectService connectService;
 
-	@GetMapping("/")
+	@GetMapping
 	public ResponseEntity<List<ConnectResponseDto>> getConnects(Authentication auth) {
 		List<ConnectResponseDto> responseDto = connectService.getConnects(auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
-	@GetMapping(value = "/", params = "member_id")
+	@GetMapping("/")
 	public ResponseEntity<ConnectResponseDto> getConnect(
 			@RequestParam(name = "member_id") Long memberId, Authentication auth) {
 		ConnectResponseDto responseDto = connectService.getConnect(memberId, auth.getName());
