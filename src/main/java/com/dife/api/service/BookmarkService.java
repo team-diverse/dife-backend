@@ -41,7 +41,13 @@ public class BookmarkService {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		if (chatroomRepository.existsByMemberAndId(member, requestDto.getChatroomId())) {
+
+		Chatroom chatroom =
+				chatroomRepository
+						.findById(requestDto.getChatroomId())
+						.orElseThrow(ChatroomNotFoundException::new);
+
+		if (chatroom.getMembers().contains(member)) {
 			List<Bookmark> bookmarks =
 					bookmarkRepository.findScrapsByChatroomId(requestDto.getChatroomId());
 
