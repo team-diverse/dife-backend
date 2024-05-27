@@ -8,6 +8,7 @@ import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,25 +56,21 @@ public class JWTFilter extends OncePerRequestFilter {
 								customUserDetails, null, customUserDetails.getAuthorities());
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 				filterChain.doFilter(request, response);
+				return;
 			}
 
-			response.setStatus(UNAUTHORIZED.value());
-			response.setCharacterEncoding("UTF-8");
-			response.setContentType("text/plain; charset=UTF-8");
-			response.getWriter().write("만료된 토큰입니다! 다시 로그인하세요!");
+			sendErrorResponse(response, "만료된 토큰입니다! 다시 로그인하세요!");
 
 		} catch (MemberException | NullPointerException | ServletException e) {
-			response.setStatus(UNAUTHORIZED.value());
-			response.setCharacterEncoding("UTF-8");
-			response.setContentType("text/plain; charset=UTF-8");
-			response.getWriter().write("인증이 필요한 회원입니다!");
-		} catch (IllegalArgumentException | ExpiredJwtException | MalformedJwtException e) {
-			response.setStatus(UNAUTHORIZED.value());
-			response.setCharacterEncoding("UTF-8");
-			response.setContentType("text/plain; charset=UTF-8");
-			response.getWriter().write("만료된 토큰입니다! 다시 로그인하세요!");
-		} catch (IllegalStateException e) {
-			response.setStatus(UNAUTHORIZED.value());
+			sendErrorResponse(response, "인증이 필요한 토큰입니다!");
+		} catch (MalformedJwtException e) {
+			sendErrorResponse(response, "손상된 토큰입니다! 다시 로그인하세요!");
+		} catch (ExpiredJwtException e) {
+			sendErrorResponse(response, "만료된 토큰입니다! 다시 로그인하세요!");
+		} catch (UnsupportedJwtException e) {
+			sendErrorResponse(response, "지원하지 않은 토큰입니다!");
+		} catch (IllegalArgumentException e) {
+			sendErrorResponse(response, "클레임이 비어있는 토큰입니다!");
 		}
 	}
 
@@ -85,5 +82,12 @@ public class JWTFilter extends OncePerRequestFilter {
 				|| servletPath.startsWith("/api/v1/api-docs")
 				|| servletPath.startsWith("/ws")
 				|| servletPath.equals("/api/members/check-refreshToken");
+	}
+
+	private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
+		response.setStatus(UNAUTHORIZED.value());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/plain; charset=UTF-8");
+		response.getWriter().write(message);
 	}
 }
