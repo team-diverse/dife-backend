@@ -13,9 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +29,6 @@ public class ChatroomService {
 	private final MemberRepository memberRepository;
 	private final ChatRepository chatRepository;
 
-	private final SimpMessageSendingOperations messagingTemplate;
 	private final ModelMapper modelMapper;
 
 	@Autowired
@@ -229,27 +225,11 @@ public class ChatroomService {
 		return modelMapper.map(chat, ChatResponseDto.class);
 	}
 
-	public Boolean isWrongPassword(Chatroom chatroom, String given_password) {
-		ChatroomSetting setting = chatroom.getChatroomSetting();
-		String password = setting.getPassword();
-
-		return !password.equals(given_password);
-	}
-
-	public void disconnectSession(Long chatroom_id, String session_id) {
-		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-		accessor.setSessionId(session_id);
-		accessor.setDestination("/sub/chatroom/" + chatroom_id);
-		messagingTemplate.convertAndSend(
-				"/sub/chatroom/" + chatroom_id, "Disconnect", accessor.getMessageHeaders());
-	}
-
-	public void increase(Long chatroomId, String sessionId) {
+	public void increase(Long chatroomId) {
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 		if (setting.getCount() >= setting.getMaxCount()) {
-			disconnectSession(chatroom.getId(), sessionId);
 			return;
 		}
 		setting.setCount(setting.getCount() + 1);
@@ -257,11 +237,11 @@ public class ChatroomService {
 		chatroomRepository.save(chatroom);
 	}
 
-	public void decrease(Long chatroomId, String sessionId) {
+	public void decrease(Long chatroomId) {
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 		ChatroomSetting setting = chatroom.getChatroomSetting();
-		if (setting.getCount() < 1) disconnectSession(chatroomId, sessionId);
+		if (setting.getCount() < 1) return;
 		setting.setCount(setting.getCount() - 1);
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
