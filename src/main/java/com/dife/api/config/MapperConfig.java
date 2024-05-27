@@ -1,10 +1,8 @@
 package com.dife.api.config;
 
-import com.dife.api.model.Chatroom;
-import com.dife.api.model.GroupPurpose;
-import com.dife.api.model.Language;
-import com.dife.api.model.Tag;
+import com.dife.api.model.*;
 import com.dife.api.model.dto.ChatroomResponseDto;
+import com.dife.api.model.dto.MemberResponseDto;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -78,6 +76,40 @@ public class MapperConfig {
 									ChatroomResponseDto::setPurposes);
 							mapper.map(
 									src -> src.getChatroomSetting().getPassword(), ChatroomResponseDto::setPassword);
+						});
+
+		return modelMapper;
+	}
+
+	@Bean(name = "memberModelMapper")
+	public ModelMapper memberModelMapper() {
+		ModelMapper modelMapper = new ModelMapper();
+		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+		modelMapper
+				.typeMap(Hobby.class, String.class)
+				.setConverter(context -> context.getSource().getName());
+		modelMapper
+				.typeMap(Language.class, String.class)
+				.setConverter(context -> context.getSource().getName());
+		modelMapper
+				.typeMap(Member.class, MemberResponseDto.class)
+				.addMappings(
+						mapper -> {
+							mapper.map(
+									src ->
+											Optional.ofNullable(src.getHobbies()).orElse(Collections.emptySet()).stream()
+													.map(Hobby::getName)
+													.collect(Collectors.toSet()),
+									MemberResponseDto::setHobbies);
+
+							mapper.map(
+									src ->
+											Optional.ofNullable(src.getLanguages())
+													.orElse(Collections.emptySet())
+													.stream()
+													.map(Language::getName)
+													.collect(Collectors.toSet()),
+									MemberResponseDto::setLanguages);
 						});
 
 		return modelMapper;
