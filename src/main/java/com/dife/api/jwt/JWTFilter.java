@@ -47,7 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
 				Member member =
 						memberRepository.findById(id).orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
 
-				if (member.getVerification_file_id() != null && !member.getIs_verified())
+				if (!member.getVerificationFileName().equals("empty") && !member.getIsVerified())
 					throw new MemberException("인증받지 않은 회원입니다!");
 
 				CustomUserDetails customUserDetails = new CustomUserDetails(member);
@@ -81,7 +81,7 @@ public class JWTFilter extends OncePerRequestFilter {
 				|| servletPath.startsWith("/swagger-ui/")
 				|| servletPath.startsWith("/api/v1/api-docs")
 				|| servletPath.startsWith("/ws")
-				|| servletPath.equals("/api/members/check-refreshToken");
+				|| servletPath.equals("/api/members/refresh-token");
 	}
 
 	private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {

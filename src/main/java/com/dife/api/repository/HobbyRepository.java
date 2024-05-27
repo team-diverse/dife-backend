@@ -2,11 +2,13 @@ package com.dife.api.repository;
 
 import com.dife.api.model.Hobby;
 import com.dife.api.model.Member;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface HobbyRepository extends JpaRepository<Hobby, Long> {
-	Optional<Hobby> findByMemberAndName(
-			@Param("member") Member member, @Param("hobbyName") String hobbyName);
+	@Query("SELECT COUNT(h) > 0 FROM Hobby h WHERE h.name = :name AND h.member = :member")
+	Boolean existsHobbyByNameAndMember(@Param("name") String name, @Param("member") Member member);
 }
