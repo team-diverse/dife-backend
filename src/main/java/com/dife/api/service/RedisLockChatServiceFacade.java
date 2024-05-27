@@ -14,39 +14,31 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class RedisLockChatServiceFacade {
+
 	@Autowired private RedissonClient redissonClient;
 	@Autowired private ChatroomService chatroomService;
 
-	@Transactional
-	public void increase(Long chatroomId, String sessionId) {
-		RLock lock = redissonClient.getLock("lock:" + chatroomId.toString());
+	private static final long WAITTIME = 10L;
+	private static final long LEASETIME = 1L;
 
-		try {
-			boolean available = lock.tryLock(10, 1, TimeUnit.SECONDS);
-			if (!available) {
-				return;
-			}
-			chatroomService.increase(chatroomId, sessionId);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			throw new RuntimeException("Interrupted during lock acquisition", e);
-		} finally {
-			if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-				lock.unlock();
-			}
-		}
+	@Transactional
+	public void increase(Long chatroomId) {
+		executeWithLock(chatroomId, () -> chatroomService.increase(chatroomId));
 	}
 
 	@Transactional
-	public void decrease(Long chatroomId, String sessionId) {
-		RLock lock = redissonClient.getLock("lock:" + chatroomId.toString());
+	public void decrease(Long chatroomId) {
+		executeWithLock(chatroomId, () -> chatroomService.decrease(chatroomId));
+	}
 
+	private void executeWithLock(Long chatroomId, Runnable action) {
+		RLock lock = redissonClient.getLock("lock:" + chatroomId.toString());
 		try {
-			boolean available = lock.tryLock(10, 1, TimeUnit.SECONDS);
+			boolean available = lock.tryLock(WAITTIME, LEASETIME, TimeUnit.SECONDS);
 			if (!available) {
 				return;
 			}
-			chatroomService.decrease(chatroomId, sessionId);
+			action.run();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException("Interrupted during lock acquisition", e);
