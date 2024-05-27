@@ -84,11 +84,10 @@ public class ChatService {
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
-		if (!isValidGroupChatroom(chatroom, setting.getPassword())) {
+		if (!isValidGroupChatroom(chatroom, dto.getPassword())) {
 			disconnectSession(chatroomId, sessionId);
 			return;
 		}
-
 		if (setting.getCount() < setting.getMaxCount()) {
 			chatServiceFacade.increase(chatroomId, sessionId);
 		} else {
@@ -96,6 +95,7 @@ public class ChatService {
 			return;
 		}
 
+		chatroom.getMembers().add(member);
 		chatroom.setChatroomSetting(setting);
 		headerAccessor.getSessionAttributes().put("username", username);
 
@@ -115,6 +115,7 @@ public class ChatService {
 			chat.setMessage(dto.getMessage());
 			chat.setChatroom(chatroom);
 
+			chatroom.getChats().add(chat);
 			chatRepository.save(chat);
 			dto.setUsername(username);
 			redisPublisher.publish(dto);
@@ -126,6 +127,9 @@ public class ChatService {
 
 		Chatroom chatroom = validChatroom(dto, headerAccessor);
 		ChatroomSetting setting = chatroom.getChatroomSetting();
+		Member member =
+				memberRepository.findById(dto.getMemberId()).orElseThrow(MemberNotFoundException::new);
+
 		Long chatroom_id = dto.getChatroomId();
 		String session_id = headerAccessor.getSessionId();
 		String username = (String) headerAccessor.getSessionAttributes().get("username");
@@ -137,6 +141,7 @@ public class ChatService {
 			return;
 		}
 
+		chatroom.getMembers().remove(member);
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
 		dto.setUsername(username);

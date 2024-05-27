@@ -15,10 +15,6 @@ public interface ChatroomRepository extends JpaRepository<Chatroom, Long> {
 	Boolean existsByName(@Param("name") String name);
 
 	@Query(
-			"SELECT COUNT(c) > 0 FROM Chatroom c JOIN c.members m WHERE m = :member AND c.id = :chatroomId")
-	Boolean existsByMemberAndId(@Param("member") Member member, @Param("chatroomId") Long chatroomId);
-
-	@Query(
 			"SELECT COUNT(c) > 0 FROM Chatroom c JOIN c.members m WHERE m = :member1 AND :member2 MEMBER OF c.members AND c.chatroomType = :chatroomType")
 	Boolean existsSingleChatroomByMembers(
 			@Param("member1") Member member1,
