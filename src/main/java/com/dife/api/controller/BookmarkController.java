@@ -2,7 +2,6 @@ package com.dife.api.controller;
 
 import com.dife.api.model.dto.BookmarkPostRequestDto;
 import com.dife.api.model.dto.BookmarkResponseDto;
-import com.dife.api.model.dto.BookmarksGetByChatroomRequestDto;
 import com.dife.api.service.BookmarkService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -10,9 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -22,18 +19,24 @@ public class BookmarkController {
 
 	private final BookmarkService bookmarkService;
 
-	@PostMapping
+	@GetMapping
+	public ResponseEntity<List<BookmarkResponseDto>> getAllBookmarks(Authentication authentication) {
+		List<BookmarkResponseDto> bookmarks = bookmarkService.getAllBookmarks(authentication.getName());
+		return ResponseEntity.ok(bookmarks);
+	}
+
+	@PostMapping(value = "/", consumes = "application/json")
 	public ResponseEntity<BookmarkResponseDto> createBookmark(
-			BookmarkPostRequestDto requestDto, Authentication auth) {
+			@RequestBody BookmarkPostRequestDto requestDto, Authentication auth) {
 		BookmarkResponseDto responseDto = bookmarkService.createBookmark(requestDto, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@GetMapping
+	@GetMapping("/{chatroomId}")
 	public ResponseEntity<List<BookmarkResponseDto>> getBookmarks(
-			BookmarksGetByChatroomRequestDto requestDto, Authentication authentication) {
+			@PathVariable(name = "chatroomId") Long chatroomId, Authentication authentication) {
 		List<BookmarkResponseDto> bookmarks =
-				bookmarkService.getBookmarks(requestDto, authentication.getName());
+				bookmarkService.getBookmarks(chatroomId, authentication.getName());
 		return ResponseEntity.ok(bookmarks);
 	}
 }

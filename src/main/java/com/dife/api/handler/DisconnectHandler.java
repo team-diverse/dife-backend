@@ -3,6 +3,7 @@ package com.dife.api.handler;
 import com.dife.api.model.Chatroom;
 import com.dife.api.model.ChatroomSetting;
 import com.dife.api.model.ChatroomType;
+import com.dife.api.model.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -15,9 +16,12 @@ public class DisconnectHandler {
 
 	private final SimpMessageSendingOperations messagingTemplate;
 
-	public boolean isEnterDisconnectChecked(Chatroom chatroom, String sessionId, String password) {
+	public boolean isEnterDisconnectChecked(
+			Chatroom chatroom, Member member, String sessionId, String password) {
 
-		if (!isValidGroupChatroom(chatroom, password) || isFull(chatroom)) {
+		if (!isValidGroupChatroom(chatroom, password)
+				|| isFull(chatroom)
+				|| isExistsAlready(chatroom, member)) {
 			disconnect(chatroom.getId(), sessionId);
 			return false;
 		}
@@ -39,6 +43,10 @@ public class DisconnectHandler {
 
 	private boolean isGroupChatroom(Chatroom chatroom) {
 		return chatroom.getChatroomType() == ChatroomType.GROUP;
+	}
+
+	private boolean isExistsAlready(Chatroom chatroom, Member member) {
+		return chatroom.getMembers().contains(member);
 	}
 
 	private boolean isRestrictedGroupChatroom(Chatroom chatroom, String password) {

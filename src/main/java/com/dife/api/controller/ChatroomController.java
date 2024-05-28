@@ -35,7 +35,7 @@ public class ChatroomController implements SwaggerChatroomController {
 		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
 	}
 
-	@PostMapping(consumes = "application/json")
+	@PostMapping(value = "/", consumes = "application/json")
 	public ResponseEntity<ChatroomResponseDto> createChatroom(
 			@RequestBody ChatroomPostRequestDto requestDto, Authentication authentication) {
 

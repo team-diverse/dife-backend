@@ -12,7 +12,6 @@ import com.dife.api.model.Chatroom;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.BookmarkPostRequestDto;
 import com.dife.api.model.dto.BookmarkResponseDto;
-import com.dife.api.model.dto.BookmarksGetByChatroomRequestDto;
 import com.dife.api.repository.BookmarkRepository;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
@@ -36,20 +35,28 @@ public class BookmarkService {
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 
-	public List<BookmarkResponseDto> getBookmarks(
-			BookmarksGetByChatroomRequestDto requestDto, String memberEmail) {
+	public List<BookmarkResponseDto> getAllBookmarks(String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		List<Bookmark> bookmarks = bookmarkRepository.findAllByMember(member);
+
+		return bookmarks.stream()
+				.map(b -> modelMapper.map(b, BookmarkResponseDto.class))
+				.collect(toList());
+	}
+
+	public List<BookmarkResponseDto> getBookmarks(Long chatroomId, String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Chatroom chatroom =
-				chatroomRepository
-						.findById(requestDto.getChatroomId())
-						.orElseThrow(ChatroomNotFoundException::new);
+				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 
 		if (chatroom.getMembers().contains(member)) {
 			List<Bookmark> bookmarks =
-					bookmarkRepository.findScrapsByChatroomId(requestDto.getChatroomId());
+					bookmarkRepository.findBookmarksByMemberAndChatroomId(chatroomId, member);
 
 			return bookmarks.stream()
 					.map(b -> modelMapper.map(b, BookmarkResponseDto.class))
@@ -62,10 +69,6 @@ public class BookmarkService {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		Chatroom chatroom =
-				chatroomRepository
-						.findById(requestDto.getChatroomId())
-						.orElseThrow(ChatroomNotFoundException::new);
 		Chat chat =
 				chatRepository
 						.findByChatroomIdAndId(requestDto.getChatroomId(), requestDto.getChatId())
@@ -74,7 +77,6 @@ public class BookmarkService {
 		Bookmark bookmark = new Bookmark();
 		bookmark.setMessage(chat.getMessage());
 		bookmark.setMember(member);
-		bookmark.setChatroom(chatroom);
 		bookmarkRepository.save(bookmark);
 
 		return modelMapper.map(bookmark, BookmarkResponseDto.class);

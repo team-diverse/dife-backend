@@ -59,7 +59,8 @@ public class ChatService {
 
 		Member member =
 				memberRepository.findById(dto.getMemberId()).orElseThrow(MemberNotFoundException::new);
-		if (!disconnectHandler.isEnterDisconnectChecked(chatroom, sessionId, dto.getPassword())) return;
+		if (!disconnectHandler.isEnterDisconnectChecked(chatroom, member, sessionId, dto.getPassword()))
+			return;
 
 		String username = member.getUsername();
 
