@@ -2,11 +2,13 @@ package com.dife.api.service;
 
 import static java.util.stream.Collectors.toList;
 
+import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.BoardCategory;
 import com.dife.api.model.Member;
 import com.dife.api.model.Post;
 import com.dife.api.model.dto.*;
+import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +24,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
 	private final PostRepository postRepository;
+	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 
-	public PostResponseDto create(PostCreateRequestDto requestDto, Member currentMember) {
+	public PostResponseDto create(PostCreateRequestDto requestDto, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Post post = new Post();
 		post.setTitle(requestDto.getTitle());
 		post.setContent(requestDto.getContent());
-		post.setIs_public(requestDto.getIs_public());
+		post.setIsPublic(requestDto.getIsPublic());
 		post.setBoardType(requestDto.getBoardType());
-		post.setMember(currentMember);
+		post.setMember(member);
 
 		postRepository.save(post);
 
@@ -39,11 +45,10 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<PostResponseDto> getPostsByBoardType(BoardRequestDto requestDto) {
-		BoardCategory boardCategory = requestDto.getBoardCategory();
+	public List<PostResponseDto> getPostsByBoardType(BoardCategory boardCategory) {
 		List<Post> posts = postRepository.findPostsByBoardType(boardCategory);
 
-		return posts.stream().map(c -> modelMapper.map(c, PostResponseDto.class)).collect(toList());
+		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
 	}
 
 	@Transactional(readOnly = true)
@@ -65,7 +70,7 @@ public class PostService {
 		post.setBoardType(dto.getBoardType());
 		post.setTitle(dto.getTitle());
 		post.setContent(dto.getContent());
-		post.setIs_public(dto.getIs_public());
+		post.setIsPublic(dto.getIsPublic());
 		postRepository.save(post);
 
 		return modelMapper.map(post, PostResponseDto.class);

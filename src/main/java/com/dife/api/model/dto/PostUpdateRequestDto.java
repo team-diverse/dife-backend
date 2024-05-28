@@ -1,8 +1,6 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.BoardCategory;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,11 +16,9 @@ public class PostUpdateRequestDto {
 
 	private String content;
 
-	private Boolean is_public;
+	private Boolean isPublic;
 
 	private BoardCategory boardType;
 
-	@NotNull
-	@JsonProperty("member_id")
 	private Long memberId;
 }

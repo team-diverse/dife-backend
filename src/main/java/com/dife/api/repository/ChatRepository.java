@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
-	List<Chat> findChatsByChatroomId(Long room_id);
+	List<Chat> findChatsByChatroomId(Long chatroom_id);
 
-	Optional<Chat> findByChatroomIdAndId(Long chatroomId, Long id);
+	Optional<Chat> findByChatroomIdAndId(Long chatroom_id, Long id);
 }

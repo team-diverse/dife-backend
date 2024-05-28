@@ -44,16 +44,6 @@ public class JWTUtil {
 				.get("id", Long.class);
 	}
 
-	public String getRole(String token) {
-
-		return Jwts.parser()
-				.verifyWith(secretKey)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload()
-				.get("role", String.class);
-	}
-
 	public Boolean isExpired(String token) {
 
 		try {

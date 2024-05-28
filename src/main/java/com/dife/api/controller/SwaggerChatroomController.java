@@ -1,5 +1,6 @@
 package com.dife.api.controller;
 
+import com.dife.api.model.ChatroomType;
 import com.dife.api.model.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,7 +38,7 @@ public interface SwaggerChatroomController {
 			})
 	ResponseEntity<ChatroomResponseDto> registerDetail(
 			GroupChatroomPutRequestDto requestDto,
-			@PathVariable(name = "chatroomId") Long chatroomId,
+			@PathVariable(name = "id") Long chatroomId,
 			Authentication auth);
 
 	@Operation(
@@ -52,7 +53,7 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
-			@RequestBody ChatroomTypeRequestDto requestDto, Authentication authentication);
+			ChatroomType chatroomType, Authentication authentication);
 
 	@Operation(summary = "채팅방 조회 API", description = "그룹, 싱글 모든 채팅방을 Id로 조회해주는 API입니다.")
 	@ApiResponse(

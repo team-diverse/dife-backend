@@ -41,18 +41,16 @@ public class ChatroomService {
 
 	private final FileService fileService;
 
-	public List<ChatroomResponseDto> getChatrooms(
-			ChatroomTypeRequestDto requestDto, String memberEmail) {
+	public List<ChatroomResponseDto> getChatrooms(ChatroomType chatroomType, String memberEmail) {
 
 		List<Chatroom> chatrooms;
 
-		if (requestDto.getChatroomType() == ChatroomType.GROUP)
-			chatrooms = chatroomRepository.findAllByChatroomType(requestDto.getChatroomType());
+		if (chatroomType == ChatroomType.GROUP)
+			chatrooms = chatroomRepository.findAllByChatroomType(chatroomType);
 		else {
 			Member member =
 					memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-			chatrooms =
-					chatroomRepository.findAllByChatroomTypeAndMember(requestDto.getChatroomType(), member);
+			chatrooms = chatroomRepository.findAllByChatroomTypeAndMember(chatroomType, member);
 		}
 		return chatrooms.stream()
 				.map(c -> modelMapper.map(c, ChatroomResponseDto.class))
@@ -106,8 +104,7 @@ public class ChatroomService {
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		if (!chatroomRepository.existsByMemberAndId(member, chatroomId))
-			throw new MemberException("수정 권한이 있는 회원이 아닙니다!");
+		if (!chatroom.getMembers().contains(member)) throw new MemberException("수정 권한이 있는 회원이 아닙니다!");
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
@@ -197,35 +194,39 @@ public class ChatroomService {
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public List<ChatResponseDto> getChats(
-			ChatsGetByChatroomRequestDto requestDto, String memberEmail) {
+	public List<ChatResponseDto> getChats(Long chatroomId, String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		if (chatroomRepository.existsByMemberAndId(member, requestDto.getChatroomId())) {
-			List<Chat> chats = chatRepository.findChatsByChatroomId(requestDto.getChatroomId());
+		Chatroom chatroom =
+				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 
-			return chats.stream()
-					.map(c -> chatroomModelMapper.map(c, ChatResponseDto.class))
-					.collect(toList());
+		if (!chatroom.getMembers().contains(member)) {
+			throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
 		}
-		throw new ChatroomException("채팅방 소속 회원만이 채팅을 불러올 수 있습니다!");
+		List<Chat> chats = chatRepository.findChatsByChatroomId(chatroomId);
+
+		return chats.stream().map(c -> modelMapper.map(c, ChatResponseDto.class)).collect(toList());
 	}
 
-	public ChatResponseDto getChat(ChatGetRequestDto requestDto, String memberEmail) {
+	public ChatResponseDto getChat(Long chatroomId, Long chatId, String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if (chatroomRepository.existsByMemberAndId(member, requestDto.getChatroomId())) {
-			Chat chat =
-					chatRepository
-							.findByChatroomIdAndId(requestDto.getChatroomId(), requestDto.getChatId())
-							.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
+		Chatroom chatroom =
+				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 
-			return chatroomModelMapper.map(chat, ChatResponseDto.class);
+		if (!chatroom.getMembers().contains(member)) {
+			throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
 		}
-		throw new ChatroomException("채팅방 소속 회원만이 채팅을 불러올 수 없습니다!");
+
+		Chat chat =
+				chatRepository
+						.findByChatroomIdAndId(chatroomId, chatId)
+						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
+
+		return modelMapper.map(chat, ChatResponseDto.class);
 	}
 
 	public Boolean isWrongPassword(Chatroom chatroom, String given_password) {

@@ -3,6 +3,7 @@ package com.dife.api.controller;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
+import com.dife.api.model.BoardCategory;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.MemberService;
@@ -21,18 +22,17 @@ public class BoardController implements SwaggerBoardController {
 	private final MemberService memberService;
 	private final PostService postService;
 
-	@GetMapping("/")
-	public ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardRequestDto requestDto) {
-		List<PostResponseDto> responseDto = postService.getPostsByBoardType(requestDto);
+	@GetMapping
+	public ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardCategory boardCategory) {
+		List<PostResponseDto> responseDto = postService.getPostsByBoardType(boardCategory);
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
-	@PostMapping
+	@PostMapping(consumes = "application/json")
 	public ResponseEntity<PostResponseDto> create(
-			PostCreateRequestDto requestDto, Authentication auth) {
+			@RequestBody PostCreateRequestDto requestDto, Authentication auth) {
 
-		Member currentMember = memberService.getMember(auth.getName());
-		PostResponseDto responseDto = postService.create(requestDto, currentMember);
+		PostResponseDto responseDto = postService.create(requestDto, auth.getName());
 
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
@@ -43,9 +43,11 @@ public class BoardController implements SwaggerBoardController {
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
-	@PutMapping("/{id}")
+	@PutMapping(value = "/{id}", consumes = "application/json")
 	public ResponseEntity<PostResponseDto> updatePost(
-			@PathVariable(name = "id") Long id, PostUpdateRequestDto requestDto, Authentication auth) {
+			@PathVariable(name = "id") Long id,
+			@RequestBody PostUpdateRequestDto requestDto,
+			Authentication auth) {
 		Member currentMember = memberService.getMember(auth.getName());
 		PostResponseDto responseDto = postService.updatePost(id, requestDto, currentMember);
 		return ResponseEntity.status(OK).body(responseDto);
