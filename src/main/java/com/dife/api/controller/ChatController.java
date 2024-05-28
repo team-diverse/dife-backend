@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -23,16 +22,16 @@ public class ChatController implements SwaggerChatController {
 
 	private final ChatroomService chatroomService;
 
-	@GetMapping(value = "/{chatroomId}")
+	@GetMapping
 	public ResponseEntity<List<ChatResponseDto>> getChats(
-			@PathVariable(name = "chatroomId") Long chatroomId, Authentication authentication) {
+			@RequestParam(name = "chatroomId") Long chatroomId, Authentication authentication) {
 		List<ChatResponseDto> chats = chatroomService.getChats(chatroomId, authentication.getName());
 		return ResponseEntity.status(OK).body(chats);
 	}
 
-	@GetMapping(value = "/{chatroomId}/")
+	@GetMapping("/")
 	public ResponseEntity<ChatResponseDto> getChat(
-			@PathVariable(name = "chatroomId") Long chatroomId,
+			@RequestParam(name = "chatroomId") Long chatroomId,
 			@RequestParam(name = "chatId") Long chatId,
 			Authentication authentication) {
 		ChatResponseDto responseDto =

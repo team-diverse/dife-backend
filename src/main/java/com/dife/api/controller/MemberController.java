@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/api/members")
 @Slf4j
-public class MemberController implements SwaggerMemberController{
+public class MemberController implements SwaggerMemberController {
 
 	private final MemberService memberService;
 	private final JWTUtil jwtUtil;
