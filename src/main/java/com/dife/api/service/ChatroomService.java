@@ -85,6 +85,7 @@ public class ChatroomService {
 		if (trimmedDescription.isEmpty())
 			throw new ChatroomException("유효하지 않은 한줄소개입니다. 공백만 존재하는 한줄 소개는 허용되지 않습니다.");
 
+		setting.setCount(setting.getCount() + 1);
 		setting.setDescription(trimmedDescription);
 		chatroom.setChatroomSetting(setting);
 
@@ -178,6 +179,7 @@ public class ChatroomService {
 		memberSet.add(currentMember);
 		memberSet.add(otherMember);
 		setting.setMaxCount(memberSet.size() > 1 ? 2 : 1);
+		setting.setCount(memberSet.size());
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
 
