@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,42 +24,39 @@ public class Member extends BaseTimeEntity {
 
 	@NotNull private String email;
 
-	@NotNull
-	@Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
-	@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$", message = "비밀번호는 영문자와 숫자를 포함해야 합니다.")
-	private String password;
+	@NotNull private String password = "";
 
 	private String username = "";
 
-	private String name;
+	private String name = "";
 
-	private String student_id;
+	private String studentId = "";
 
-	private String major;
+	private String major = "";
 
 	private String role = "user";
 
-	private String verification_file_id;
+	private String verificationFileName = "empty";
 
-	private Boolean is_korean;
+	private Boolean isKorean = true;
 
-	private Boolean is_public = true;
+	private Boolean isPublic = true;
 
 	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
-	private Set<Language> languages;
+	private Set<Language> languages = new HashSet<>();
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
-	private Set<Hobby> hobbies;
+	private Set<Hobby> hobbies = new HashSet<>();
 
-	private String profile_file_id;
+	private String profileFileName = "empty";
 
 	@Size(max = 60, message = "자기소개는 최대 60자까지 입력 가능합니다.")
-	private String bio;
+	private String bio = "";
 
-	private Boolean is_verified = false;
+	private Boolean isVerified = false;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "fromMember")
@@ -73,7 +70,8 @@ public class Member extends BaseTimeEntity {
 	@JsonBackReference
 	private Set<Chatroom> chatrooms;
 
-	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+	@JsonIgnore
 	private Set<Bookmark> bookmarks;
 
 	@JsonIgnore

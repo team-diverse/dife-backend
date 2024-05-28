@@ -61,10 +61,14 @@ public class PostService {
 		return modelMapper.map(post, PostResponseDto.class);
 	}
 
-	public PostResponseDto updatePost(Long id, PostUpdateRequestDto dto, Member currentMember) {
+	public PostResponseDto updatePost(Long id, PostUpdateRequestDto dto, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
 		Post post =
 				postRepository
-						.findByMemberAndId(currentMember, id)
+						.findByMemberAndId(member, id)
 						.orElseThrow(() -> new PostNotFoundException("해당 게시물이 존재하지 않습니다!"));
 
 		post.setBoardType(dto.getBoardType());
@@ -76,10 +80,13 @@ public class PostService {
 		return modelMapper.map(post, PostResponseDto.class);
 	}
 
-	public void deletePost(Long id, Member currentMember) {
+	public void deletePost(Long id, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Post post =
 				postRepository
-						.findByMemberAndId(currentMember, id)
+						.findByMemberAndId(member, id)
 						.orElseThrow(() -> new PostNotFoundException("해당 게시물이 존재하지 않습니다!"));
 
 		postRepository.delete(post);

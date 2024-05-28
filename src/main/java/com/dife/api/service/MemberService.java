@@ -2,7 +2,7 @@ package com.dife.api.service;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
-import com.dife.api.config.EmailValidator;
+import com.dife.api.config.RegisterValidator;
 import com.dife.api.exception.*;
 import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.*;
@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -39,36 +41,35 @@ public class MemberService {
 	private final LanguageRepository languageRepository;
 	private final HobbyRepository hobbyRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
-	private final EmailValidator emailValidator;
+	private final RegisterValidator registerValidator;
 	private final JavaMailSender javaMailSender;
 	private final FileService fileService;
 	private final ModelMapper modelMapper;
+
+	@Autowired
+	@Qualifier("memberModelMapper")
+	private ModelMapper memberModelMapper;
 
 	private final AuthenticationManager authenticationManager;
 	private final JWTUtil jwtUtil;
 	private static final long ACCESS_TOKEN_VALIDITY_DURATION = 60 * 60 * 1000L;
 	private static final long REFRESH_TOKEN_VALIDITY_DURATION = 90 * 24 * 60 * 1000L;
 
-	public Member registerEmailAndPassword(RegisterEmailAndPasswordRequestDto dto) {
-		if (!emailValidator.isValidEmail(dto.getEmail())) {
-			throw new RegisterException("유효하지 않은 이메일입니다");
-		}
+	public RegisterResponseDto registerEmailAndPassword(RegisterEmailAndPasswordRequestDto dto) {
 
-		if (dto.getPassword() == null || !dto.getPassword().matches("(?=.*[0-9a-zA-Z\\\\W]).{8,20}")) {
-			throw new RegisterException("비밀번호는 영문 대,소문자와 숫자, 특수기호가 적어도 1개 이상 포함된 8자 ~ 20자의 비밀번호여야 합니다.");
-		}
+		registerValidator.registerValidate(dto.getEmail(), dto.getPassword());
 
-		if (memberRepository.existsByEmail(dto.getEmail())) {
+		if (memberRepository.existsByEmail(dto.getEmail()))
 			throw new DuplicateMemberException("이미 가입되어있는 이메일입니다");
-		}
 
 		Member member = new Member();
 		member.setEmail(dto.getEmail());
+
 		String encodedPassword = passwordEncoder.encode(dto.getPassword());
 		member.setPassword(encodedPassword);
 
 		memberRepository.save(member);
-		return member;
+		return modelMapper.map(member, RegisterResponseDto.class);
 	}
 
 	public Boolean checkUsername(String username) {
@@ -78,81 +79,62 @@ public class MemberService {
 		return true;
 	}
 
-	public Member registerDetail(
+	public MemberResponseDto registerDetail(
 			String username,
-			Boolean is_korean,
+			Boolean isKorean,
 			String bio,
 			MbtiCategory mbti,
 			Set<String> hobbies,
 			Set<String> languages,
-			Boolean is_public,
+			Boolean isPublic,
 			Long id,
-			MultipartFile profile_img,
-			MultipartFile verification_file) {
-		Member member =
-				memberRepository.findById(id).orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
+			MultipartFile profileImg,
+			MultipartFile verificationFile) {
+		Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 
-		if (profile_img != null && !profile_img.isEmpty()) {
-			FileDto profileImgPath = fileService.upload(profile_img);
-			member.setProfile_file_id(profileImgPath.getName());
-		} else {
-			member.setProfile_file_id(null);
+		if (profileImg.isEmpty() || member.getProfileFileName().isEmpty())
+			member.setProfileFileName("empty");
+		else {
+			FileDto profileImgPath = fileService.upload(profileImg);
+			member.setProfileFileName(profileImgPath.getName());
 		}
 
-		if (verification_file != null && !verification_file.isEmpty()) {
-			FileDto verificationImgPath = fileService.upload(verification_file);
-			member.setVerification_file_id(verificationImgPath.getName());
-		} else {
-			throw new RegisterException("재학생 인증은 필수 사항입니다!");
+		if (verificationFile.isEmpty() || verificationFile.isEmpty())
+			member.setVerificationFileName("empty");
+		else {
+			FileDto verificationImgPath = fileService.upload(verificationFile);
+			member.setVerificationFileName(verificationImgPath.getName());
 		}
+
 		member.setUsername(username);
-		member.setIs_korean(is_korean);
+		member.setIsKorean(isKorean);
 		member.setBio(bio);
 		member.setMbti(mbti);
 
-		Set<Hobby> myhobbies = new HashSet<>();
-
-		if (hobbies != null) {
-			for (String hob : hobbies) {
-				Optional<Hobby> hobbyOptional = hobbyRepository.findByMemberAndName(member, hob);
-				if (!hobbyOptional.isPresent()) {
-					Hobby newHobby = new Hobby();
-					newHobby.setName(hob);
-					newHobby.setMember(member);
-					hobbyRepository.save(newHobby);
-					myhobbies.add(newHobby);
-				} else {
-					myhobbies.add(hobbyOptional.get());
-				}
+		Set<Hobby> myHobbies = member.getHobbies();
+		for (String hobbyName : hobbies) {
+			if (!hobbyRepository.existsHobbyByNameAndMember(hobbyName, member)) {
+				Hobby nHobby = new Hobby();
+				nHobby.setName(hobbyName);
+				hobbyRepository.save(nHobby);
+				myHobbies.add(nHobby);
 			}
 		}
 
-		member.setHobbies(myhobbies);
-
-		Set<Language> mylanguages = new HashSet<>();
-
-		if (languages == null || languages.isEmpty()) {
-			throw new RegisterException("언어 선택은 필수입니다.");
-		} else {
-			for (String lan : languages) {
-				Optional<Language> languageOptional = languageRepository.findByMemberAndName(member, lan);
-				if (!languageOptional.isPresent()) {
-					Language newLanguage = new Language();
-					newLanguage.setName(lan);
-					newLanguage.setMember(member);
-					languageRepository.save(newLanguage);
-					mylanguages.add(newLanguage);
-				} else {
-					mylanguages.add(languageOptional.get());
-				}
+		Set<Language> myLanguages = member.getLanguages();
+		for (String languageName : languages) {
+			if (!languageRepository.existsLanguageByNameAndMember(languageName, member)) {
+				Language nLanguage = new Language();
+				nLanguage.setName(languageName);
+				languageRepository.save(nLanguage);
+				myLanguages.add(nLanguage);
 			}
 		}
 
-		member.setLanguages(mylanguages);
-		member.setIs_public(is_public);
+		member.setIsPublic(isPublic);
 		memberRepository.save(member);
 
-		return member;
+		return memberModelMapper.map(member, MemberResponseDto.class);
 	}
 
 	public ResponseEntity<LoginSuccessDto> login(LoginDto dto) {
@@ -180,23 +162,15 @@ public class MemberService {
 		return responseEntity;
 	}
 
-	public Member getMember(String email) {
+	public MemberResponseDto getMember(String email) {
 
-		Member member =
-				memberRepository
-						.findByEmail(email)
-						.orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
+		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 
-		return member;
+		return memberModelMapper.map(member, MemberResponseDto.class);
 	}
 
-	public boolean changePassword(VerifyEmailDto emailDto) {
-
-		if (!memberRepository.existsByEmail(emailDto.getEmail())) {
-			return false;
-		}
-		Optional<Member> optionalMember = memberRepository.findByEmail(emailDto.getEmail());
-		Member member = optionalMember.get();
+	public void changePassword(String email) {
+		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 
 		String charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 		StringBuilder sb = new StringBuilder();
@@ -222,7 +196,6 @@ public class MemberService {
 						+ "\n"
 						+ "안전한 인터넷 환경에서 항상 비밀번호를 관리하세요.");
 		javaMailSender.send(simpleMailMessage);
-		return true;
 	}
 
 	public List<MemberResponseDto> getRandomMembers(int count, String email) {
@@ -240,7 +213,7 @@ public class MemberService {
 
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : randomMembers) {
-			memberResponseDtos.add(modelMapper.map(member, MemberResponseDto.class));
+			memberResponseDtos.add(memberModelMapper.map(member, MemberResponseDto.class));
 		}
 		return memberResponseDtos;
 	}

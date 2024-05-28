@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.websocket.server.PathParam;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,7 +24,7 @@ public interface SwaggerChatController {
 						schema = @Schema(implementation = ChatResponseDto.class))
 			})
 	ResponseEntity<List<ChatResponseDto>> getChats(
-			@PathParam("chatroomId") Long chatroomId, Authentication authentication);
+			@RequestParam(name = "chatroomId") Long chatroomId, Authentication authentication);
 
 	@Operation(summary = "단일 채팅 가져오기 API", description = "채팅방의 ID와 채팅 ID를 입력하여 단일 채팅을 가져옵니다.")
 	@ApiResponse(
@@ -37,7 +36,7 @@ public interface SwaggerChatController {
 						schema = @Schema(implementation = ChatResponseDto.class))
 			})
 	ResponseEntity<ChatResponseDto> getChat(
-			@PathParam("chatroomId") Long chatroomId,
+			@RequestParam(name = "chatroomId") Long chatroomId,
 			@RequestParam(name = "chatId") Long chatId,
 			Authentication authentication);
 }

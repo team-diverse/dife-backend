@@ -4,7 +4,6 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.BoardCategory;
-import com.dife.api.model.Member;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.MemberService;
 import com.dife.api.service.PostService;
@@ -48,15 +47,13 @@ public class BoardController implements SwaggerBoardController {
 			@PathVariable(name = "id") Long id,
 			@RequestBody PostUpdateRequestDto requestDto,
 			Authentication auth) {
-		Member currentMember = memberService.getMember(auth.getName());
-		PostResponseDto responseDto = postService.updatePost(id, requestDto, currentMember);
+		PostResponseDto responseDto = postService.updatePost(id, requestDto, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deletePost(@PathVariable(name = "id") Long id, Authentication auth) {
-		Member currentMember = memberService.getMember(auth.getName());
-		postService.deletePost(id, currentMember);
+		postService.deletePost(id, auth.getName());
 		return new ResponseEntity<>(OK);
 	}
 }

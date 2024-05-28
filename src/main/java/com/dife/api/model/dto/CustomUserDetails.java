@@ -48,14 +48,6 @@ public class CustomUserDetails implements UserDetails {
 		return member.getId();
 	}
 
-	public Boolean getIsVerified() {
-		return member.getIs_verified();
-	}
-
-	public String getVerificationFileId() {
-		return member.getVerification_file_id();
-	}
-
 	@Override
 	public boolean isAccountNonExpired() {
 

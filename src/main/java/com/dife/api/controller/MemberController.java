@@ -1,20 +1,14 @@
 package com.dife.api.controller;
 
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
 import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.MbtiCategory;
-import com.dife.api.model.Member;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.MemberService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -33,38 +27,21 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/api/members")
 @Slf4j
-public class MemberController {
+public class MemberController implements SwaggerMemberController {
 
 	private final MemberService memberService;
 	private final JWTUtil jwtUtil;
 
 	@PostMapping("/register")
-	@Operation(summary = "회원가입1 API", description = "이메일과 비밀번호를 사용하여 새 회원을 등록합니다.")
-	@ApiResponse(
-			responseCode = "201",
-			description = "회원가입1 성공 예시",
-			content = {
-				@Content(
-						mediaType = "application/json",
-						schema = @Schema(implementation = RegisterResponseDto.class))
-			})
 	public ResponseEntity<RegisterResponseDto> registerEmailAndPassword(
-			@RequestBody(
-							description = "이메일과 비밀번호를 포함하는 등록 데이터",
-							required = true,
-							content =
-									@Content(
-											schema = @Schema(implementation = RegisterEmailAndPasswordRequestDto.class)))
-					RegisterEmailAndPasswordRequestDto dto) {
-		Member member = memberService.registerEmailAndPassword(dto);
+			@Valid @RequestBody RegisterEmailAndPasswordRequestDto dto) {
+		RegisterResponseDto responseDto = memberService.registerEmailAndPassword(dto);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponseDto(member));
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 	}
 
-	@RequestMapping(path = "/{id}", method = RequestMethod.HEAD)
-	@Operation(summary = "중복 닉네임 확인", description = "중복 닉네임 여부를 확인합니다.")
-	public ResponseEntity<Void> checkUsername(
-			@RequestParam(name = "username") String username, @PathVariable(name = "id") Long id) {
+	@RequestMapping(method = RequestMethod.HEAD)
+	public ResponseEntity<Void> checkUsername(@RequestParam(name = "username") String username) {
 		Boolean isValid = memberService.checkUsername(username);
 
 		if (isValid) {
@@ -73,67 +50,47 @@ public class MemberController {
 		return ResponseEntity.status(HttpStatus.CONFLICT).build();
 	}
 
-	@PutMapping(value = "/{id}", consumes = "multipart/form-data")
-	@Operation(summary = "회원가입2 API", description = "회원가입 세부사항을 입력합니다.")
-	@ApiResponse(
-			responseCode = "201",
-			description = "회원가입2 성공 예시",
-			content = {
-				@Content(
-						mediaType = "application/json",
-						schema = @Schema(implementation = MemberResponseDto.class))
-			})
+	@PutMapping("/{id}")
 	public ResponseEntity<MemberResponseDto> registerDetail(
-			@RequestParam(name = "username") String username,
-			@RequestParam(name = "is_korean") Boolean is_korean,
+			@RequestParam(name = "username", required = false) String username,
+			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
-			@RequestParam(name = "languages") Set<String> languages,
-			@RequestParam(name = "profile_img", required = false) MultipartFile profile_img,
-			@RequestParam(name = "verification_file", required = false) MultipartFile verification_file,
-			@RequestParam(name = "is_public") Boolean is_public,
+			@RequestParam(name = "languages", required = false) Set<String> languages,
+			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
+			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
+			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@PathVariable(name = "id") Long id) {
 
-		Member member =
+		MemberResponseDto responseDto =
 				memberService.registerDetail(
 						username,
-						is_korean,
+						isKorean,
 						bio,
 						mbti,
 						hobbies,
 						languages,
-						is_public,
+						isPublic,
 						id,
-						profile_img,
-						verification_file);
-		return ResponseEntity.status(HttpStatus.CREATED).body(new MemberResponseDto(member));
+						profileImg,
+						verificationFile);
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 	}
 
 	@GetMapping("/profile")
-	@Operation(summary = "마이페이지 API", description = "로그인 한 유저의 개인 정보를 확인할 수 있는 마이페이지입니다.")
-	@ApiResponse(
-			responseCode = "200",
-			description = "마이페이지 정보 예시",
-			content = {
-				@Content(
-						mediaType = "application/json",
-						schema = @Schema(implementation = MemberResponseDto.class))
-			})
 	public ResponseEntity<MemberResponseDto> profile(Authentication auth) {
-		Member currentMember = memberService.getMember(auth.getName());
-		MemberResponseDto memberResponseDto = new MemberResponseDto(currentMember);
-		return ResponseEntity.ok(memberResponseDto);
+		MemberResponseDto responseDto = memberService.getMember(auth.getName());
+		return ResponseEntity.ok(responseDto);
 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<LoginSuccessDto> login(@Valid @RequestBody LoginDto dto) {
-
 		return memberService.login(dto);
 	}
 
 	@PostMapping("/refresh-token")
-	public ResponseEntity<Void> checkToken(RefreshTokenRequestDto requestDto) {
+	public ResponseEntity<Void> checkToken(@Valid @RequestBody RefreshTokenRequestDto requestDto) {
 
 		boolean isTokenExpired = jwtUtil.isExpired(requestDto.getToken());
 		if (isTokenExpired) {
@@ -143,38 +100,16 @@ public class MemberController {
 	}
 
 	@PutMapping("/change-password")
-	@Operation(
-			summary = "비밀번호 변경 API",
-			description = "이메일을 발송해 유저는 변경된 비밀번호를 받아 유효한 로그인을 진행할 수 있게 됩니다.")
-	@ApiResponse(
-			responseCode = "200",
-			description = "비밀번호 변경 발송 예시",
-			content = {
-				@Content(
-						mediaType = "application/json",
-						schema = @Schema(implementation = VerifyEmailDto.class))
-			})
-	public ResponseEntity<HashMap> mailCheck(@RequestBody VerifyEmailDto emailDto) {
-		boolean success = memberService.changePassword(emailDto);
+	public ResponseEntity<Void> changePassword(@RequestParam(name = "email") String email) {
+		memberService.changePassword(email);
 
-		HashMap<String, Object> responseMap = new HashMap<>();
-
-		if (success) {
-			responseMap.put("status", 200);
-			responseMap.put("message", "메일 발송 성공");
-			return new ResponseEntity<HashMap>(responseMap, HttpStatus.OK);
-		} else {
-			responseMap.put("status", 500);
-			responseMap.put("message", "메일 발송 실패");
-			return new ResponseEntity<HashMap>(responseMap, HttpStatus.CONFLICT);
-		}
+		return new ResponseEntity<>(OK);
 	}
 
 	@GetMapping("/random")
 	public ResponseEntity<List<MemberResponseDto>> getRandomMembers(
 			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
-		List<MemberResponseDto> MemberResponseDtos =
-				memberService.getRandomMembers(count, auth.getName());
-		return ResponseEntity.ok(MemberResponseDtos);
+		List<MemberResponseDto> responseDto = memberService.getRandomMembers(count, auth.getName());
+		return ResponseEntity.ok(responseDto);
 	}
 }
