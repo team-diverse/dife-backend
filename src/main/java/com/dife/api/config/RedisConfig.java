@@ -2,6 +2,9 @@ package com.dife.api.config;
 
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.redis.RedisSubscriber;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +33,13 @@ public class RedisConfig {
 		RedisStandaloneConfiguration configuration =
 				new RedisStandaloneConfiguration(redisHost, redisPort);
 		return new LettuceConnectionFactory(configuration);
+	}
+
+	@Bean(destroyMethod = "shutdown")
+	public RedissonClient redisson() {
+		Config config = new Config();
+		config.useSingleServer().setAddress("redis://" + redisHost + ":" + redisPort);
+		return Redisson.create(config);
 	}
 
 	@Bean
