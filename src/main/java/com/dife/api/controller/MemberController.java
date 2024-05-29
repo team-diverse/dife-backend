@@ -32,7 +32,7 @@ public class MemberController implements SwaggerMemberController {
 	private final MemberService memberService;
 	private final JWTUtil jwtUtil;
 
-	@PostMapping("/register")
+	@PostMapping(value = "/register", consumes = "application/json")
 	public ResponseEntity<RegisterResponseDto> registerEmailAndPassword(
 			@Valid @RequestBody RegisterEmailAndPasswordRequestDto dto) {
 		RegisterResponseDto responseDto = memberService.registerEmailAndPassword(dto);
@@ -40,7 +40,7 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 	}
 
-	@RequestMapping(method = RequestMethod.HEAD)
+	@GetMapping
 	public ResponseEntity<Void> checkUsername(@RequestParam(name = "username") String username) {
 		Boolean isValid = memberService.checkUsername(username);
 
@@ -84,12 +84,12 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@PostMapping("/login")
+	@PostMapping(value = "/login", consumes = "application/json")
 	public ResponseEntity<LoginSuccessDto> login(@Valid @RequestBody LoginDto dto) {
 		return memberService.login(dto);
 	}
 
-	@PostMapping("/refresh-token")
+	@PostMapping(value = "/refresh-token", consumes = "application/json")
 	public ResponseEntity<Void> checkToken(@Valid @RequestBody RefreshTokenRequestDto requestDto) {
 
 		boolean isTokenExpired = jwtUtil.isExpired(requestDto.getToken());
