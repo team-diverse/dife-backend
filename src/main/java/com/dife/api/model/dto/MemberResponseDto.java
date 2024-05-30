@@ -8,6 +8,7 @@ import lombok.*;
 
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "회원 응답 데이터 전송 객체")

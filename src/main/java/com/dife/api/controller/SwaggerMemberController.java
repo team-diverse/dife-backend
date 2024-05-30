@@ -6,11 +6,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +28,7 @@ public interface SwaggerMemberController {
 						schema = @Schema(implementation = RegisterResponseDto.class))
 			})
 	ResponseEntity<RegisterResponseDto> registerEmailAndPassword(
-			RegisterEmailAndPasswordRequestDto dto);
+			@Valid @RequestBody RegisterEmailAndPasswordRequestDto dto);
 
 	@Operation(summary = "중복 닉네임 확인", description = "회원가입 세부사항을 입력하기에 앞서 중복 닉네임 여부를 확인합니다.")
 	@ApiResponse(responseCode = "200", description = "중복 닉네임 확인 성공 예시")
@@ -42,15 +44,15 @@ public interface SwaggerMemberController {
 						schema = @Schema(implementation = MemberResponseDto.class))
 			})
 	ResponseEntity<MemberResponseDto> registerDetail(
-			@RequestParam(name = "username") String username,
-			@RequestParam(name = "isKorean") Boolean isKorean,
+			@RequestParam(name = "username", required = false) String username,
+			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
-			@RequestParam(name = "languages") Set<String> languages,
-			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
-			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
-			@RequestParam(name = "isPublic") Boolean isPublic,
+			@RequestParam(name = "languages", required = false) Set<String> languages,
+			@RequestParam(name = "profileImg", required = true) MultipartFile profileImg,
+			@RequestParam(name = "verificationFile", required = true) MultipartFile verificationFile,
+			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@PathVariable(name = "id") Long id);
 
 	@Operation(summary = "마이페이지 API", description = "로그인 한 유저의 개인 정보를 확인할 수 있는 마이페이지 입니다.")
@@ -75,11 +77,11 @@ public interface SwaggerMemberController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = LoginSuccessDto.class))
 			})
-	ResponseEntity<LoginSuccessDto> login(LoginDto dto);
+	ResponseEntity<LoginSuccessDto> login(@Valid @RequestBody LoginDto dto);
 
 	@Operation(summary = "토큰 확인 API", description = "토큰의 입력을 받아 만료 여부를 알 수 있게 합니다.")
 	@ApiResponse(responseCode = "200", description = "비밀번호 변경 발송 예시")
-	ResponseEntity<Void> checkToken(RefreshTokenRequestDto requestDto);
+	ResponseEntity<Void> checkToken(@Valid @RequestBody RefreshTokenRequestDto requestDto);
 
 	@Operation(
 			summary = "비밀번호 변경 API",

@@ -32,7 +32,7 @@ public class MemberController implements SwaggerMemberController {
 	private final MemberService memberService;
 	private final JWTUtil jwtUtil;
 
-	@PostMapping("/register")
+	@PostMapping(value = "/register", consumes = "application/json")
 	public ResponseEntity<RegisterResponseDto> registerEmailAndPassword(
 			@Valid @RequestBody RegisterEmailAndPasswordRequestDto dto) {
 		RegisterResponseDto responseDto = memberService.registerEmailAndPassword(dto);
@@ -40,7 +40,7 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 	}
 
-	@RequestMapping(method = RequestMethod.HEAD)
+	@GetMapping
 	public ResponseEntity<Void> checkUsername(@RequestParam(name = "username") String username) {
 		Boolean isValid = memberService.checkUsername(username);
 
@@ -50,7 +50,7 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.status(HttpStatus.CONFLICT).build();
 	}
 
-	@PutMapping("/{id}")
+	@PutMapping(value = "/{id}", consumes = "multipart/form-data")
 	public ResponseEntity<MemberResponseDto> registerDetail(
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
@@ -59,7 +59,7 @@ public class MemberController implements SwaggerMemberController {
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
-			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
+			@RequestParam(name = "verificationFile") MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@PathVariable(name = "id") Long id) {
 
@@ -84,12 +84,12 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@PostMapping("/login")
+	@PostMapping(value = "/login", consumes = "application/json")
 	public ResponseEntity<LoginSuccessDto> login(@Valid @RequestBody LoginDto dto) {
 		return memberService.login(dto);
 	}
 
-	@PostMapping("/refresh-token")
+	@PostMapping(value = "/refresh-token", consumes = "application/json")
 	public ResponseEntity<Void> checkToken(@Valid @RequestBody RefreshTokenRequestDto requestDto) {
 
 		boolean isTokenExpired = jwtUtil.isExpired(requestDto.getToken());
@@ -99,14 +99,14 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.ok().build();
 	}
 
-	@PutMapping("/change-password")
+	@GetMapping("/change-password")
 	public ResponseEntity<Void> changePassword(@RequestParam(name = "email") String email) {
 		memberService.changePassword(email);
 
 		return new ResponseEntity<>(OK);
 	}
 
-	@GetMapping("/random")
+	@GetMapping(value = "/random", consumes = "multipart/form-data")
 	public ResponseEntity<List<MemberResponseDto>> getRandomMembers(
 			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
 		List<MemberResponseDto> responseDto = memberService.getRandomMembers(count, auth.getName());
