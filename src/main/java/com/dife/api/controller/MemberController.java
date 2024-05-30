@@ -106,7 +106,7 @@ public class MemberController implements SwaggerMemberController {
 		return new ResponseEntity<>(OK);
 	}
 
-	@GetMapping(value = "/random", consumes = "multipart/form-data")
+	@GetMapping("/random")
 	public ResponseEntity<List<MemberResponseDto>> getRandomMembers(
 			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
 		List<MemberResponseDto> responseDto = memberService.getRandomMembers(count, auth.getName());
