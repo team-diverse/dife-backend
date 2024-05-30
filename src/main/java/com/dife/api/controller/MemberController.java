@@ -99,7 +99,7 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.ok().build();
 	}
 
-	@PutMapping(value = "/change-password", consumes = "multipart/form-data")
+	@GetMapping("/change-password")
 	public ResponseEntity<Void> changePassword(@RequestParam(name = "email") String email) {
 		memberService.changePassword(email);
 
