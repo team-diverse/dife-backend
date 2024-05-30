@@ -50,7 +50,7 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.status(HttpStatus.CONFLICT).build();
 	}
 
-	@PutMapping("/{id}")
+	@PutMapping(value = "/{id}", consumes = "multipart/form-data")
 	public ResponseEntity<MemberResponseDto> registerDetail(
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
@@ -58,8 +58,8 @@ public class MemberController implements SwaggerMemberController {
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
-			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
-			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
+			@RequestParam(name = "profileImg") MultipartFile profileImg,
+			@RequestParam(name = "verificationFile") MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@PathVariable(name = "id") Long id) {
 
@@ -99,14 +99,14 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.ok().build();
 	}
 
-	@PutMapping("/change-password")
+	@PutMapping(value = "/change-password", consumes = "multipart/form-data")
 	public ResponseEntity<Void> changePassword(@RequestParam(name = "email") String email) {
 		memberService.changePassword(email);
 
 		return new ResponseEntity<>(OK);
 	}
 
-	@GetMapping("/random")
+	@GetMapping(value = "/random", consumes = "multipart/form-data")
 	public ResponseEntity<List<MemberResponseDto>> getRandomMembers(
 			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
 		List<MemberResponseDto> responseDto = memberService.getRandomMembers(count, auth.getName());

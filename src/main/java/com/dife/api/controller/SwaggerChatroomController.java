@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<ChatroomResponseDto> createChatroom(
-			ChatroomPostRequestDto requestDto, Authentication authentication);
+			@Valid @RequestBody ChatroomPostRequestDto requestDto, Authentication authentication);
 
 	@Operation(summary = "채팅방 생성2 API", description = "사용자가 DTO를 작성해 PUT요청으로 그룹 채팅방2 생성")
 	@ApiResponse(

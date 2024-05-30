@@ -92,15 +92,16 @@ public class MemberService {
 			MultipartFile verificationFile) {
 		Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 
-		if (profileImg.isEmpty() || member.getProfileFileName().isEmpty())
+		if (profileImg == null || profileImg.isEmpty() || member.getProfileFileName().isEmpty())
 			member.setProfileFileName("empty");
 		else {
 			FileDto profileImgPath = fileService.upload(profileImg);
 			member.setProfileFileName(profileImgPath.getName());
 		}
 
-		if (verificationFile.isEmpty() || verificationFile.isEmpty())
-			member.setVerificationFileName("empty");
+		if (verificationFile == null
+				|| verificationFile.isEmpty()
+				|| member.getVerificationFileName().isEmpty()) member.setVerificationFileName("empty");
 		else {
 			FileDto verificationImgPath = fileService.upload(verificationFile);
 			member.setVerificationFileName(verificationImgPath.getName());

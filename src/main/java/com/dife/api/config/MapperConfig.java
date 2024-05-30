@@ -95,6 +95,14 @@ public class MapperConfig {
 				.typeMap(Member.class, MemberResponseDto.class)
 				.addMappings(
 						mapper -> {
+							mapper.map(Member::getUsername, MemberResponseDto::setUsername);
+							mapper.map(Member::getIsKorean, MemberResponseDto::setIsKorean);
+							mapper.map(Member::getBio, MemberResponseDto::setBio);
+							mapper.map(Member::getMbti, MemberResponseDto::setMbti);
+							mapper.map(Member::getIsPublic, MemberResponseDto::setIsPublic);
+							mapper.map(Member::getProfileFileName, MemberResponseDto::setProfileFileName);
+							mapper.map(Member::getIsVerified, MemberResponseDto::setIsVerified);
+
 							mapper.map(
 									src ->
 											Optional.ofNullable(src.getHobbies()).orElse(Collections.emptySet()).stream()
