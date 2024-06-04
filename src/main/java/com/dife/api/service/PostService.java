@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +28,7 @@ public class PostService {
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 
-	public PostResponseDto create(PostCreateRequestDto requestDto, String memberEmail) {
+	public PostResponseDto createPost(PostCreateRequestDto requestDto, String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -46,17 +47,15 @@ public class PostService {
 
 	@Transactional(readOnly = true)
 	public List<PostResponseDto> getPostsByBoardType(BoardCategory boardCategory) {
-		List<Post> posts = postRepository.findPostsByBoardType(boardCategory);
+		Sort sort = Sort.by(Sort.Direction.DESC, "created");
+		List<Post> posts = postRepository.findPostsByBoardType(boardCategory, sort);
 
 		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
 	}
 
 	@Transactional(readOnly = true)
 	public PostResponseDto getPost(Long id) {
-		Post post =
-				postRepository
-						.findById(id)
-						.orElseThrow(() -> new PostNotFoundException("해당 게시물이 존재하지 않습니다!"));
+		Post post = postRepository.findById(id).orElseThrow(PostNotFoundException::new);
 
 		return modelMapper.map(post, PostResponseDto.class);
 	}
@@ -67,9 +66,7 @@ public class PostService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Post post =
-				postRepository
-						.findByMemberAndId(member, id)
-						.orElseThrow(() -> new PostNotFoundException("해당 게시물이 존재하지 않습니다!"));
+				postRepository.findByMemberAndId(member, id).orElseThrow(PostNotFoundException::new);
 
 		post.setBoardType(dto.getBoardType());
 		post.setTitle(dto.getTitle());
@@ -85,9 +82,7 @@ public class PostService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Post post =
-				postRepository
-						.findByMemberAndId(member, id)
-						.orElseThrow(() -> new PostNotFoundException("해당 게시물이 존재하지 않습니다!"));
+				postRepository.findByMemberAndId(member, id).orElseThrow(PostNotFoundException::new);
 
 		postRepository.delete(post);
 	}

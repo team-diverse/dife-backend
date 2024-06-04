@@ -5,7 +5,6 @@ import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.BoardCategory;
 import com.dife.api.model.dto.*;
-import com.dife.api.service.MemberService;
 import com.dife.api.service.PostService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/posts")
 public class BoardController implements SwaggerBoardController {
 
-	private final MemberService memberService;
 	private final PostService postService;
 
 	@GetMapping
@@ -28,10 +26,10 @@ public class BoardController implements SwaggerBoardController {
 	}
 
 	@PostMapping(consumes = "application/json")
-	public ResponseEntity<PostResponseDto> create(
+	public ResponseEntity<PostResponseDto> createPost(
 			@RequestBody PostCreateRequestDto requestDto, Authentication auth) {
 
-		PostResponseDto responseDto = postService.create(requestDto, auth.getName());
+		PostResponseDto responseDto = postService.createPost(requestDto, auth.getName());
 
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}

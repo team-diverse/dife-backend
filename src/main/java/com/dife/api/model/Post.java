@@ -1,6 +1,7 @@
 package com.dife.api.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,10 +19,12 @@ public class Post extends BaseTimeEntity {
 
 	private String content;
 
-	private Boolean isPublic;
+	private Boolean isPublic = true;
 
 	@Enumerated(EnumType.STRING)
 	private BoardCategory boardType = BoardCategory.FREE;
+
+	private Integer likeCount = 0;
 
 	private Integer viewCount = 0;
 

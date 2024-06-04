@@ -24,6 +24,8 @@ public class PostResponseDto {
 
 	private Boolean isPublic;
 
+	private Integer likeCount;
+
 	private Integer viewCount;
 
 	private LocalDateTime created;
@@ -31,6 +33,6 @@ public class PostResponseDto {
 	private LocalDateTime modified;
 
 	@NotNull
-	@JsonProperty("member")
+	@JsonProperty("writer")
 	private Member Member;
 }
