@@ -31,4 +31,7 @@ public class Post extends BaseTimeEntity {
 	@ManyToOne
 	@JoinColumn(name = "member_id")
 	private Member member;
+
+	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private List<Comment> comments;
 }
