@@ -42,16 +42,22 @@ public class CommentService {
 	}
 
 	public CommentResponseDto createComment(
-			CommentCreateRequestDto requestDto, Long postId, String memberEmail) {
+			CommentCreateRequestDto requestDto, Long postId, Long parentCommentId, String memberEmail) {
 		Member writer =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
+		Comment parentComment =
+				(parentCommentId != null) ? commentRepository.findById(parentCommentId).orElse(null) : null;
 		Comment comment = new Comment();
-		comment.setPost(post);
+		comment.setPost(parentComment == null ? post : null);
+		comment.setParentComment(parentComment);
 		comment.setWriter(writer);
 		comment.setContent(requestDto.getContent());
 		comment.setIsPublic(requestDto.getIsPublic());
+		if (parentComment != null) {
+			parentComment.getChildrenComments().add(comment);
+		}
 
 		commentRepository.save(comment);
 

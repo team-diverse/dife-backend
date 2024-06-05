@@ -1,7 +1,10 @@
 package com.dife.api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,4 +34,13 @@ public class Comment extends BaseTimeEntity {
 	@JoinColumn(name = "post_id")
 	@JsonIgnore
 	private Post post;
+
+	@ManyToOne
+	@JoinColumn(name = "parent_id")
+	@JsonIgnore
+	private Comment parentComment;
+
+	@OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
+	@JsonBackReference
+	private List<Comment> childrenComments = new ArrayList<>();
 }

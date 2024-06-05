@@ -21,10 +21,11 @@ public class CommentController {
 	public ResponseEntity<CommentResponseDto> createComment(
 			@RequestBody CommentCreateRequestDto requestDto,
 			@PathVariable(name = "postId") Long postId,
+			@RequestParam(name = "parentCommentId", required = false) Long parentCommentId,
 			Authentication auth) {
 
 		CommentResponseDto responseDto =
-				commentService.createComment(requestDto, postId, auth.getName());
+				commentService.createComment(requestDto, postId, parentCommentId, auth.getName());
 
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
