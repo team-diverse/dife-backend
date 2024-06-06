@@ -49,6 +49,7 @@ public class FileService {
 		}
 
 		File fileInfo = new File();
+		fileInfo.setOriginalName(originalFilename);
 		fileInfo.setName(fileName);
 		fileInfo.setSize(fileSize);
 		fileInfo.setUrl("https://");

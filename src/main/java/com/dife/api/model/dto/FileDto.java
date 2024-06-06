@@ -15,6 +15,8 @@ import lombok.Setter;
 public class FileDto {
 	private Long id;
 
+	@NotNull private String originalName;
+
 	@NotNull private String name;
 
 	@NotNull private String size;
