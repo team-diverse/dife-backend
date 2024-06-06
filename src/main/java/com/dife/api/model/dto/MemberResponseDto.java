@@ -46,7 +46,9 @@ public class MemberResponseDto {
 	@Schema(description = "취미", example = "Soccer")
 	private Set<String> hobbies;
 
-	@Schema(description = "프로필 파일 이름", example = "cookie.jpeg")
+	@Schema(
+			description = "프로필 파일 접근 가능한 S3경로",
+			example = "https://dife-bucket.s3.amazonaws.com/cookie.jpeg")
 	private String profileFileName;
 
 	@Schema(description = "한줄 소개", example = "hello")

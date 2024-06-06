@@ -96,7 +96,8 @@ public class MemberService {
 			member.setProfileFileName("empty");
 		else {
 			FileDto profileImgPath = fileService.upload(profileImg);
-			member.setProfileFileName(profileImgPath.getName());
+			String imageUrl = fileService.getImageUrl(profileImgPath.getOriginalName());
+			member.setProfileFileName(imageUrl);
 		}
 
 		if (verificationFile == null
@@ -117,20 +118,25 @@ public class MemberService {
 			if (!hobbyRepository.existsHobbyByNameAndMember(hobbyName, member)) {
 				Hobby nHobby = new Hobby();
 				nHobby.setName(hobbyName);
+				nHobby.setMember(member);
 				hobbyRepository.save(nHobby);
 				myHobbies.add(nHobby);
 			}
 		}
+		member.setHobbies(myHobbies);
 
 		Set<Language> myLanguages = member.getLanguages();
 		for (String languageName : languages) {
 			if (!languageRepository.existsLanguageByNameAndMember(languageName, member)) {
 				Language nLanguage = new Language();
 				nLanguage.setName(languageName);
+				nLanguage.setMember(member);
 				languageRepository.save(nLanguage);
 				myLanguages.add(nLanguage);
 			}
 		}
+
+		member.setLanguages(myLanguages);
 
 		member.setIsPublic(isPublic);
 		memberRepository.save(member);

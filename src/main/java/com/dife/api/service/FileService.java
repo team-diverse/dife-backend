@@ -58,4 +58,8 @@ public class FileService {
 
 		return modelMapper.map(fileInfo, FileDto.class);
 	}
+
+	public String getImageUrl(String fileName) {
+		return String.format("https://%s.s3.amazonaws.com/%s", bucketName, fileName);
+	}
 }
