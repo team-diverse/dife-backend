@@ -5,6 +5,7 @@ import com.dife.api.model.Format;
 import com.dife.api.model.dto.FileDto;
 import com.dife.api.repository.FileRepository;
 import java.io.IOException;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 public class FileService {
 	private final FileRepository fileRepository;
 	private final S3Client s3Client;
+	private final S3Presigner presigner;
 	private final ModelMapper modelMapper;
 
 	@Value("${spring.aws.bucket-name}")
@@ -59,7 +65,27 @@ public class FileService {
 		return modelMapper.map(fileInfo, FileDto.class);
 	}
 
-	public String getImageUrl(String fileName) {
-		return String.format("https://%s.s3.amazonaws.com/%s", bucketName, fileName);
+	public String getPresignUrl(String fileName) {
+		if (fileName == null || fileName.equals("empty")) {
+			return null;
+		}
+
+		GetObjectRequest getObjectRequest =
+				GetObjectRequest.builder().bucket(bucketName).key(fileName).build();
+
+		GetObjectPresignRequest getObjectPresignRequest =
+				GetObjectPresignRequest.builder()
+						.signatureDuration(Duration.ofMinutes(5))
+						.getObjectRequest(getObjectRequest)
+						.build();
+
+		PresignedGetObjectRequest presignedGetObjectRequest =
+				presigner.presignGetObject(getObjectPresignRequest);
+
+		String url = presignedGetObjectRequest.url().toString();
+
+		presigner.close();
+
+		return url;
 	}
 }

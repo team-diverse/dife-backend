@@ -96,8 +96,7 @@ public class MemberService {
 			member.setProfileFileName("empty");
 		else {
 			FileDto profileImgPath = fileService.upload(profileImg);
-			String imageUrl = fileService.getImageUrl(profileImgPath.getOriginalName());
-			member.setProfileFileName(imageUrl);
+			member.setProfileFileName(profileImgPath.getOriginalName());
 		}
 
 		if (verificationFile == null
@@ -172,8 +171,10 @@ public class MemberService {
 	public MemberResponseDto getMember(String email) {
 
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
 
-		return memberModelMapper.map(member, MemberResponseDto.class);
+		responseDto.setProfilePresignUrl(fileService.getPresignUrl(member.getProfileFileName()));
+		return responseDto;
 	}
 
 	public void changePassword(String email) {
