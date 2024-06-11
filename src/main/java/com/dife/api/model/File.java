@@ -21,6 +21,9 @@ public class File {
 	private Long id;
 
 	@Column(nullable = false)
+	private String originalName;
+
+	@Column(nullable = false)
 	private String name;
 
 	@Column(nullable = false)
