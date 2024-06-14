@@ -2,6 +2,9 @@ package com.dife.api.redis;
 
 import com.dife.api.model.dto.ChatRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
@@ -27,13 +30,26 @@ public class RedisSubscriber implements MessageListener {
 			ObjectMapper objectMapper = new ObjectMapper();
 			ChatRequestDto dto = objectMapper.readValue(publishMessage, ChatRequestDto.class);
 			String destination = "/sub/chatroom/" + dto.getChatroomId();
-			String nMessage = "";
+
 			switch (dto.getChatType()) {
-				case ENTER -> nMessage = dto.getUsername() + "님이 입장하셨습니다!";
-				case CHAT -> nMessage = dto.getMessage();
-				case EXIT -> nMessage = dto.getUsername() + "님이 퇴장하셨습니다!";
+				case ENTER:
+					Map<String, Object> enterMessage = new HashMap<>();
+					enterMessage.put("message", dto.getUsername() + "님이 입장하셨습니다!");
+					messagingTemplate.convertAndSend(destination, enterMessage);
+					break;
+				case CHAT:
+					Map<String, Object> chatMessage = new HashMap<>();
+					chatMessage.put("username", dto.getUsername());
+					chatMessage.put("message", dto.getMessage());
+					chatMessage.put("created", LocalDateTime.now());
+					messagingTemplate.convertAndSend(destination, chatMessage);
+					break;
+				case EXIT:
+					Map<String, Object> exitMessage = new HashMap<>();
+					exitMessage.put("message", dto.getUsername() + "님이 퇴장하셨습니다!");
+					messagingTemplate.convertAndSend(destination, exitMessage);
+					break;
 			}
-			messagingTemplate.convertAndSend(destination, nMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}

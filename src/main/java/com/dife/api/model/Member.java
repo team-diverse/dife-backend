@@ -66,9 +66,9 @@ public class Member extends BaseTimeEntity {
 	@OneToMany(mappedBy = "toMember")
 	private Set<Connect> received;
 
-	@ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
+	@ManyToMany(mappedBy = "members")
 	@JsonBackReference
-	private Set<Chatroom> chatrooms;
+	private Set<Chatroom> chatrooms = new HashSet<>();
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
 	@JsonIgnore

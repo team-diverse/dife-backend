@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,4 +30,8 @@ public class Chat {
 	@JoinColumn(name = "chatroom_id")
 	@JsonIgnore
 	private Chatroom chatroom;
+
+	private String username;
+
+	private LocalDateTime created;
 }

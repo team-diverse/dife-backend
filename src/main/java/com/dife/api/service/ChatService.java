@@ -11,6 +11,7 @@ import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
 import com.dife.api.repository.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -89,6 +90,8 @@ public class ChatService {
 			Chat chat = new Chat();
 			chat.setMessage(dto.getMessage());
 			chat.setChatroom(chatroom);
+			chat.setUsername(username);
+			chat.setCreated(LocalDateTime.now());
 
 			chatroom.getChats().add(chat);
 			chatRepository.save(chat);
