@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Board API", description = "게시판 서비스 API")
 public interface SwaggerBoardController {
 
-	@Operation(summary = "게시판 조회 API", description = "게시판 종류를 입력해 게시판을 조회합니다.")
+	@Operation(summary = "게시판 조회 API", description = "게시판 종류를 입력해 최신순으로 게시판을 조회합니다.")
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardCategory boardCategory);
 
@@ -24,7 +24,7 @@ public interface SwaggerBoardController {
 			responseCode = "201",
 			description = "게시글 생성 성공 예시",
 			content = @Content(mediaType = "application/json"))
-	ResponseEntity<PostResponseDto> create(PostCreateRequestDto requestDto, Authentication auth);
+	ResponseEntity<PostResponseDto> createPost(PostCreateRequestDto requestDto, Authentication auth);
 
 	@Operation(summary = "단일 게시글 조회 API", description = "게시글 ID를 이용해 게시글을 가져옵니다.")
 	@ApiResponse(
