@@ -2,16 +2,11 @@ package com.dife.api.service;
 
 import static java.util.stream.Collectors.toList;
 
-import com.dife.api.exception.DuplicateLikeException;
-import com.dife.api.exception.LikeNotFoundException;
-import com.dife.api.exception.MemberNotFoundException;
-import com.dife.api.exception.PostNotFoundException;
+import com.dife.api.exception.*;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.LikeCreateRequestDto;
 import com.dife.api.model.dto.PostResponseDto;
-import com.dife.api.repository.LikePostRepository;
-import com.dife.api.repository.MemberRepository;
-import com.dife.api.repository.PostRepository;
+import com.dife.api.repository.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class LikeService {
 
 	private final PostRepository postRepository;
+	private final CommentRepository commentRepository;
 	private final MemberRepository memberRepository;
 	private final LikePostRepository likePostRepository;
+	private final LikeCommentRepository likeCommentRepository;
 
 	private final ModelMapper modelMapper;
 
@@ -50,6 +47,7 @@ public class LikeService {
 				createLikePost(dto.getPostId(), memberEmail);
 				break;
 			case COMMENT:
+				createLikeComment(dto.getCommentId(), memberEmail);
 		}
 	}
 
@@ -80,5 +78,20 @@ public class LikeService {
 		postLike.getPost().getPostLikes().remove(postLike);
 		member.getPostLikes().remove(postLike);
 		likePostRepository.delete(postLike);
+	}
+
+	public void createLikeComment(Long commentId, String memberEmail) {
+		Comment comment =
+				commentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		if (likeCommentRepository.existsByCommentAndMember(comment, member)) {
+			throw new DuplicateLikeException();
+		}
+		LikeComment likeComment = new LikeComment();
+		likeComment.setComment(comment);
+		likeComment.setMember(member);
+		likeCommentRepository.save(likeComment);
 	}
 }

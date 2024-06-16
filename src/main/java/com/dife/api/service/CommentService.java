@@ -1,7 +1,5 @@
 package com.dife.api.service;
 
-import static java.util.stream.Collectors.toList;
-
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.Comment;
@@ -13,6 +11,7 @@ import com.dife.api.repository.CommentRepository;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -37,8 +36,13 @@ public class CommentService {
 		List<Comment> comments = commentRepository.findCommentsByPost(post);
 
 		return comments.stream()
-				.map(c -> modelMapper.map(c, CommentResponseDto.class))
-				.collect(toList());
+				.map(
+						comment -> {
+							CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
+							dto.setLikesCount(comment.getCommentLikes().size());
+							return dto;
+						})
+				.collect(Collectors.toList());
 	}
 
 	public CommentResponseDto createComment(
