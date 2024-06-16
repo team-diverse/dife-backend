@@ -3,6 +3,7 @@ package com.dife.api.service;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.DuplicateLikeException;
+import com.dife.api.exception.LikeNotFoundException;
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
@@ -64,5 +65,20 @@ public class LikeService {
 		likePost.setPost(post);
 		likePost.setMember(member);
 		likePostRepository.save(likePost);
+	}
+
+	public void deleteLikePost(Long postId, String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+		LikePost likePost =
+				likePostRepository
+						.findByPostAndMember(post, member)
+						.orElseThrow(LikeNotFoundException::new);
+
+		likePost.getPost().getPostLikes().remove(likePost);
+		member.getPostLikes().remove(likePost);
+		likePostRepository.delete(likePost);
 	}
 }

@@ -31,4 +31,11 @@ public class LikeController {
 		likeService.createLike(requestDto, auth.getName());
 		return new ResponseEntity<>(OK);
 	}
+
+	@DeleteMapping
+	public ResponseEntity<Void> deleteLikePost(
+			@RequestParam(name = "postId", required = false) Long postId, Authentication auth) {
+		likeService.deleteLikePost(postId, auth.getName());
+		return new ResponseEntity<>(OK);
+	}
 }
