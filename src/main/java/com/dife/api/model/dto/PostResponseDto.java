@@ -24,7 +24,7 @@ public class PostResponseDto {
 
 	private Boolean isPublic;
 
-	private Integer likeCount;
+	private Integer likesCount;
 
 	private Integer viewCount;
 

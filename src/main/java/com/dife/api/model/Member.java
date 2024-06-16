@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -77,4 +78,8 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	@OneToMany(mappedBy = "member")
 	private Set<Post> posts;
+
+	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
+	@JsonIgnore
+	private List<LikePost> PostLikes;
 }

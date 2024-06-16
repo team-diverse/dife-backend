@@ -56,8 +56,10 @@ public class PostService {
 	@Transactional(readOnly = true)
 	public PostResponseDto getPost(Long id) {
 		Post post = postRepository.findById(id).orElseThrow(PostNotFoundException::new);
+		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
+		responseDto.setLikesCount(post.getPostLikes().size());
 
-		return modelMapper.map(post, PostResponseDto.class);
+		return responseDto;
 	}
 
 	public PostResponseDto updatePost(Long id, PostUpdateRequestDto dto, String memberEmail) {
