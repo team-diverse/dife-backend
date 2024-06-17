@@ -105,46 +105,81 @@ public class ChatroomService {
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
-		Set<Tag> myTags = setting.getTags();
+		Set<Tag> existingTags = tagRepository.findTagsByChatroomSetting(setting);
+		Map<String, Tag> nameToTagMap =
+				existingTags.stream().collect(Collectors.toMap(Tag::getName, Function.identity()));
+
+		Set<Tag> updatedTags = new HashSet<>();
+
 		for (String tagName : requestDto.getTags()) {
-			if (!tagRepository.existsTagByNameAndChatroomSetting(tagName, setting)) {
+			if (nameToTagMap.containsKey(tagName)) {
+				updatedTags.add(nameToTagMap.get(tagName));
+			} else {
 				Tag nTag = new Tag();
 				nTag.setName(tagName);
-				nTag.setChatroom_setting(setting);
+				nTag.setChatroomSetting(setting);
 				tagRepository.save(nTag);
-				myTags.add(nTag);
+				updatedTags.add(nTag);
 			}
 		}
-		setting.setTags(myTags);
+		existingTags.stream()
+				.filter(tag -> !requestDto.getTags().contains(tag.getName()))
+				.forEach(tagRepository::delete);
+
+		setting.setTags(updatedTags);
+
 		if (requestDto.getMaxCount() > 30 || requestDto.getMaxCount() < 3)
 			throw new ChatroomException("그룹 채팅방 인원은 3명 이상 30명 이하여야 합니다!");
 		setting.setMaxCount(requestDto.getMaxCount());
 
-		Set<Language> myLanguages = setting.getLanguages();
+		Set<Language> existingLanguages = languageRepository.findLanguagesByChatroomSetting(setting);
+		Map<String, Language> nameToLanguageMap =
+				existingLanguages.stream()
+						.collect(Collectors.toMap(Language::getName, Function.identity()));
+
+		Set<Language> updatedLanguages = new HashSet<>();
+
 		for (String languageName : requestDto.getLanguages()) {
-			if (!languageRepository.existsLanguageByNameAndChatroomSetting(languageName, setting)) {
+			if (nameToLanguageMap.containsKey(languageName)) {
+				updatedLanguages.add(nameToLanguageMap.get(languageName));
+			} else {
 				Language nLanguage = new Language();
 				nLanguage.setName(languageName);
-				nLanguage.setChatroom_setting(setting);
+				nLanguage.setChatroomSetting(setting);
 				languageRepository.save(nLanguage);
-				myLanguages.add(nLanguage);
+				updatedLanguages.add(nLanguage);
 			}
 		}
-		setting.setLanguages(myLanguages);
+		existingLanguages.stream()
+				.filter(language -> !requestDto.getLanguages().contains(language.getName()))
+				.forEach(languageRepository::delete);
 
-		Set<GroupPurpose> myGroupPurposes = setting.getPurposes();
+		setting.setLanguages(updatedLanguages);
+
+		Set<GroupPurpose> existingGroupPurposes =
+				groupPurposesRepository.findGroupPurposesByChatroomSetting(setting);
+		Map<String, GroupPurpose> nameToGroupPurposeMap =
+				existingGroupPurposes.stream()
+						.collect(Collectors.toMap(GroupPurpose::getName, Function.identity()));
+
+		Set<GroupPurpose> updatedGroupPurposes = new HashSet<>();
+
 		for (String groupPurposeName : requestDto.getPurposes()) {
-			if (!groupPurposesRepository.existsGroupPurposeByNameAndChatroomSetting(
-					groupPurposeName, setting)) {
+			if (nameToGroupPurposeMap.containsKey(groupPurposeName)) {
+				updatedGroupPurposes.add(nameToGroupPurposeMap.get(groupPurposeName));
+			} else {
 				GroupPurpose nPurpose = new GroupPurpose();
 				nPurpose.setName(groupPurposeName);
-				nPurpose.setChatroom_setting(setting);
+				nPurpose.setChatroomSetting(setting);
 				groupPurposesRepository.save(nPurpose);
 				myGroupPurposes.add(nPurpose);
 			}
 		}
-		setting.setPurposes(myGroupPurposes);
+		existingGroupPurposes.stream()
+				.filter(groupPurpose -> !requestDto.getPurposes().contains(groupPurpose.getName()))
+				.forEach(groupPurposesRepository::delete);
 
+		setting.setPurposes(updatedGroupPurposes);
 		Boolean isPublic = requestDto.getIsPublic();
 		setting.setIsPublic(isPublic);
 
