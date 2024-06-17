@@ -3,7 +3,6 @@ package com.dife.api.model.dto;
 import com.dife.api.model.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Set;
 import lombok.*;
 
@@ -23,9 +22,10 @@ public class ChatroomResponseDto {
 
 	private String description;
 
-	private Map<String, String> activeSessions;
-
 	private String profileImgName;
+
+	@Schema(description = "Presigned S3경로")
+	private String profilePresignUrl;
 
 	private Set<String> tags;
 
