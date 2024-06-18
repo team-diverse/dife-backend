@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +36,7 @@ public class MemberController implements SwaggerMemberController {
 			@Valid @RequestBody RegisterEmailAndPasswordRequestDto dto) {
 		RegisterResponseDto responseDto = memberService.registerEmailAndPassword(dto);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 
 	@GetMapping
@@ -47,7 +46,7 @@ public class MemberController implements SwaggerMemberController {
 		if (isValid) {
 			return ResponseEntity.ok().build();
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).build();
+		return ResponseEntity.status(CONFLICT).build();
 	}
 
 	@PutMapping(value = "/{id}", consumes = "multipart/form-data")
@@ -75,7 +74,7 @@ public class MemberController implements SwaggerMemberController {
 						id,
 						profileImg,
 						verificationFile);
-		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+		return ResponseEntity.status(OK).body(responseDto);
 	}
 
 	@GetMapping("/profile")

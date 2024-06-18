@@ -1,12 +1,14 @@
 package com.dife.api.controller;
 
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+
 import com.dife.api.model.ChatroomType;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.ChatroomService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -26,14 +28,14 @@ public class ChatroomController implements SwaggerChatroomController {
 			ChatroomType chatroomType, Authentication authentication) {
 		List<ChatroomResponseDto> responseDto =
 				chatroomService.getChatrooms(chatroomType, authentication.getName());
-		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+		return ResponseEntity.status(OK).body(responseDto);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(
 			@PathVariable(name = "id") Long chatroomId) {
 		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId);
-		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+		return ResponseEntity.status(OK).body(responseDto);
 	}
 
 	@PostMapping
@@ -49,7 +51,7 @@ public class ChatroomController implements SwaggerChatroomController {
 				chatroomService.createChatroom(
 						profileImg, chatroomType, name, description, toMemberId, authentication.getName());
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 
 	@PutMapping(value = "/{id}", consumes = "application/json")
@@ -60,6 +62,6 @@ public class ChatroomController implements SwaggerChatroomController {
 
 		ChatroomResponseDto responseDto =
 				chatroomService.registerDetail(requestDto, chatroomId, auth.getName());
-		return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+		return ResponseEntity.status(OK).body(responseDto);
 	}
 }
