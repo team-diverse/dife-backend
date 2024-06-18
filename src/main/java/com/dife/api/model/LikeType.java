@@ -1,6 +1,6 @@
 package com.dife.api.model;
 
 public enum LikeType {
-	POSTLIKES,
-	COMMENTLIKES
+	POST,
+	COMMENT
 }

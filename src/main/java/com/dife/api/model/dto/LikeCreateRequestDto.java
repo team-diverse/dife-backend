@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 public class LikeCreateRequestDto {
 
-	private LikeType likeType;
+	private LikeType type;
 
 	private Long postId;
 

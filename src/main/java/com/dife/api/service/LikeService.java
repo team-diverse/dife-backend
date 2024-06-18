@@ -36,20 +36,20 @@ public class LikeService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		List<LikePost> likePosts = likePostRepository.findLikePostsByMember(member);
+		List<PostLike> postLikes = likePostRepository.findPostLikesByMember(member);
 
 		List<Post> posts =
-				likePosts.stream().map(LikePost::getPost).distinct().collect(Collectors.toList());
+				postLikes.stream().map(PostLike::getPost).distinct().collect(Collectors.toList());
 
 		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
 	}
 
 	public void createLike(LikeCreateRequestDto dto, String memberEmail) {
-		switch (dto.getLikeType()) {
-			case POSTLIKES:
+		switch (dto.getType()) {
+			case POST:
 				createLikePost(dto.getPostId(), memberEmail);
 				break;
-			case COMMENTLIKES:
+			case COMMENT:
 		}
 	}
 
@@ -61,10 +61,10 @@ public class LikeService {
 		if (likePostRepository.existsByPostAndMember(post, member)) {
 			throw new DuplicateLikeException();
 		}
-		LikePost likePost = new LikePost();
-		likePost.setPost(post);
-		likePost.setMember(member);
-		likePostRepository.save(likePost);
+		PostLike postLike = new PostLike();
+		postLike.setPost(post);
+		postLike.setMember(member);
+		likePostRepository.save(postLike);
 	}
 
 	public void deleteLikePost(Long postId, String memberEmail) {
@@ -72,13 +72,13 @@ public class LikeService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
-		LikePost likePost =
+		PostLike postLike =
 				likePostRepository
 						.findByPostAndMember(post, member)
 						.orElseThrow(LikeNotFoundException::new);
 
-		likePost.getPost().getPostLikes().remove(likePost);
-		member.getPostLikes().remove(likePost);
-		likePostRepository.delete(likePost);
+		postLike.getPost().getPostLikes().remove(postLike);
+		member.getPostLikes().remove(postLike);
+		likePostRepository.delete(postLike);
 	}
 }

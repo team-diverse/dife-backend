@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "post_likes")
-public class LikePost extends BaseTimeEntity {
+public class PostLike extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

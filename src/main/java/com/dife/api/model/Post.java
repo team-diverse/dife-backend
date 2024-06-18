@@ -34,5 +34,5 @@ public class Post extends BaseTimeEntity {
 	private List<Comment> comments;
 
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	private List<LikePost> PostLikes;
+	private List<PostLike> PostLikes;
 }
