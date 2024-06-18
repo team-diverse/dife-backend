@@ -31,25 +31,11 @@ public class RedisSubscriber implements MessageListener {
 			ChatRequestDto dto = objectMapper.readValue(publishMessage, ChatRequestDto.class);
 			String destination = "/sub/chatroom/" + dto.getChatroomId();
 
-			switch (dto.getChatType()) {
-				case ENTER:
-					Map<String, Object> enterMessage = new HashMap<>();
-					enterMessage.put("message", dto.getUsername() + "님이 입장하셨습니다!");
-					messagingTemplate.convertAndSend(destination, enterMessage);
-					break;
-				case CHAT:
-					Map<String, Object> chatMessage = new HashMap<>();
-					chatMessage.put("username", dto.getUsername());
-					chatMessage.put("message", dto.getMessage());
-					chatMessage.put("created", LocalDateTime.now());
-					messagingTemplate.convertAndSend(destination, chatMessage);
-					break;
-				case EXIT:
-					Map<String, Object> exitMessage = new HashMap<>();
-					exitMessage.put("message", dto.getUsername() + "님이 퇴장하셨습니다!");
-					messagingTemplate.convertAndSend(destination, exitMessage);
-					break;
-			}
+			Map<String, Object> enterMessage = new HashMap<>();
+			enterMessage.put("username", dto.getUsername());
+			enterMessage.put("message", dto.getMessage());
+			enterMessage.put("created", LocalDateTime.now());
+			messagingTemplate.convertAndSend(destination, enterMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
