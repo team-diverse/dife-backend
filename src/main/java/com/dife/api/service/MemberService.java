@@ -261,11 +261,12 @@ public class MemberService {
 				memberRepository.findAll().stream()
 						.filter(
 								member ->
-										safeMbtiCategories.contains(member.getMbti())
-												|| member.getHobbies().stream()
-														.anyMatch(hobby -> safeHobbies.contains(hobby.getName()))
-												|| member.getLanguages().stream()
-														.anyMatch(language -> safeLanguages.contains(language.getName())))
+										(safeMbtiCategories.contains(member.getMbti())
+														|| member.getHobbies().stream()
+																.anyMatch(hobby -> safeHobbies.contains(hobby.getName()))
+														|| member.getLanguages().stream()
+																.anyMatch(language -> safeLanguages.contains(language.getName())))
+												&& member.getIsPublic().equals(true))
 						.collect(Collectors.toList());
 
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
