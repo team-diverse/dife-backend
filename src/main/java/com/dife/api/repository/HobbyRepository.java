@@ -1,5 +1,6 @@
 package com.dife.api.repository;
 
+import com.dife.api.model.ChatroomSetting;
 import com.dife.api.model.Hobby;
 import com.dife.api.model.Member;
 import java.util.Set;
@@ -9,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface HobbyRepository extends JpaRepository<Hobby, Long> {
 	Set<Hobby> findHobbiesByMember(Member member);
+
+	Set<Hobby> findHobbiesByChatroomSetting(ChatroomSetting chatroomSetting);
 }

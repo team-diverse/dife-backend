@@ -122,28 +122,28 @@ public class ChatroomService {
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
-		Set<Tag> existingTags = tagRepository.findTagsByChatroomSetting(setting);
-		Map<String, Tag> nameToTagMap =
-				existingTags.stream().collect(Collectors.toMap(Tag::getName, Function.identity()));
+		Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByChatroomSetting(setting);
+		Map<String, Hobby> nameToHobbyMap =
+				existingHobbies.stream().collect(Collectors.toMap(Hobby::getName, Function.identity()));
 
-		Set<Tag> updatedTags = new HashSet<>();
+		Set<Hobby> updatedHobbies = new HashSet<>();
 
-		for (String tagName : requestDto.getTags()) {
-			if (nameToTagMap.containsKey(tagName)) {
-				updatedTags.add(nameToTagMap.get(tagName));
+		for (String hobbyName : requestDto.getHobbies()) {
+			if (nameToHobbyMap.containsKey(hobbyName)) {
+				updatedHobbies.add(nameToHobbyMap.get(hobbyName));
 			} else {
-				Tag nTag = new Tag();
-				nTag.setName(tagName);
-				nTag.setChatroomSetting(setting);
-				tagRepository.save(nTag);
-				updatedTags.add(nTag);
+				Hobby nHobby = new Hobby();
+				nHobby.setName(hobbyName);
+				nHobby.setChatroomSetting(setting);
+				hobbyRepository.save(nHobby);
+				updatedHobbies.add(nHobby);
 			}
 		}
-		existingTags.stream()
-				.filter(tag -> !requestDto.getTags().contains(tag.getName()))
-				.forEach(tagRepository::delete);
+		existingHobbies.stream()
+				.filter(hobby -> !requestDto.getHobbies().contains(hobby.getName()))
+				.forEach(hobbyRepository::delete);
 
-		setting.setTags(updatedTags);
+		setting.setHobbies(updatedHobbies);
 
 		if (requestDto.getMaxCount() > 30 || requestDto.getMaxCount() < 3)
 			throw new ChatroomException("그룹 채팅방 인원은 3명 이상 30명 이하여야 합니다!");

@@ -24,7 +24,7 @@ public class MapperConfig {
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 		modelMapper
-				.typeMap(Tag.class, String.class)
+				.typeMap(Hobby.class, String.class)
 				.setConverter(context -> context.getSource().getName());
 		modelMapper
 				.typeMap(Language.class, String.class)
@@ -50,12 +50,12 @@ public class MapperConfig {
 									src -> src.getChatroomSetting().getIsPublic(), ChatroomResponseDto::setIsPublic);
 							mapper.map(
 									src ->
-											Optional.ofNullable(src.getChatroomSetting().getTags())
+											Optional.ofNullable(src.getChatroomSetting().getHobbies())
 													.orElse(Collections.emptySet())
 													.stream()
-													.map(Tag::getName)
+													.map(Hobby::getName)
 													.collect(Collectors.toSet()),
-									ChatroomResponseDto::setTags);
+									ChatroomResponseDto::setHobbies);
 
 							mapper.map(
 									src ->
