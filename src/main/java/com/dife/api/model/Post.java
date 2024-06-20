@@ -24,8 +24,6 @@ public class Post extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private BoardCategory boardType = BoardCategory.FREE;
 
-	private Integer likeCount = 0;
-
 	private Integer viewCount = 0;
 
 	@ManyToOne
@@ -34,4 +32,7 @@ public class Post extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private List<Comment> comments;
+
+	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private List<PostLike> PostLikes;
 }
