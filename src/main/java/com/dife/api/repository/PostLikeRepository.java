@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LikePostRepository extends JpaRepository<PostLike, Long> {
+public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
 	List<PostLike> findPostLikesByMember(Member member);
 

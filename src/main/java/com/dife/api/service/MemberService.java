@@ -80,7 +80,7 @@ public class MemberService {
 		return true;
 	}
 
-	public MemberResponseDto registerDetail(
+	public MemberResponseDto update(
 			String username,
 			Boolean isKorean,
 			String bio,
