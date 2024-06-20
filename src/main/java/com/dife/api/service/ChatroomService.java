@@ -99,16 +99,19 @@ public class ChatroomService {
 
 		chatroomRepository.save(chatroom);
 
-		if (profileImg == null || profileImg.isEmpty() || setting.getProfileImgName().isEmpty())
+		if (setting.getProfileImgName().equals("empty") && profileImg.isEmpty()) {
 			setting.setProfileImgName("empty");
-		else {
-			FileDto profileImgPath = fileService.upload(profileImg);
-			setting.setProfileImgName(profileImgPath.getOriginalName());
+		} else {
+			if (!profileImg.isEmpty()) {
+				FileDto profileImgPath = fileService.upload(profileImg);
+				setting.setProfileImgName(profileImgPath.getOriginalName());
+			}
 		}
+
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public ChatroomResponseDto registerDetail(
+	public ChatroomResponseDto update(
 			GroupChatroomPutRequestDto requestDto, Long chatroomId, String memberEmail) {
 
 		Chatroom chatroom =

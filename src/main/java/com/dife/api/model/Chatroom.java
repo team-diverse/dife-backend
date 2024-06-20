@@ -1,5 +1,6 @@
 package com.dife.api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -37,7 +38,7 @@ public class Chatroom extends BaseTimeEntity {
 			name = "chatroom_member",
 			joinColumns = @JoinColumn(name = "chatroom_id"),
 			inverseJoinColumns = @JoinColumn(name = "member_id"))
-	@JsonManagedReference
+	@JsonBackReference
 	private Set<Member> members = new HashSet<>();
 
 	@OneToMany(mappedBy = "chatroom", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
