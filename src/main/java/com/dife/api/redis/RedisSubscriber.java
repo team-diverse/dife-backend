@@ -2,6 +2,9 @@ package com.dife.api.redis;
 
 import com.dife.api.model.dto.ChatRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
@@ -25,15 +28,15 @@ public class RedisSubscriber implements MessageListener {
 			String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(messageBody);
 
 			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.registerModule(new JavaTimeModule());
 			ChatRequestDto dto = objectMapper.readValue(publishMessage, ChatRequestDto.class);
 			String destination = "/sub/chatroom/" + dto.getChatroomId();
-			String nMessage = "";
-			switch (dto.getChatType()) {
-				case ENTER -> nMessage = dto.getUsername() + "님이 입장하셨습니다!";
-				case CHAT -> nMessage = dto.getMessage();
-				case EXIT -> nMessage = dto.getUsername() + "님이 퇴장하셨습니다!";
-			}
-			messagingTemplate.convertAndSend(destination, nMessage);
+
+			Map<String, Object> enterMessage = new HashMap<>();
+			enterMessage.put("username", dto.getUsername());
+			enterMessage.put("message", dto.getMessage());
+			enterMessage.put("created", dto.getCreated());
+			messagingTemplate.convertAndSend(destination, enterMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}

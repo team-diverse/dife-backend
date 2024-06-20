@@ -3,6 +3,7 @@ package com.dife.api.redis;
 import com.dife.api.model.dto.ChatRequestDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,6 +19,7 @@ public class RedisPublisher {
 
 	public void publish(ChatRequestDto dto) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
 		String jsonMessage = mapper.writeValueAsString(dto);
 
 		redisTemplate.convertAndSend(topic.getTopic(), jsonMessage);

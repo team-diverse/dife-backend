@@ -11,6 +11,7 @@ import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
 import com.dife.api.repository.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -71,7 +72,11 @@ public class ChatService {
 		chatroom.setChatroomSetting(setting);
 		headerAccessor.getSessionAttributes().put("username", username);
 
+		String enterMessage = username + "님이 입장하셨습니다!";
+		saveChat(username, chatroom, enterMessage);
+
 		dto.setUsername(member.getUsername());
+		dto.setMessage(enterMessage);
 		redisPublisher.publish(dto);
 		chatroomRepository.save(chatroom);
 	}
@@ -86,12 +91,7 @@ public class ChatService {
 		String username = (String) headerAccessor.getSessionAttributes().get("username");
 
 		if (dto.getMessage().length() <= 300) {
-			Chat chat = new Chat();
-			chat.setMessage(dto.getMessage());
-			chat.setChatroom(chatroom);
-
-			chatroom.getChats().add(chat);
-			chatRepository.save(chat);
+			saveChat(username, chatroom, dto.getMessage());
 			dto.setUsername(username);
 			redisPublisher.publish(dto);
 		}
@@ -120,10 +120,25 @@ public class ChatService {
 		chatroom.getMembers().remove(member);
 		disconnectHandler.disconnect(chatroomId, sessionId);
 
+		String exitMessage = username + "님이 퇴장하셨습니다!";
+		saveChat(username, chatroom, exitMessage);
+
+		dto.setMessage(exitMessage);
 		redisPublisher.publish(dto);
 		notificationHandler.isAlone(chatroom, sessionId);
 
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
+	}
+
+	public void saveChat(String username, Chatroom chatroom, String message) {
+		Chat chat = new Chat();
+		chat.setMessage(message);
+		chat.setChatroom(chatroom);
+		chat.setUsername(username);
+		chat.setCreated(LocalDateTime.now());
+
+		chatroom.getChats().add(chat);
+		chatRepository.save(chat);
 	}
 }
