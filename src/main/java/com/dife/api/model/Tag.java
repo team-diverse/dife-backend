@@ -20,5 +20,5 @@ public class Tag {
 	@ManyToOne
 	@JoinColumn(name = "chatroom_setting_id")
 	@JsonIgnore
-	private ChatroomSetting chatroom_setting;
+	private ChatroomSetting chatroomSetting;
 }

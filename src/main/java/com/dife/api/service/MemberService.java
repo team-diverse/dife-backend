@@ -11,6 +11,7 @@ import com.dife.api.repository.HobbyRepository;
 import com.dife.api.repository.LanguageRepository;
 import com.dife.api.repository.MemberRepository;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -112,30 +113,52 @@ public class MemberService {
 		member.setBio(bio);
 		member.setMbti(mbti);
 
-		Set<Hobby> myHobbies = member.getHobbies();
+		Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByMember(member);
+		Map<String, Hobby> nameToHobbyMap =
+				existingHobbies.stream().collect(Collectors.toMap(Hobby::getName, Function.identity()));
+
+		Set<Hobby> updatedHobbies = new HashSet<>();
+
 		for (String hobbyName : hobbies) {
-			if (!hobbyRepository.existsHobbyByNameAndMember(hobbyName, member)) {
+			if (nameToHobbyMap.containsKey(hobbyName)) {
+				updatedHobbies.add(nameToHobbyMap.get(hobbyName));
+			} else {
 				Hobby nHobby = new Hobby();
 				nHobby.setName(hobbyName);
 				nHobby.setMember(member);
 				hobbyRepository.save(nHobby);
-				myHobbies.add(nHobby);
+				updatedHobbies.add(nHobby);
 			}
 		}
-		member.setHobbies(myHobbies);
+		existingHobbies.stream()
+				.filter(hobby -> !hobbies.contains(hobby.getName()))
+				.forEach(hobbyRepository::delete);
 
-		Set<Language> myLanguages = member.getLanguages();
+		member.setHobbies(updatedHobbies);
+
+		Set<Language> existingLanguages = languageRepository.findLanguagesByMember(member);
+		Map<String, Language> nameToLanguageMap =
+				existingLanguages.stream()
+						.collect(Collectors.toMap(Language::getName, Function.identity()));
+
+		Set<Language> updatedLanguages = new HashSet<>();
+
 		for (String languageName : languages) {
-			if (!languageRepository.existsLanguageByNameAndMember(languageName, member)) {
+			if (nameToLanguageMap.containsKey(languageName)) {
+				updatedLanguages.add(nameToLanguageMap.get(languageName));
+			} else {
 				Language nLanguage = new Language();
 				nLanguage.setName(languageName);
 				nLanguage.setMember(member);
 				languageRepository.save(nLanguage);
-				myLanguages.add(nLanguage);
+				updatedLanguages.add(nLanguage);
 			}
 		}
+		existingLanguages.stream()
+				.filter(language -> !languages.contains(language.getName()))
+				.forEach(languageRepository::delete);
 
-		member.setLanguages(myLanguages);
+		member.setLanguages(updatedLanguages);
 
 		member.setIsPublic(isPublic);
 		memberRepository.save(member);

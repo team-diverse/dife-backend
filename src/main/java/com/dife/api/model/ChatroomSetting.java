@@ -21,18 +21,18 @@ public class ChatroomSetting {
 	@Size(max = 60)
 	private String description = "";
 
-	private String profileImgName = "";
+	private String profileImgName = "empty";
 
-	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "chatroomSetting", cascade = CascadeType.ALL)
 	private Set<Tag> tags = new HashSet<>();
 
 	private Integer count = 0;
 	private Integer maxCount = 30;
 
-	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "chatroomSetting", cascade = CascadeType.ALL)
 	private Set<GroupPurpose> purposes = new HashSet<>();
 
-	@OneToMany(mappedBy = "chatroom_setting", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "chatroomSetting", cascade = CascadeType.ALL)
 	private Set<Language> languages = new HashSet<>();
 
 	private Boolean isPublic = true;

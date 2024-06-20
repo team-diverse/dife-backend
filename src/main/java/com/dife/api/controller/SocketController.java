@@ -18,7 +18,7 @@ public class SocketController {
 
 	@MessageMapping("/chatroom/chat")
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
-			throws JsonProcessingException, InterruptedException {
+			throws JsonProcessingException {
 		chatService.sendMessage(dto, headerAccessor);
 	}
 }

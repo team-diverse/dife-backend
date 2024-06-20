@@ -20,5 +20,5 @@ public class GroupPurpose {
 	@ManyToOne
 	@JoinColumn(name = "chatroom_setting_id")
 	@JsonIgnore
-	private ChatroomSetting chatroom_setting;
+	private ChatroomSetting chatroomSetting;
 }
