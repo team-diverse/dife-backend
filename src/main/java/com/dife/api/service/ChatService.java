@@ -73,10 +73,7 @@ public class ChatService {
 		headerAccessor.getSessionAttributes().put("username", username);
 
 		String enterMessage = username + "님이 입장하셨습니다!";
-		saveChat(username, chatroom, enterMessage);
-
-		dto.setUsername(member.getUsername());
-		dto.setMessage(enterMessage);
+		saveChat(username, chatroom, enterMessage, dto);
 		redisPublisher.publish(dto);
 		chatroomRepository.save(chatroom);
 	}
@@ -91,8 +88,7 @@ public class ChatService {
 		String username = (String) headerAccessor.getSessionAttributes().get("username");
 
 		if (dto.getMessage().length() <= 300) {
-			saveChat(username, chatroom, dto.getMessage());
-			dto.setUsername(username);
+			saveChat(username, chatroom, dto.getMessage(), dto);
 			redisPublisher.publish(dto);
 		}
 	}
@@ -121,9 +117,8 @@ public class ChatService {
 		disconnectHandler.disconnect(chatroomId, sessionId);
 
 		String exitMessage = username + "님이 퇴장하셨습니다!";
-		saveChat(username, chatroom, exitMessage);
+		saveChat(username, chatroom, exitMessage, dto);
 
-		dto.setMessage(exitMessage);
 		redisPublisher.publish(dto);
 		notificationHandler.isAlone(chatroom, sessionId);
 
@@ -131,7 +126,8 @@ public class ChatService {
 		chatroomRepository.save(chatroom);
 	}
 
-	public void saveChat(String username, Chatroom chatroom, String message) {
+	public void saveChat(
+			String username, Chatroom chatroom, String message, ChatRequestDto requestDto) {
 		Chat chat = new Chat();
 		chat.setMessage(message);
 		chat.setChatroom(chatroom);
@@ -140,5 +136,9 @@ public class ChatService {
 
 		chatroom.getChats().add(chat);
 		chatRepository.save(chat);
+
+		requestDto.setUsername(username);
+		requestDto.setMessage(message);
+		requestDto.setCreated(chat.getCreated());
 	}
 }
