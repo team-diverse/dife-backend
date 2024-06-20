@@ -1,6 +1,5 @@
 package com.dife.api.service;
 
-import static com.dife.api.model.LikeType.POST;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.*;
@@ -25,8 +24,8 @@ public class LikeService {
 	private final PostRepository postRepository;
 	private final CommentRepository commentRepository;
 	private final MemberRepository memberRepository;
-	private final LikePostRepository likePostRepository;
-	private final LikeCommentRepository likeCommentRepository;
+	private final PostLikeRepository postLikeRepository;
+	private final CommentLikeRepository commentLikeRepository;
 
 	private final ModelMapper modelMapper;
 
@@ -34,7 +33,7 @@ public class LikeService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		List<PostLike> postLikes = likePostRepository.findPostLikesByMember(member);
+		List<PostLike> postLikes = postLikeRepository.findPostLikesByMember(member);
 
 		List<Post> posts =
 				postLikes.stream().map(PostLike::getPost).distinct().collect(Collectors.toList());
@@ -57,13 +56,13 @@ public class LikeService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if (likePostRepository.existsByPostAndMember(post, member)) {
+		if (postLikeRepository.existsByPostAndMember(post, member)) {
 			throw new DuplicateLikeException();
 		}
 		PostLike postLike = new PostLike();
 		postLike.setPost(post);
 		postLike.setMember(member);
-		likePostRepository.save(postLike);
+		postLikeRepository.save(postLike);
 	}
 
 	public void deleteLikePost(LikeCreateRequestDto dto, String memberEmail) {
@@ -76,13 +75,13 @@ public class LikeService {
 						postRepository.findById(dto.getPostId()).orElseThrow(PostNotFoundException::new);
 
 				PostLike likePost =
-						likePostRepository
+						postLikeRepository
 								.findByPostAndMember(post, member)
 								.orElseThrow(LikeNotFoundException::new);
 
 				likePost.getPost().getPostLikes().remove(likePost);
 				member.getPostLikes().remove(likePost);
-				likePostRepository.delete(likePost);
+				postLikeRepository.delete(likePost);
 				break;
 
 			case COMMENT:
@@ -91,13 +90,13 @@ public class LikeService {
 								.findById(dto.getCommentId())
 								.orElseThrow(CommentNotFoundException::new);
 
-				LikeComment likeComment =
-						likeCommentRepository
+				CommentLike commentLike =
+						commentLikeRepository
 								.findByCommentAndMember(comment, member)
 								.orElseThrow(LikeNotFoundException::new);
 
-				likeComment.getComment().getCommentLikes().remove(likeComment);
-				likeCommentRepository.delete(likeComment);
+				commentLike.getComment().getCommentLikes().remove(commentLike);
+				commentLikeRepository.delete(commentLike);
 				break;
 		}
 	}
@@ -108,12 +107,12 @@ public class LikeService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if (likeCommentRepository.existsByCommentAndMember(comment, member)) {
+		if (commentLikeRepository.existsByCommentAndMember(comment, member)) {
 			throw new DuplicateLikeException();
 		}
-		LikeComment likeComment = new LikeComment();
-		likeComment.setComment(comment);
-		likeComment.setMember(member);
-		likeCommentRepository.save(likeComment);
+		CommentLike commentLike = new CommentLike();
+		commentLike.setComment(comment);
+		commentLike.setMember(member);
+		commentLikeRepository.save(commentLike);
 	}
 }
