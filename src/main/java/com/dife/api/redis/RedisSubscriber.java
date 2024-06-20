@@ -2,7 +2,7 @@ package com.dife.api.redis;
 
 import com.dife.api.model.dto.ChatRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +28,14 @@ public class RedisSubscriber implements MessageListener {
 			String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(messageBody);
 
 			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.registerModule(new JavaTimeModule());
 			ChatRequestDto dto = objectMapper.readValue(publishMessage, ChatRequestDto.class);
 			String destination = "/sub/chatroom/" + dto.getChatroomId();
 
 			Map<String, Object> enterMessage = new HashMap<>();
 			enterMessage.put("username", dto.getUsername());
 			enterMessage.put("message", dto.getMessage());
-			enterMessage.put("created", LocalDateTime.now());
+			enterMessage.put("created", dto.getCreated());
 			messagingTemplate.convertAndSend(destination, enterMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage());
