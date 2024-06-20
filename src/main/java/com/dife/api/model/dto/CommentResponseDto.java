@@ -21,7 +21,7 @@ public class CommentResponseDto {
 
 	private Boolean isPublic;
 
-	private Integer likeCount;
+	private Integer likesCount;
 
 	private Integer viewCount;
 

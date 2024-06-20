@@ -22,8 +22,6 @@ public class Comment extends BaseTimeEntity {
 
 	private Boolean isPublic = true;
 
-	private Integer likeCount = 0;
-
 	private Integer viewCount = 0;
 
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -43,4 +41,7 @@ public class Comment extends BaseTimeEntity {
 	@OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
 	@JsonBackReference
 	private List<Comment> childrenComments = new ArrayList<>();
+
+	@OneToMany(mappedBy = "comment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private List<LikeComment> CommentLikes;
 }

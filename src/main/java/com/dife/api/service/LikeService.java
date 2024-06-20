@@ -1,17 +1,13 @@
 package com.dife.api.service;
 
+import static com.dife.api.model.LikeType.POST;
 import static java.util.stream.Collectors.toList;
 
-import com.dife.api.exception.DuplicateLikeException;
-import com.dife.api.exception.LikeNotFoundException;
-import com.dife.api.exception.MemberNotFoundException;
-import com.dife.api.exception.PostNotFoundException;
+import com.dife.api.exception.*;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.LikeCreateRequestDto;
 import com.dife.api.model.dto.PostResponseDto;
-import com.dife.api.repository.LikePostRepository;
-import com.dife.api.repository.MemberRepository;
-import com.dife.api.repository.PostRepository;
+import com.dife.api.repository.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class LikeService {
 
 	private final PostRepository postRepository;
+	private final CommentRepository commentRepository;
 	private final MemberRepository memberRepository;
 	private final LikePostRepository likePostRepository;
+	private final LikeCommentRepository likeCommentRepository;
 
 	private final ModelMapper modelMapper;
 
@@ -50,6 +48,7 @@ public class LikeService {
 				createLikePost(dto.getPostId(), memberEmail);
 				break;
 			case COMMENT:
+				createLikeComment(dto.getCommentId(), memberEmail);
 		}
 	}
 
@@ -67,18 +66,54 @@ public class LikeService {
 		likePostRepository.save(postLike);
 	}
 
-	public void deleteLikePost(Long postId, String memberEmail) {
+	public void deleteLikePost(LikeCreateRequestDto dto, String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
-		PostLike postLike =
-				likePostRepository
-						.findByPostAndMember(post, member)
-						.orElseThrow(LikeNotFoundException::new);
+		switch (dto.getType()) {
+			case POST:
+				Post post =
+						postRepository.findById(dto.getPostId()).orElseThrow(PostNotFoundException::new);
 
-		postLike.getPost().getPostLikes().remove(postLike);
-		member.getPostLikes().remove(postLike);
-		likePostRepository.delete(postLike);
+				PostLike likePost =
+						likePostRepository
+								.findByPostAndMember(post, member)
+								.orElseThrow(LikeNotFoundException::new);
+
+				likePost.getPost().getPostLikes().remove(likePost);
+				member.getPostLikes().remove(likePost);
+				likePostRepository.delete(likePost);
+				break;
+
+			case COMMENT:
+				Comment comment =
+						commentRepository
+								.findById(dto.getCommentId())
+								.orElseThrow(CommentNotFoundException::new);
+
+				LikeComment likeComment =
+						likeCommentRepository
+								.findByCommentAndMember(comment, member)
+								.orElseThrow(LikeNotFoundException::new);
+
+				likeComment.getComment().getCommentLikes().remove(likeComment);
+				likeCommentRepository.delete(likeComment);
+				break;
+		}
+	}
+
+	public void createLikeComment(Long commentId, String memberEmail) {
+		Comment comment =
+				commentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		if (likeCommentRepository.existsByCommentAndMember(comment, member)) {
+			throw new DuplicateLikeException();
+		}
+		LikeComment likeComment = new LikeComment();
+		likeComment.setComment(comment);
+		likeComment.setMember(member);
+		likeCommentRepository.save(likeComment);
 	}
 }
