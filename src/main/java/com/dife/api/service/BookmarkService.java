@@ -2,20 +2,11 @@ package com.dife.api.service;
 
 import static java.util.stream.Collectors.toList;
 
-import com.dife.api.exception.BookmarkNotFoundException;
-import com.dife.api.exception.ChatroomException;
-import com.dife.api.exception.ChatroomNotFoundException;
-import com.dife.api.exception.MemberNotFoundException;
-import com.dife.api.model.Bookmark;
-import com.dife.api.model.Chat;
-import com.dife.api.model.Chatroom;
-import com.dife.api.model.Member;
-import com.dife.api.model.dto.BookmarkPostRequestDto;
+import com.dife.api.exception.*;
+import com.dife.api.model.*;
+import com.dife.api.model.dto.BookmarkCreateRequestDto;
 import com.dife.api.model.dto.BookmarkResponseDto;
-import com.dife.api.repository.BookmarkRepository;
-import com.dife.api.repository.ChatRepository;
-import com.dife.api.repository.ChatroomRepository;
-import com.dife.api.repository.MemberRepository;
+import com.dife.api.repository.*;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +23,7 @@ public class BookmarkService {
 	private final BookmarkRepository bookmarkRepository;
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
+	private final PostRepository postRepository;
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 
@@ -65,7 +57,14 @@ public class BookmarkService {
 		throw new BookmarkNotFoundException();
 	}
 
-	public BookmarkResponseDto createBookmark(BookmarkPostRequestDto requestDto, String memberEmail) {
+	public BookmarkResponseDto createBookmark(
+			BookmarkCreateRequestDto requestDto, String memberEmail) {
+		if (requestDto.getPostId() != null) return createBookmarkPost(requestDto, memberEmail);
+		return createBookmarkChat(requestDto, memberEmail);
+	}
+
+	public BookmarkResponseDto createBookmarkChat(
+			BookmarkCreateRequestDto requestDto, String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -76,6 +75,23 @@ public class BookmarkService {
 
 		Bookmark bookmark = new Bookmark();
 		bookmark.setMessage(chat.getMessage());
+		bookmark.setMember(member);
+		bookmarkRepository.save(bookmark);
+
+		return modelMapper.map(bookmark, BookmarkResponseDto.class);
+	}
+
+	public BookmarkResponseDto createBookmarkPost(
+			BookmarkCreateRequestDto requestDto, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		Post post =
+				postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
+		if (!post.getIsPublic()) throw new PostUnauthorizedException();
+
+		Bookmark bookmark = new Bookmark();
+		bookmark.setPost(post);
 		bookmark.setMember(member);
 		bookmarkRepository.save(bookmark);
 
