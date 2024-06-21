@@ -135,7 +135,6 @@ public class ChatService {
 		Chat chat = new Chat();
 		chat.setMessage(message);
 		chat.setChatroom(chatroom);
-		chat.setUsername(username);
 		chat.setCreated(LocalDateTime.now());
 
 		chatroom.getChats().add(chat);
