@@ -31,7 +31,9 @@ public class Chat {
 	@JsonIgnore
 	private Chatroom chatroom;
 
-	private String username;
+	@ManyToOne
+	@JoinColumn(name = "member_id")
+	private Member member;
 
 	private LocalDateTime created;
 }

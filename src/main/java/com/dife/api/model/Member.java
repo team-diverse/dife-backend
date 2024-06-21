@@ -71,6 +71,10 @@ public class Member extends BaseTimeEntity {
 	@JsonBackReference
 	private Set<Chatroom> chatrooms = new HashSet<>();
 
+	@OneToMany(mappedBy = "member")
+	@JsonIgnore
+	private List<Chat> chats;
+
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
 	@JsonIgnore
 	private Set<Bookmark> bookmarks;
