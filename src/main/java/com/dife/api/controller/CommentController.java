@@ -14,18 +14,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/comments")
-public class CommentController {
+public class CommentController implements SwaggerCommentController {
 	private final CommentService commentService;
 
 	@PostMapping(value = "/{postId}", consumes = "application/json")
 	public ResponseEntity<CommentResponseDto> createComment(
-			@RequestBody CommentCreateRequestDto requestDto,
-			@PathVariable(name = "postId") Long postId,
-			@RequestParam(name = "parentCommentId", required = false) Long parentCommentId,
-			Authentication auth) {
+			@RequestBody CommentCreateRequestDto requestDto, Authentication auth) {
 
-		CommentResponseDto responseDto =
-				commentService.createComment(requestDto, postId, parentCommentId, auth.getName());
+		CommentResponseDto responseDto = commentService.createComment(requestDto, auth.getName());
 
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}

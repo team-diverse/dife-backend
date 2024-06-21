@@ -12,4 +12,8 @@ public class CommentCreateRequestDto {
 	private String content;
 
 	private Boolean isPublic;
+
+	private Long postId;
+
+	private Long parentCommentId;
 }

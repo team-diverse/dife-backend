@@ -1,5 +1,7 @@
 package com.dife.api.controller;
 
+import static org.springframework.http.HttpStatus.CREATED;
+
 import com.dife.api.model.dto.BookmarkCreateRequestDto;
 import com.dife.api.model.dto.BookmarkResponseDto;
 import com.dife.api.service.BookmarkService;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/bookmarks")
 @Slf4j
-public class BookmarkController {
+public class BookmarkController implements SwaggerBookmarkController {
 
 	private final BookmarkService bookmarkService;
 
@@ -29,7 +31,7 @@ public class BookmarkController {
 	public ResponseEntity<BookmarkResponseDto> createBookmark(
 			@RequestBody BookmarkCreateRequestDto requestDto, Authentication auth) {
 		BookmarkResponseDto responseDto = bookmarkService.createBookmark(requestDto, auth.getName());
-		return ResponseEntity.ok(responseDto);
+		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 
 	@GetMapping("/{chatroomId}")

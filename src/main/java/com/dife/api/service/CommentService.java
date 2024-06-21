@@ -45,14 +45,16 @@ public class CommentService {
 				.collect(Collectors.toList());
 	}
 
-	public CommentResponseDto createComment(
-			CommentCreateRequestDto requestDto, Long postId, Long parentCommentId, String memberEmail) {
+	public CommentResponseDto createComment(CommentCreateRequestDto requestDto, String memberEmail) {
 		Member writer =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+		Post post =
+				postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
 
 		Comment parentComment =
-				(parentCommentId != null) ? commentRepository.findById(parentCommentId).orElse(null) : null;
+				(requestDto.getParentCommentId() != null)
+						? commentRepository.findById(requestDto.getParentCommentId()).orElse(null)
+						: null;
 		Comment comment = new Comment();
 		comment.setPost(parentComment == null ? post : null);
 		comment.setParentComment(parentComment);

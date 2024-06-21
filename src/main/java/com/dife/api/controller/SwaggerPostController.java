@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Board API", description = "게시판 서비스 API")
+@Tag(name = "Post API", description = "게시판/게시글 서비스 API")
 public interface SwaggerPostController {
 
 	@Operation(summary = "게시판 조회 API", description = "게시판 종류를 입력해 최신순으로 게시판을 조회합니다.")
