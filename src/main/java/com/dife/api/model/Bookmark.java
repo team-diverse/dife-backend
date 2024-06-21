@@ -1,7 +1,6 @@
 package com.dife.api.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,11 +19,14 @@ public class Bookmark {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull
 	@Size(max = 300)
 	private String message;
 
 	@ManyToOne
 	@JoinColumn(name = "member_id")
 	private Member member;
+
+	@ManyToOne
+	@JoinColumn(name = "post_id")
+	private Post post;
 }

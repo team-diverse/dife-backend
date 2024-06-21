@@ -1,6 +1,6 @@
 package com.dife.api.controller;
 
-import com.dife.api.model.dto.BookmarkPostRequestDto;
+import com.dife.api.model.dto.BookmarkCreateRequestDto;
 import com.dife.api.model.dto.BookmarkResponseDto;
 import com.dife.api.service.BookmarkService;
 import java.util.List;
@@ -25,15 +25,15 @@ public class BookmarkController {
 		return ResponseEntity.ok(bookmarks);
 	}
 
-	@PostMapping(value = "/", consumes = "application/json")
+	@PostMapping(consumes = "application/json")
 	public ResponseEntity<BookmarkResponseDto> createBookmark(
-			@RequestBody BookmarkPostRequestDto requestDto, Authentication auth) {
+			@RequestBody BookmarkCreateRequestDto requestDto, Authentication auth) {
 		BookmarkResponseDto responseDto = bookmarkService.createBookmark(requestDto, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 
 	@GetMapping("/{chatroomId}")
-	public ResponseEntity<List<BookmarkResponseDto>> getBookmarks(
+	public ResponseEntity<List<BookmarkResponseDto>> getBookmarkChats(
 			@PathVariable(name = "chatroomId") Long chatroomId, Authentication authentication) {
 		List<BookmarkResponseDto> bookmarks =
 				bookmarkService.getBookmarks(chatroomId, authentication.getName());
