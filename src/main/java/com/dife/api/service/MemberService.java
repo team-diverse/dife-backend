@@ -1,5 +1,6 @@
 package com.dife.api.service;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import com.dife.api.config.RegisterValidator;
@@ -283,5 +284,16 @@ public class MemberService {
 			memberResponseDtos.add(memberModelMapper.map(member, MemberResponseDto.class));
 		}
 		return memberResponseDtos;
+	}
+
+	public List<MemberResponseDto> getSearchMembers(String keyword) {
+		String trimmedKeyword = keyword.trim();
+		List<Member> members;
+
+		members = memberRepository.findAllByKeywordSearch(trimmedKeyword);
+		if (members.isEmpty()) throw new MemberNotFoundException();
+		return members.stream()
+				.map(m -> memberModelMapper.map(m, MemberResponseDto.class))
+				.collect(toList());
 	}
 }

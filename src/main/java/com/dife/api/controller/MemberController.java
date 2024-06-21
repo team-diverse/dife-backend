@@ -121,4 +121,11 @@ public class MemberController implements SwaggerMemberController {
 				memberService.getFilterMembers(mbtiCategories, hobbies, languages);
 		return ResponseEntity.ok(responseDto);
 	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<MemberResponseDto>> getSearchMembers(
+			@RequestParam(name = "keyword") String keyword) {
+		List<MemberResponseDto> responseDto = memberService.getSearchMembers(keyword);
+		return ResponseEntity.ok(responseDto);
+	}
 }
