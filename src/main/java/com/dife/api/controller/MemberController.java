@@ -50,7 +50,7 @@ public class MemberController implements SwaggerMemberController {
 	}
 
 	@PutMapping(value = "/{id}", consumes = "multipart/form-data")
-	public ResponseEntity<MemberResponseDto> registerDetail(
+	public ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
 			@RequestParam(name = "bio", required = false) String bio,

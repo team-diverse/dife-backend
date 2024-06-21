@@ -37,6 +37,8 @@ spring:
 
 jwt:
     secret: ${JWT_SECRET}
+
+
 springdoc:
     swagger-ui:
         groups-order: DESC
@@ -49,8 +51,6 @@ springdoc:
     api-docs:
       path: /api/v1/api-docs
     show-actuator: true
-    default-consumes-media-type: application/x-www-form-urlencoded
-    default-produces-media-type: application/json
     writer-with-default-pretty-printer: true
     model-and-view-allowed: true
     paths-to-match:

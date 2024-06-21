@@ -24,7 +24,7 @@ public class LikeController {
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
-	@PostMapping
+	@PostMapping(consumes = "application/json")
 	public ResponseEntity<Void> createLike(
 			@RequestBody LikeCreateRequestDto requestDto, Authentication auth) {
 
