@@ -77,4 +77,11 @@ public class ChatroomController implements SwaggerChatroomController {
 				chatroomService.getFilterChatrooms(hobbies, languages, purposes, minCount, maxCount);
 		return ResponseEntity.ok(responseDto);
 	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
+			@RequestParam(name = "keyword") String keyword) {
+		List<ChatroomResponseDto> responseDto = chatroomService.getSearchChatrooms(keyword);
+		return ResponseEntity.ok(responseDto);
+	}
 }

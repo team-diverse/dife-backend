@@ -95,4 +95,14 @@ public interface SwaggerMemberController {
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<List<MemberResponseDto>> getRandomMembers(
 			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth);
+
+	@Operation(
+			summary = "필터 선택지 회원 조회 API",
+			description =
+					"세부적인 회원 조회 필터링 선택지를 사용자에게 제시해 해당하는 회원을 조회할 수 있게 됩니다. MBTI, 취미, 언어의 복수 선택, 단일 종류 선택 가능한 name Set을 입력받게 됩니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<List<MemberResponseDto>> getFilterMembers(
+			@RequestParam(name = "mbtis", required = false) Set<MbtiCategory> mbtiCategories,
+			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
+			@RequestParam(name = "languages", required = false) Set<String> languages);
 }

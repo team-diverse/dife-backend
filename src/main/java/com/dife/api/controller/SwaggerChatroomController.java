@@ -77,4 +77,37 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<ChatroomResponseDto> getGroupChatroom(@PathVariable(name = "id") Long id);
+
+	@Operation(
+			summary = "그룹 채팅방 필터 검색 조회 API",
+			description =
+					"세부적인 그룹 채팅방 조회 필터링 선택지를 사용자에게 제시해 해당하는 그룹 채팅방을 조회할 수 있게 됩니다. 채팅방 목적, 취미, 언어의 복수 선택, 단일 종류 선택 가능한 name Set을 입력받게 됩니다.")
+	@ApiResponse(
+			responseCode = "200",
+			description = "채팅방 조회 성공 예시",
+			content = {
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = ChatroomResponseDto.class))
+			})
+	ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
+			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
+			@RequestParam(name = "languages", required = false) Set<String> languages,
+			@RequestParam(name = "purposes", required = false) Set<String> purposes,
+			@RequestParam(name = "minCount", required = false, defaultValue = "3") Integer minCount,
+			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount);
+
+	@Operation(
+			summary = "채팅방 필터 검색 조회 API",
+			description = "채팅방 이름, 한줄 소개에 해당 검색어가 포함되는 채팅방들을 조회하는 API입니다.")
+	@ApiResponse(
+			responseCode = "200",
+			description = "채팅방 조회 성공 예시",
+			content = {
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = ChatroomResponseDto.class))
+			})
+	ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
+			@RequestParam(name = "keyword") String keyword);
 }
