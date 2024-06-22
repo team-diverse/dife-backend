@@ -34,6 +34,7 @@ public class RedisSubscriber implements MessageListener {
 
 			Map<String, Object> enterMessage = new HashMap<>();
 			enterMessage.put("username", dto.getUsername());
+			enterMessage.put("member_id", dto.getMemberId());
 			enterMessage.put("message", dto.getMessage());
 			enterMessage.put("created", dto.getCreated());
 			messagingTemplate.convertAndSend(destination, enterMessage);

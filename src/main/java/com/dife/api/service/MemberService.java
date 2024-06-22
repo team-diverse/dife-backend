@@ -203,6 +203,10 @@ public class MemberService {
 		return responseDto;
 	}
 
+	public Member getMemberById(Long id) {
+		return memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
+	}
+
 	public void changePassword(String email) {
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 

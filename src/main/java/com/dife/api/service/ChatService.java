@@ -1,7 +1,6 @@
 package com.dife.api.service;
 
 import com.dife.api.exception.ChatroomNotFoundException;
-import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.handler.DisconnectHandler;
 import com.dife.api.handler.NotificationHandler;
 import com.dife.api.model.*;
@@ -9,7 +8,6 @@ import com.dife.api.model.dto.*;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
-import com.dife.api.repository.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -20,20 +18,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class ChatService {
 
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
-	private final MemberRepository memberRepository;
 
 	private final RedisPublisher redisPublisher;
 	private final RedisLockChatServiceFacade chatServiceFacade;
 
 	private final DisconnectHandler disconnectHandler;
 	private final NotificationHandler notificationHandler;
+	private final MemberService memberService;
 
-	@Transactional
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
 		switch (dto.getChatType()) {
@@ -41,7 +39,7 @@ public class ChatService {
 				enter(dto, headerAccessor);
 				break;
 			case CHAT:
-				chat(dto, headerAccessor);
+				chat(dto);
 				break;
 			case EXIT:
 				exit(dto, headerAccessor);
@@ -58,8 +56,7 @@ public class ChatService {
 		Long chatroomId = chatroom.getId();
 		String sessionId = headerAccessor.getSessionId();
 
-		Member member =
-				memberRepository.findById(dto.getMemberId()).orElseThrow(MemberNotFoundException::new);
+		Member member = memberService.getMemberById(dto.getMemberId());
 		if (!disconnectHandler.isEnterDisconnectChecked(chatroom, member, sessionId, dto.getPassword()))
 			return;
 
@@ -73,22 +70,24 @@ public class ChatService {
 		headerAccessor.getSessionAttributes().put("username", username);
 
 		String enterMessage = username + "님이 입장하셨습니다!";
-		saveChat(username, chatroom, enterMessage, dto);
+		Chat chat = saveChat(member, chatroom, enterMessage);
+		updateChatRequestDto(dto, chat);
 		redisPublisher.publish(dto);
 		chatroomRepository.save(chatroom);
 	}
 
-	public void chat(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
-			throws JsonProcessingException {
+	public void chat(ChatRequestDto dto) throws JsonProcessingException {
 
 		Chatroom chatroom =
 				chatroomRepository
 						.findById(dto.getChatroomId())
 						.orElseThrow(ChatroomNotFoundException::new);
-		String username = (String) headerAccessor.getSessionAttributes().get("username");
+
+		Member member = memberService.getMemberById(dto.getMemberId());
 
 		if (dto.getMessage().length() <= 300) {
-			saveChat(username, chatroom, dto.getMessage(), dto);
+			Chat chat = saveChat(member, chatroom, dto.getMessage());
+			updateChatRequestDto(dto, chat);
 			redisPublisher.publish(dto);
 		}
 	}
@@ -101,8 +100,7 @@ public class ChatService {
 						.findById(dto.getChatroomId())
 						.orElseThrow(ChatroomNotFoundException::new);
 		ChatroomSetting setting = chatroom.getChatroomSetting();
-		Member member =
-				memberRepository.findById(dto.getMemberId()).orElseThrow(MemberNotFoundException::new);
+		Member member = memberService.getMemberById(dto.getMemberId());
 
 		Long chatroomId = dto.getChatroomId();
 		String sessionId = headerAccessor.getSessionId();
@@ -117,7 +115,8 @@ public class ChatService {
 		disconnectHandler.disconnect(chatroomId, sessionId);
 
 		String exitMessage = username + "님이 퇴장하셨습니다!";
-		saveChat(username, chatroom, exitMessage, dto);
+		Chat chat = saveChat(member, chatroom, exitMessage);
+		updateChatRequestDto(dto, chat);
 
 		redisPublisher.publish(dto);
 		notificationHandler.isAlone(chatroom, sessionId);
@@ -126,18 +125,19 @@ public class ChatService {
 		chatroomRepository.save(chatroom);
 	}
 
-	public void saveChat(
-			String username, Chatroom chatroom, String message, ChatRequestDto requestDto) {
+	public Chat saveChat(Member member, Chatroom chatroom, String message) {
 		Chat chat = new Chat();
 		chat.setMessage(message);
 		chat.setChatroom(chatroom);
+		chat.setMember(member);
 		chat.setCreated(LocalDateTime.now());
-
-		chatroom.getChats().add(chat);
 		chatRepository.save(chat);
+		return chat;
+	}
 
-		requestDto.setUsername(username);
-		requestDto.setMessage(message);
-		requestDto.setCreated(chat.getCreated());
+	private void updateChatRequestDto(ChatRequestDto dto, Chat chat) {
+		dto.setUsername(chat.getMember().getUsername());
+		dto.setMessage(chat.getMessage());
+		dto.setCreated(chat.getCreated());
 	}
 }
