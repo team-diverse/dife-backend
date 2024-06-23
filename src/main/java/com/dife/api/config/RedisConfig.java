@@ -2,6 +2,11 @@ package com.dife.api.config;
 
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.redis.RedisSubscriber;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -57,20 +62,40 @@ public class RedisConfig {
 	}
 
 	@Bean
-	public RedisPublisher redisPublisher(ChannelTopic topic) {
-		return new RedisPublisher(redisTemplate(), topic);
+	public RedisPublisher redisPublisher(
+			RedisTemplate<String, String> redisTemplate, ChannelTopic topic, ObjectMapper objectMapper) {
+		return new RedisPublisher(redisTemplate, topic, objectMapper);
 	}
 
 	@Bean
-	public MessageListenerAdapter messageListener(SimpMessagingTemplate messagingTemplate) {
-		return new MessageListenerAdapter(new RedisSubscriber(redisTemplate(), messagingTemplate));
+	public MessageListenerAdapter messageListener(RedisSubscriber redisSubscriber) {
+		return new MessageListenerAdapter(redisSubscriber);
 	}
 
 	@Bean
-	public RedisMessageListenerContainer redisContainer(SimpMessagingTemplate messagingTemplate) {
+	public RedisSubscriber redisSubscriber(
+			RedisTemplate<String, String> redisTemplate,
+			SimpMessagingTemplate messagingTemplate,
+			ObjectMapper objectMapper) {
+		return new RedisSubscriber(redisTemplate, messagingTemplate, objectMapper);
+	}
+
+	@Bean
+	public RedisMessageListenerContainer redisContainer(
+			MessageListenerAdapter messageListenerAdapter, ChannelTopic topic) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(lettuceConnectionFactory());
-		container.addMessageListener(messageListener(messagingTemplate), topic());
+		container.addMessageListener(messageListenerAdapter, topic);
 		return container;
+	}
+
+	@Bean
+	public ObjectMapper objectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		JavaTimeModule module = new JavaTimeModule();
+		module.addSerializer(
+				LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ISO_DATE_TIME));
+		objectMapper.registerModule(module);
+		return objectMapper;
 	}
 }

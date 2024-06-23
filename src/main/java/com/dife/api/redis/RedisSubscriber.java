@@ -1,9 +1,7 @@
 package com.dife.api.redis;
 
-import com.dife.api.model.dto.ChatRequestDto;
+import com.dife.api.model.dto.ChatRedisDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +15,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class RedisSubscriber implements MessageListener {
-
 	private final RedisTemplate redisTemplate;
 	private final SimpMessagingTemplate messagingTemplate;
+	private final ObjectMapper objectMapper;
 
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
@@ -27,17 +25,11 @@ public class RedisSubscriber implements MessageListener {
 			byte[] messageBody = message.getBody();
 			String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(messageBody);
 
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.registerModule(new JavaTimeModule());
-			ChatRequestDto dto = objectMapper.readValue(publishMessage, ChatRequestDto.class);
-			String destination = "/sub/chatroom/" + dto.getChatroomId();
+			ChatRedisDto dto = objectMapper.readValue(publishMessage, ChatRedisDto.class);
+			String destination = "/sub/chatroom/" + dto.getChatroom().getId();
 
-			Map<String, Object> enterMessage = new HashMap<>();
-			enterMessage.put("username", dto.getUsername());
-			enterMessage.put("member_id", dto.getMemberId());
-			enterMessage.put("message", dto.getMessage());
-			enterMessage.put("created", dto.getCreated());
-			messagingTemplate.convertAndSend(destination, enterMessage);
+			Map<String, Object> propagateMessage = objectMapper.convertValue(dto, Map.class);
+			messagingTemplate.convertAndSend(destination, propagateMessage);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}

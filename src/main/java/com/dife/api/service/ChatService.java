@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class ChatService {
 	private final DisconnectHandler disconnectHandler;
 	private final NotificationHandler notificationHandler;
 	private final MemberService memberService;
+	private final ModelMapper modelMapper;
 
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
@@ -71,8 +73,8 @@ public class ChatService {
 
 		String enterMessage = username + "님이 입장하셨습니다!";
 		Chat chat = saveChat(member, chatroom, enterMessage);
-		updateChatRequestDto(dto, chat);
-		redisPublisher.publish(dto);
+		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
+		redisPublisher.publish(chatRedisDto);
 		chatroomRepository.save(chatroom);
 	}
 
@@ -87,8 +89,8 @@ public class ChatService {
 
 		if (dto.getMessage().length() <= 300) {
 			Chat chat = saveChat(member, chatroom, dto.getMessage());
-			updateChatRequestDto(dto, chat);
-			redisPublisher.publish(dto);
+			ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
+			redisPublisher.publish(chatRedisDto);
 		}
 	}
 
@@ -116,10 +118,9 @@ public class ChatService {
 
 		String exitMessage = username + "님이 퇴장하셨습니다!";
 		Chat chat = saveChat(member, chatroom, exitMessage);
-		updateChatRequestDto(dto, chat);
 
-		dto.setMessage(exitMessage);
-		redisPublisher.publish(dto);
+		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
+		redisPublisher.publish(chatRedisDto);
 		notificationHandler.isAlone(chatroom, sessionId);
 
 		chatroom.setChatroomSetting(setting);
@@ -134,11 +135,5 @@ public class ChatService {
 		chat.setCreated(LocalDateTime.now());
 		chatRepository.save(chat);
 		return chat;
-	}
-
-	private void updateChatRequestDto(ChatRequestDto dto, Chat chat) {
-		dto.setUsername(chat.getMember().getUsername());
-		dto.setMessage(chat.getMessage());
-		dto.setCreated(chat.getCreated());
 	}
 }
