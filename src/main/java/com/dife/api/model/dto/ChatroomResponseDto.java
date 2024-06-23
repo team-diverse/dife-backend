@@ -3,6 +3,8 @@ package com.dife.api.model.dto;
 import com.dife.api.model.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import lombok.*;
 
@@ -43,7 +45,7 @@ public class ChatroomResponseDto {
 
 	private LocalDateTime created;
 
-	private Set<Member> Members;
+	private List<Long> MembersList = new ArrayList<>();
 
 	private Set<Chat> chats;
 }
