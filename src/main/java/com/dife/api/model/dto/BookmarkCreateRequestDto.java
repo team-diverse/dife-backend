@@ -7,13 +7,9 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommentCreateRequestDto {
+public class BookmarkCreateRequestDto {
 
-	private String content;
-
-	private Boolean isPublic;
-
+	private Long chatroomId;
+	private Long chatId;
 	private Long postId;
-
-	private Long parentCommentId;
 }

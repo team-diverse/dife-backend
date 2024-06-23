@@ -58,6 +58,7 @@ public class PostService {
 		Post post = postRepository.findById(id).orElseThrow(PostNotFoundException::new);
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
 		responseDto.setLikesCount(post.getPostLikes().size());
+		responseDto.setBookmarkCount(post.getBookmarks().size());
 
 		return responseDto;
 	}

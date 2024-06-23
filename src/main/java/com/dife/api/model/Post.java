@@ -1,5 +1,6 @@
 package com.dife.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.Getter;
@@ -31,8 +32,14 @@ public class Post extends BaseTimeEntity {
 	private Member member;
 
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<Comment> comments;
 
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<PostLike> PostLikes;
+
+	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Bookmark> Bookmarks;
 }

@@ -7,7 +7,6 @@ import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.MemberService;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "Member API", description = "Member API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/members")

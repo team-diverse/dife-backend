@@ -1,6 +1,6 @@
 package com.dife.api.model.dto;
 
-import jakarta.annotation.Nullable;
+import com.dife.api.model.Post;
 import lombok.*;
 
 @Getter
@@ -12,5 +12,5 @@ public class BookmarkResponseDto {
 
 	private Long id;
 	private String message;
-	@Nullable private Long chatroomId;
+	private Post post;
 }
