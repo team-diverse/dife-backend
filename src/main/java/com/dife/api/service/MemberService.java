@@ -94,7 +94,6 @@ public class MemberService {
 			MultipartFile verificationFile) {
 		Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 
-
 		if ("empty".equals(member.getVerificationFileName())
 				&& (verificationFile == null || verificationFile.isEmpty())) {
 			throw new MemberNotAddVerificationException();
