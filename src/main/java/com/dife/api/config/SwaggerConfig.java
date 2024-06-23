@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@OpenAPIDefinition(info = @Info(title = "Dife API", description = "커넥트 명세서 작성완료", version = "v1"))
+@OpenAPIDefinition(info = @Info(title = "Dife API", version = "v1"))
 @Configuration
 public class SwaggerConfig {
 

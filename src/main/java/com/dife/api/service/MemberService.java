@@ -1,5 +1,6 @@
 package com.dife.api.service;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import com.dife.api.config.RegisterValidator;
@@ -93,19 +94,24 @@ public class MemberService {
 			MultipartFile verificationFile) {
 		Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 
-		if (profileImg == null || profileImg.isEmpty() || member.getProfileFileName().isEmpty())
-			member.setProfileFileName("empty");
-		else {
-			FileDto profileImgPath = fileService.upload(profileImg);
-			member.setProfileFileName(profileImgPath.getOriginalName());
+		if ("empty".equals(member.getVerificationFileName())
+				&& (verificationFile == null || verificationFile.isEmpty())) {
+			throw new MemberNotAddVerificationException();
+		} else {
+			if (verificationFile != null && !verificationFile.isEmpty()) {
+				FileDto verificationImgPath = fileService.upload(verificationFile);
+				member.setVerificationFileName(verificationImgPath.getName());
+			}
 		}
 
-		if (verificationFile == null
-				|| verificationFile.isEmpty()
-				|| member.getVerificationFileName().isEmpty()) member.setVerificationFileName("empty");
-		else {
-			FileDto verificationImgPath = fileService.upload(verificationFile);
-			member.setVerificationFileName(verificationImgPath.getName());
+		if ("empty".equals(member.getProfileFileName())
+				&& (profileImg == null || profileImg.isEmpty())) {
+			member.setProfileFileName("empty");
+		} else {
+			if (profileImg != null && !profileImg.isEmpty()) {
+				FileDto profileImgPath = fileService.upload(profileImg);
+				member.setProfileFileName(profileImgPath.getOriginalName());
+			}
 		}
 
 		member.setUsername(username);
@@ -113,13 +119,16 @@ public class MemberService {
 		member.setBio(bio);
 		member.setMbti(mbti);
 
+		Set<String> safeHobbies = hobbies != null ? hobbies : Collections.emptySet();
+		Set<String> safeLanguages = languages != null ? languages : Collections.emptySet();
+
 		Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByMember(member);
 		Map<String, Hobby> nameToHobbyMap =
 				existingHobbies.stream().collect(Collectors.toMap(Hobby::getName, Function.identity()));
 
 		Set<Hobby> updatedHobbies = new HashSet<>();
 
-		for (String hobbyName : hobbies) {
+		for (String hobbyName : safeHobbies) {
 			if (nameToHobbyMap.containsKey(hobbyName)) {
 				updatedHobbies.add(nameToHobbyMap.get(hobbyName));
 			} else {
@@ -143,7 +152,7 @@ public class MemberService {
 
 		Set<Language> updatedLanguages = new HashSet<>();
 
-		for (String languageName : languages) {
+		for (String languageName : safeLanguages) {
 			if (nameToLanguageMap.containsKey(languageName)) {
 				updatedLanguages.add(nameToLanguageMap.get(languageName));
 			} else {
@@ -274,5 +283,16 @@ public class MemberService {
 			memberResponseDtos.add(memberModelMapper.map(member, MemberResponseDto.class));
 		}
 		return memberResponseDtos;
+	}
+
+	public List<MemberResponseDto> getSearchMembers(String keyword) {
+		String trimmedKeyword = keyword.trim();
+		List<Member> members;
+
+		members = memberRepository.findAllByKeywordSearch(trimmedKeyword);
+		if (members.isEmpty()) throw new MemberNotFoundException();
+		return members.stream()
+				.map(m -> memberModelMapper.map(m, MemberResponseDto.class))
+				.collect(toList());
 	}
 }

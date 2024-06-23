@@ -34,24 +34,24 @@ public interface SwaggerMemberController {
 	@ApiResponse(responseCode = "200", description = "중복 닉네임 확인 성공 예시")
 	ResponseEntity<Void> checkUsername(@RequestParam(name = "username") String username);
 
-	@Operation(summary = "회원가입2 API", description = "회원가입 세부사항을 입력해 회원등록을 마무리합니다.")
+	@Operation(summary = "회원정보 업데이트 API", description = "회원가입 세부사항을 입력해 회원등록을 업데이트 합니다.")
 	@ApiResponse(
-			responseCode = "201",
-			description = "회원가입2 성공 예시",
+			responseCode = "200",
+			description = "회원정보 업데이트 성공 예시",
 			content = {
 				@Content(
 						mediaType = "application/json",
 						schema = @Schema(implementation = MemberResponseDto.class))
 			})
-	ResponseEntity<MemberResponseDto> registerDetail(
+	ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
-			@RequestParam(name = "profileImg", required = true) MultipartFile profileImg,
-			@RequestParam(name = "verificationFile", required = true) MultipartFile verificationFile,
+			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
+			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@PathVariable(name = "id") Long id);
 
@@ -95,4 +95,21 @@ public interface SwaggerMemberController {
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<List<MemberResponseDto>> getRandomMembers(
 			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth);
+
+	@Operation(
+			summary = "필터 선택지 회원 조회 API",
+			description =
+					"세부적인 회원 조회 필터링 선택지를 사용자에게 제시해 해당하는 회원을 조회할 수 있게 됩니다. MBTI, 취미, 언어의 복수 선택, 단일 종류 선택 가능한 name Set을 입력받게 됩니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<List<MemberResponseDto>> getFilterMembers(
+			@RequestParam(name = "mbtis", required = false) Set<MbtiCategory> mbtiCategories,
+			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
+			@RequestParam(name = "languages", required = false) Set<String> languages);
+
+	@Operation(
+			summary = "회원 필터 검색 조회 API",
+			description = "회원의 이름, 닉네임, 전공, 학번, 한줄 소개에 해당 검색어가 포함되는 회원들을 조회하는 API입니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<List<MemberResponseDto>> getSearchMembers(
+			@RequestParam(name = "keyword") String keyword);
 }

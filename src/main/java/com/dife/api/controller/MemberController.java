@@ -50,7 +50,7 @@ public class MemberController implements SwaggerMemberController {
 	}
 
 	@PutMapping(value = "/{id}", consumes = "multipart/form-data")
-	public ResponseEntity<MemberResponseDto> registerDetail(
+	public ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
 			@RequestParam(name = "bio", required = false) String bio,
@@ -119,6 +119,13 @@ public class MemberController implements SwaggerMemberController {
 			@RequestParam(name = "languages", required = false) Set<String> languages) {
 		List<MemberResponseDto> responseDto =
 				memberService.getFilterMembers(mbtiCategories, hobbies, languages);
+		return ResponseEntity.ok(responseDto);
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<MemberResponseDto>> getSearchMembers(
+			@RequestParam(name = "keyword") String keyword) {
+		List<MemberResponseDto> responseDto = memberService.getSearchMembers(keyword);
 		return ResponseEntity.ok(responseDto);
 	}
 }

@@ -99,11 +99,14 @@ public class ChatroomService {
 
 		chatroomRepository.save(chatroom);
 
-		if (profileImg == null || profileImg.isEmpty() || setting.getProfileImgName().isEmpty())
+		if ("empty".equals(setting.getProfileImgName())
+				&& (profileImg == null || profileImg.isEmpty())) {
 			setting.setProfileImgName("empty");
-		else {
-			FileDto profileImgPath = fileService.upload(profileImg);
-			setting.setProfileImgName(profileImgPath.getOriginalName());
+		} else {
+			if (profileImg != null && !profileImg.isEmpty()) {
+				FileDto profileImgPath = fileService.upload(profileImg);
+				setting.setProfileImgName(profileImgPath.getOriginalName());
+			}
 		}
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
@@ -337,6 +340,7 @@ public class ChatroomService {
 								})
 						.collect(Collectors.toList());
 
+		if (validChatrooms.isEmpty()) throw new ChatroomNotFoundException();
 		List<ChatroomResponseDto> chatroomResponseDtos = new ArrayList<>();
 		for (Chatroom chatroom : validChatrooms) {
 			ChatroomResponseDto chatroomResponseDto =
@@ -344,5 +348,16 @@ public class ChatroomService {
 			chatroomResponseDtos.add(chatroomResponseDto);
 		}
 		return chatroomResponseDtos;
+	}
+
+	public List<ChatroomResponseDto> getSearchChatrooms(String keyword) {
+		String trimmedKeyword = keyword.trim();
+		List<Chatroom> chatrooms;
+
+		chatrooms = chatroomRepository.findAllByKeywordSearch(trimmedKeyword);
+		if (chatrooms.isEmpty()) throw new ChatroomNotFoundException();
+		return chatrooms.stream()
+				.map(c -> chatroomModelMapper.map(c, ChatroomResponseDto.class))
+				.collect(toList());
 	}
 }

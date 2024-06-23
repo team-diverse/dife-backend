@@ -27,4 +27,13 @@ public interface ChatroomRepository extends JpaRepository<Chatroom, Long> {
 			"SELECT c FROM Chatroom c JOIN c.members m WHERE m = :member AND c.chatroomType = :chatroomType")
 	List<Chatroom> findAllByChatroomTypeAndMember(
 			@Param("chatroomType") ChatroomType chatroomType, @Param("member") Member member);
+
+	@Query(
+			"""
+				SELECT c FROM Chatroom c
+						WHERE c.chatroomSetting.isPublic = true
+						AND (c.name LIKE %:keyword%
+						OR c.chatroomSetting.description LIKE %:keyword%)
+				""")
+	List<Chatroom> findAllByKeywordSearch(@Param("keyword") String keyword);
 }

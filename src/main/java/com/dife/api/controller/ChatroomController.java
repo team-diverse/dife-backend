@@ -39,7 +39,7 @@ public class ChatroomController implements SwaggerChatroomController {
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
-	@PostMapping
+	@PostMapping(consumes = "multipart/form-data")
 	public ResponseEntity<ChatroomResponseDto> createChatroom(
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "chatroomType") ChatroomType chatroomType,
@@ -56,7 +56,7 @@ public class ChatroomController implements SwaggerChatroomController {
 	}
 
 	@PutMapping(value = "/{id}", consumes = "application/json")
-	public ResponseEntity<ChatroomResponseDto> registerDetail(
+	public ResponseEntity<ChatroomResponseDto> update(
 			@RequestBody GroupChatroomPutRequestDto requestDto,
 			@PathVariable(name = "id") Long chatroomId,
 			Authentication auth) {
@@ -67,14 +67,21 @@ public class ChatroomController implements SwaggerChatroomController {
 	}
 
 	@GetMapping("/filter")
-	public ResponseEntity<List<ChatroomResponseDto>> getFilterMembers(
+	public ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "purposes", required = false) Set<String> purposes,
-			@RequestParam(name = "minCount", required = false) Integer minCount,
-			@RequestParam(name = "maxCount", required = false) Integer maxCount) {
+			@RequestParam(name = "minCount", required = false, defaultValue = "3") Integer minCount,
+			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount) {
 		List<ChatroomResponseDto> responseDto =
 				chatroomService.getFilterChatrooms(hobbies, languages, purposes, minCount, maxCount);
+		return ResponseEntity.ok(responseDto);
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
+			@RequestParam(name = "keyword") String keyword) {
+		List<ChatroomResponseDto> responseDto = chatroomService.getSearchChatrooms(keyword);
 		return ResponseEntity.ok(responseDto);
 	}
 }
