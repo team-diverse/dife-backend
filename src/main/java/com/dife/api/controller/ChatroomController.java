@@ -7,6 +7,7 @@ import com.dife.api.model.ChatroomType;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.ChatroomService;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -63,5 +64,17 @@ public class ChatroomController implements SwaggerChatroomController {
 		ChatroomResponseDto responseDto =
 				chatroomService.registerDetail(requestDto, chatroomId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
+	}
+
+	@GetMapping("/filter")
+	public ResponseEntity<List<ChatroomResponseDto>> getFilterMembers(
+			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
+			@RequestParam(name = "languages", required = false) Set<String> languages,
+			@RequestParam(name = "purposes", required = false) Set<String> purposes,
+			@RequestParam(name = "minCount", required = false) Integer minCount,
+			@RequestParam(name = "maxCount", required = false) Integer maxCount) {
+		List<ChatroomResponseDto> responseDto =
+				chatroomService.getFilterChatrooms(hobbies, languages, purposes, minCount, maxCount);
+		return ResponseEntity.ok(responseDto);
 	}
 }

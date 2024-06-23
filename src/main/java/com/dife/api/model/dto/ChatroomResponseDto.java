@@ -27,7 +27,7 @@ public class ChatroomResponseDto {
 	@Schema(description = "Presigned S3경로")
 	private String profilePresignUrl;
 
-	private Set<String> tags;
+	private Set<String> hobbies;
 
 	private Integer count;
 

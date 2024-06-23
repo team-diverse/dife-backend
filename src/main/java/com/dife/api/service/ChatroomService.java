@@ -6,10 +6,7 @@ import com.dife.api.exception.*;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ChatroomService {
 
 	private final ChatroomRepository chatroomRepository;
-	private final TagRepository tagRepository;
+	private final HobbyRepository hobbyRepository;
 	private final LanguageRepository languageRepository;
 	private final GroupPurposesRepository groupPurposesRepository;
 	private final MemberRepository memberRepository;
@@ -122,28 +119,28 @@ public class ChatroomService {
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
-		Set<Tag> existingTags = tagRepository.findTagsByChatroomSetting(setting);
-		Map<String, Tag> nameToTagMap =
-				existingTags.stream().collect(Collectors.toMap(Tag::getName, Function.identity()));
+		Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByChatroomSetting(setting);
+		Map<String, Hobby> nameToHobbyMap =
+				existingHobbies.stream().collect(Collectors.toMap(Hobby::getName, Function.identity()));
 
-		Set<Tag> updatedTags = new HashSet<>();
+		Set<Hobby> updatedHobbies = new HashSet<>();
 
-		for (String tagName : requestDto.getTags()) {
-			if (nameToTagMap.containsKey(tagName)) {
-				updatedTags.add(nameToTagMap.get(tagName));
+		for (String hobbyName : requestDto.getHobbies()) {
+			if (nameToHobbyMap.containsKey(hobbyName)) {
+				updatedHobbies.add(nameToHobbyMap.get(hobbyName));
 			} else {
-				Tag nTag = new Tag();
-				nTag.setName(tagName);
-				nTag.setChatroomSetting(setting);
-				tagRepository.save(nTag);
-				updatedTags.add(nTag);
+				Hobby nHobby = new Hobby();
+				nHobby.setName(hobbyName);
+				nHobby.setChatroomSetting(setting);
+				hobbyRepository.save(nHobby);
+				updatedHobbies.add(nHobby);
 			}
 		}
-		existingTags.stream()
-				.filter(tag -> !requestDto.getTags().contains(tag.getName()))
-				.forEach(tagRepository::delete);
+		existingHobbies.stream()
+				.filter(hobby -> !requestDto.getHobbies().contains(hobby.getName()))
+				.forEach(hobbyRepository::delete);
 
-		setting.setTags(updatedTags);
+		setting.setHobbies(updatedHobbies);
 
 		if (requestDto.getMaxCount() > 30 || requestDto.getMaxCount() < 3)
 			throw new ChatroomException("그룹 채팅방 인원은 3명 이상 30명 이하여야 합니다!");
@@ -300,5 +297,52 @@ public class ChatroomService {
 		setting.setCount(setting.getCount() - 1);
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
+	}
+
+	public List<ChatroomResponseDto> getFilterChatrooms(
+			Set<String> hobbies,
+			Set<String> languages,
+			Set<String> purposes,
+			Integer minCount,
+			Integer maxCount) {
+
+		Set<String> safeHobbies = hobbies != null ? hobbies : Collections.emptySet();
+		Set<String> safePurposes = purposes != null ? purposes : Collections.emptySet();
+		Set<String> safeLanguages = languages != null ? languages : Collections.emptySet();
+
+		List<Chatroom> validChatrooms =
+				chatroomRepository.findAll().stream()
+						.filter(
+								chatroom -> {
+									ChatroomSetting setting = chatroom.getChatroomSetting();
+									if (setting == null) {
+										return false;
+									}
+
+									boolean matchesHobby =
+											setting.getHobbies().stream()
+													.anyMatch(hobby -> safeHobbies.contains(hobby.getName()));
+									boolean matchesPurpose =
+											setting.getPurposes().stream()
+													.anyMatch(purpose -> safePurposes.contains(purpose.getName()));
+									boolean matchesLanguage =
+											setting.getLanguages().stream()
+													.anyMatch(language -> safeLanguages.contains(language.getName()));
+									boolean isPublic = setting.getIsPublic().equals(true);
+									boolean isEnough =
+											(minCount <= setting.getMaxCount() && setting.getMaxCount() <= maxCount);
+									return (matchesHobby || matchesPurpose || matchesLanguage)
+											&& isPublic
+											&& isEnough;
+								})
+						.collect(Collectors.toList());
+
+		List<ChatroomResponseDto> chatroomResponseDtos = new ArrayList<>();
+		for (Chatroom chatroom : validChatrooms) {
+			ChatroomResponseDto chatroomResponseDto =
+					chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
+			chatroomResponseDtos.add(chatroomResponseDto);
+		}
+		return chatroomResponseDtos;
 	}
 }

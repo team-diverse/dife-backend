@@ -24,7 +24,7 @@ public class ChatroomSetting {
 	private String profileImgName = "empty";
 
 	@OneToMany(mappedBy = "chatroomSetting", cascade = CascadeType.ALL)
-	private Set<Tag> tags = new HashSet<>();
+	private Set<Hobby> hobbies = new HashSet<>();
 
 	private Integer count = 0;
 	private Integer maxCount = 30;

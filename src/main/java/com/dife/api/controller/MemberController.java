@@ -111,4 +111,14 @@ public class MemberController implements SwaggerMemberController {
 		List<MemberResponseDto> responseDto = memberService.getRandomMembers(count, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
+
+	@GetMapping("/filter")
+	public ResponseEntity<List<MemberResponseDto>> getFilterMembers(
+			@RequestParam(name = "mbtis", required = false) Set<MbtiCategory> mbtiCategories,
+			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
+			@RequestParam(name = "languages", required = false) Set<String> languages) {
+		List<MemberResponseDto> responseDto =
+				memberService.getFilterMembers(mbtiCategories, hobbies, languages);
+		return ResponseEntity.ok(responseDto);
+	}
 }

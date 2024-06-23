@@ -18,7 +18,7 @@ public class GroupChatroomPutRequestDto {
 
 	private Set<String> purposes;
 
-	private Set<String> tags;
+	private Set<String> hobbies;
 
 	private Set<String> languages;
 

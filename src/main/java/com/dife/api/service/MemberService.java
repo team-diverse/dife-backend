@@ -248,4 +248,31 @@ public class MemberService {
 		}
 		return memberResponseDtos;
 	}
+
+	public List<MemberResponseDto> getFilterMembers(
+			Set<MbtiCategory> mbtiCategories, Set<String> hobbies, Set<String> languages) {
+
+		Set<MbtiCategory> safeMbtiCategories =
+				mbtiCategories != null ? mbtiCategories : Collections.emptySet();
+		Set<String> safeHobbies = hobbies != null ? hobbies : Collections.emptySet();
+		Set<String> safeLanguages = languages != null ? languages : Collections.emptySet();
+
+		List<Member> validMembers =
+				memberRepository.findAll().stream()
+						.filter(
+								member ->
+										(safeMbtiCategories.contains(member.getMbti())
+														|| member.getHobbies().stream()
+																.anyMatch(hobby -> safeHobbies.contains(hobby.getName()))
+														|| member.getLanguages().stream()
+																.anyMatch(language -> safeLanguages.contains(language.getName())))
+												&& member.getIsPublic().equals(true))
+						.collect(Collectors.toList());
+
+		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
+		for (Member member : validMembers) {
+			memberResponseDtos.add(memberModelMapper.map(member, MemberResponseDto.class));
+		}
+		return memberResponseDtos;
+	}
 }
