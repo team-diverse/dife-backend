@@ -1,6 +1,5 @@
 package com.dife.api.service;
 
-import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import com.dife.api.config.RegisterValidator;
@@ -209,6 +208,15 @@ public class MemberService {
 		return responseDto;
 	}
 
+	public MemberResponseDto getMemberById(Long memberId) {
+
+		Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+
+		responseDto.setProfilePresignUrl(fileService.getPresignUrl(member.getProfileFileName()));
+		return responseDto;
+	}
+
 	public void changePassword(String email) {
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 
@@ -253,7 +261,9 @@ public class MemberService {
 
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : randomMembers) {
-			memberResponseDtos.add(memberModelMapper.map(member, MemberResponseDto.class));
+			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+			responseDto.setProfilePresignUrl(fileService.getPresignUrl(member.getProfileFileName()));
+			memberResponseDtos.add(responseDto);
 		}
 		return memberResponseDtos;
 	}
@@ -280,19 +290,30 @@ public class MemberService {
 
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : validMembers) {
-			memberResponseDtos.add(memberModelMapper.map(member, MemberResponseDto.class));
+			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+			responseDto.setProfilePresignUrl(fileService.getPresignUrl(member.getProfileFileName()));
+			memberResponseDtos.add(responseDto);
 		}
 		return memberResponseDtos;
 	}
 
 	public List<MemberResponseDto> getSearchMembers(String keyword) {
 		String trimmedKeyword = keyword.trim();
-		List<Member> members;
+		List<Member> members = memberRepository.findAllByKeywordSearch(trimmedKeyword);
 
-		members = memberRepository.findAllByKeywordSearch(trimmedKeyword);
-		if (members.isEmpty()) throw new MemberNotFoundException();
+		if (members.isEmpty()) {
+			throw new MemberNotFoundException();
+		}
+
 		return members.stream()
-				.map(m -> memberModelMapper.map(m, MemberResponseDto.class))
-				.collect(toList());
+				.map(
+						member -> {
+							MemberResponseDto responseDto =
+									memberModelMapper.map(member, MemberResponseDto.class);
+							responseDto.setProfilePresignUrl(
+									fileService.getPresignUrl(member.getProfileFileName()));
+							return responseDto;
+						})
+				.collect(Collectors.toList());
 	}
 }

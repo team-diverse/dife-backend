@@ -345,6 +345,7 @@ public class ChatroomService {
 		for (Chatroom chatroom : validChatrooms) {
 			ChatroomResponseDto chatroomResponseDto =
 					chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
+			chatroomResponseDto.setProfilePresignUrl(chatroom.getChatroomSetting().getProfileImgName());
 			chatroomResponseDtos.add(chatroomResponseDto);
 		}
 		return chatroomResponseDtos;
@@ -357,7 +358,14 @@ public class ChatroomService {
 		chatrooms = chatroomRepository.findAllByKeywordSearch(trimmedKeyword);
 		if (chatrooms.isEmpty()) throw new ChatroomNotFoundException();
 		return chatrooms.stream()
-				.map(c -> chatroomModelMapper.map(c, ChatroomResponseDto.class))
-				.collect(toList());
+				.map(
+						chatroom -> {
+							ChatroomResponseDto chatroomResponseDto =
+									chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
+							chatroomResponseDto.setProfilePresignUrl(
+									fileService.getPresignUrl(chatroom.getChatroomSetting().getProfileImgName()));
+							return chatroomResponseDto;
+						})
+				.collect(Collectors.toList());
 	}
 }
