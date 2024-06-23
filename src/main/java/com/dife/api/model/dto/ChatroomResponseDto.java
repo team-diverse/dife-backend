@@ -43,7 +43,7 @@ public class ChatroomResponseDto {
 
 	private LocalDateTime created;
 
-	private Set<Member> Members;
+	private Set<Member> members;
 
 	private Set<Chat> chats;
 }

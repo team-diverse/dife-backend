@@ -19,6 +19,7 @@ public class Hobby {
 
 	@ManyToOne
 	@JoinColumn(name = "member_id")
+	@JsonIgnore
 	private Member member;
 
 	@ManyToOne
