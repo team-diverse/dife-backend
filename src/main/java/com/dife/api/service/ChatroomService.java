@@ -108,9 +108,7 @@ public class ChatroomService {
 				setting.setProfileImgName(profileImgPath.getOriginalName());
 			}
 		}
-		ChatroomResponseDto responseDto = chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
-		responseDto.getMembersList().add(member.getId());
-		return responseDto;
+		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
 	public ChatroomResponseDto registerDetail(
