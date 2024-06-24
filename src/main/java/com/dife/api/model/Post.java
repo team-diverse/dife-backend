@@ -25,8 +25,6 @@ public class Post extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private BoardCategory boardType = BoardCategory.FREE;
 
-	private Integer viewCount = 0;
-
 	@ManyToOne
 	@JoinColumn(name = "member_id")
 	private Member member;
