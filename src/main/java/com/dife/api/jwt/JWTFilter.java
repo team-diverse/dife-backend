@@ -47,7 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
 				Member member =
 						memberRepository.findById(id).orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다!"));
 
-				if (!member.getVerificationFileName().equals("empty") && !member.getIsVerified())
+				if (member.getVerificationFile() != null && !member.getIsVerified())
 					throw new MemberException("인증받지 않은 회원입니다!");
 
 				CustomUserDetails customUserDetails = new CustomUserDetails(member);
