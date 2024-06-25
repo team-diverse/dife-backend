@@ -62,7 +62,7 @@ public class ChatroomController implements SwaggerChatroomController {
 			Authentication auth) {
 
 		ChatroomResponseDto responseDto =
-				chatroomService.registerDetail(requestDto, chatroomId, auth.getName());
+				chatroomService.update(requestDto, chatroomId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 

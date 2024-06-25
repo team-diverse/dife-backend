@@ -61,7 +61,7 @@ public class MemberController implements SwaggerMemberController {
 			@PathVariable(name = "id") Long id) {
 
 		MemberResponseDto responseDto =
-				memberService.registerDetail(
+				memberService.update(
 						username,
 						isKorean,
 						bio,
