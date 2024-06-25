@@ -1,5 +1,6 @@
 package com.dife.api.model.dto;
 
+import com.dife.api.model.File;
 import com.dife.api.model.MbtiCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -47,7 +48,7 @@ public class MemberResponseDto {
 	private Set<String> hobbies;
 
 	@Schema(description = "S3에 저장되는 프로필 이미지", example = "cookie.jpeg")
-	private String profileFileName;
+	private File profileImg;
 
 	@Schema(description = "Presigned S3경로")
 	private String profilePresignUrl;

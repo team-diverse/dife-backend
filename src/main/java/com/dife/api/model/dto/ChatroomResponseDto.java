@@ -22,7 +22,7 @@ public class ChatroomResponseDto {
 
 	private String description;
 
-	private String profileImgName;
+	private File profileImg;
 
 	@Schema(description = "Presigned S3경로")
 	private String profilePresignUrl;
