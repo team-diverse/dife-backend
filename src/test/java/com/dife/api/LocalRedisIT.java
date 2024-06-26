@@ -2,8 +2,9 @@ package com.dife.api;
 
 import com.dife.api.config.LocalRedisConfig;
 import com.dife.api.config.TestConfig;
-import com.dife.api.model.ChatType;
-import com.dife.api.model.dto.ChatRequestDto;
+import com.dife.api.model.Chatroom;
+import com.dife.api.model.Member;
+import com.dife.api.model.dto.ChatRedisDto;
 import com.dife.api.redis.RedisPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,12 +25,12 @@ public class LocalRedisIT {
 
 	@Test
 	void test() throws Exception {
-		ChatRequestDto chatRequestDto = new ChatRequestDto();
-		chatRequestDto.setChatroomId(1L);
-		chatRequestDto.setUsername("user1");
-		chatRequestDto.setChatType(ChatType.CHAT);
-		chatRequestDto.setMessage("Hello, Redis!");
-
-		redisPublisher.publish(chatRequestDto);
+		Chatroom chatroom = new Chatroom();
+		Member member = new Member();
+		ChatRedisDto dto = new ChatRedisDto();
+		dto.setChatroom(chatroom);
+		dto.setMember(member);
+		dto.setMessage("Hello, Redis!");
+		redisPublisher.publish(dto);
 	}
 }
