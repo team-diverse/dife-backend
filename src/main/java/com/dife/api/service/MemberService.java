@@ -209,12 +209,15 @@ public class MemberService {
 	}
 
 	public MemberResponseDto getMemberById(Long memberId) {
-
 		Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
 
 		responseDto.setProfilePresignUrl(fileService.getPresignUrl(member.getProfileFileName()));
 		return responseDto;
+	}
+
+	public Member getMemberEntityById(Long id) {
+		return memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 	}
 
 	public void changePassword(String email) {
