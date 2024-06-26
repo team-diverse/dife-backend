@@ -318,25 +318,33 @@ public class ChatroomService {
 						.filter(
 								chatroom -> {
 									ChatroomSetting setting = chatroom.getChatroomSetting();
-									if (setting == null) {
-										return false;
-									}
-
-									boolean matchesHobby =
-											setting.getHobbies().stream()
+									return setting != null && setting.getIsPublic().equals(true);
+								})
+						.filter(
+								chatroom -> {
+									ChatroomSetting setting = chatroom.getChatroomSetting();
+									return safeHobbies.isEmpty()
+											|| setting.getHobbies().stream()
 													.anyMatch(hobby -> safeHobbies.contains(hobby.getName()));
-									boolean matchesPurpose =
-											setting.getPurposes().stream()
+								})
+						.filter(
+								chatroom -> {
+									ChatroomSetting setting = chatroom.getChatroomSetting();
+									return safePurposes.isEmpty()
+											|| setting.getPurposes().stream()
 													.anyMatch(purpose -> safePurposes.contains(purpose.getName()));
-									boolean matchesLanguage =
-											setting.getLanguages().stream()
+								})
+						.filter(
+								chatroom -> {
+									ChatroomSetting setting = chatroom.getChatroomSetting();
+									return safeLanguages.isEmpty()
+											|| setting.getLanguages().stream()
 													.anyMatch(language -> safeLanguages.contains(language.getName()));
-									boolean isPublic = setting.getIsPublic().equals(true);
-									boolean isEnough =
-											(minCount <= setting.getMaxCount() && setting.getMaxCount() <= maxCount);
-									return (matchesHobby || matchesPurpose || matchesLanguage)
-											&& isPublic
-											&& isEnough;
+								})
+						.filter(
+								chatroom -> {
+									ChatroomSetting setting = chatroom.getChatroomSetting();
+									return setting.getMaxCount() > minCount && setting.getMaxCount() < maxCount;
 								})
 						.collect(Collectors.toList());
 

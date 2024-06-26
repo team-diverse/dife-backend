@@ -281,15 +281,25 @@ public class MemberService {
 
 		List<Member> validMembers =
 				memberRepository.findAll().stream()
+						.filter(member -> member.getIsPublic().equals(true))
 						.filter(
 								member ->
-										(safeMbtiCategories.contains(member.getMbti())
-														|| member.getHobbies().stream()
-																.anyMatch(hobby -> safeHobbies.contains(hobby.getName()))
-														|| member.getLanguages().stream()
-																.anyMatch(language -> safeLanguages.contains(language.getName())))
-												&& member.getIsPublic().equals(true))
+										safeLanguages.isEmpty()
+												|| member.getLanguages().stream()
+														.anyMatch(language -> safeLanguages.contains(language.getName())))
+						.filter(
+								member ->
+										safeMbtiCategories.isEmpty() || safeMbtiCategories.contains(member.getMbti()))
+						.filter(
+								member ->
+										safeHobbies.isEmpty()
+												|| member.getHobbies().stream()
+														.anyMatch(hobby -> safeHobbies.contains(hobby.getName())))
 						.collect(Collectors.toList());
+
+		if (validMembers.isEmpty()) {
+			throw new MemberNotFoundException();
+		}
 
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : validMembers) {
