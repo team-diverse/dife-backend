@@ -38,8 +38,8 @@ public class MapperConfig {
 				.addMappings(
 						mapper -> {
 							mapper.map(
-									src -> src.getChatroomSetting().getProfileImgName(),
-									ChatroomResponseDto::setProfileImgName);
+									src -> src.getChatroomSetting().getProfileImg(),
+									ChatroomResponseDto::setProfileImg);
 							mapper.map(
 									src -> src.getChatroomSetting().getDescription(),
 									ChatroomResponseDto::setDescription);
@@ -100,7 +100,7 @@ public class MapperConfig {
 							mapper.map(Member::getBio, MemberResponseDto::setBio);
 							mapper.map(Member::getMbti, MemberResponseDto::setMbti);
 							mapper.map(Member::getIsPublic, MemberResponseDto::setIsPublic);
-							mapper.map(Member::getProfileFileName, MemberResponseDto::setProfileFileName);
+							mapper.map(Member::getProfileImg, MemberResponseDto::setProfileImg);
 							mapper.map(Member::getIsVerified, MemberResponseDto::setIsVerified);
 
 							mapper.map(

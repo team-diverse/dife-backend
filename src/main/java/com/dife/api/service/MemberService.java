@@ -80,7 +80,7 @@ public class MemberService {
 		return true;
 	}
 
-	public MemberResponseDto registerDetail(
+	public MemberResponseDto update(
 			String username,
 			Boolean isKorean,
 			String bio,
@@ -93,30 +93,27 @@ public class MemberService {
 			MultipartFile verificationFile) {
 		Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 
-		if ("empty".equals(member.getVerificationFileName())
-				&& (verificationFile == null || verificationFile.isEmpty())) {
+		if ((verificationFile.isEmpty() || verificationFile == null)
+				&& (member.getUsername().equals(""))) {
 			throw new MemberNotAddVerificationException();
 		} else {
 			if (verificationFile != null && !verificationFile.isEmpty()) {
 				FileDto verificationImgPath = fileService.upload(verificationFile);
-				member.setVerificationFileName(verificationImgPath.getName());
+				File file = modelMapper.map(verificationImgPath, File.class);
+				member.setVerificationFile(file);
 			}
 		}
 
-		if ("empty".equals(member.getProfileFileName())
-				&& (profileImg == null || profileImg.isEmpty())) {
-			member.setProfileFileName("empty");
-		} else {
-			if (profileImg != null && !profileImg.isEmpty()) {
-				FileDto profileImgPath = fileService.upload(profileImg);
-				member.setProfileFileName(profileImgPath.getOriginalName());
-			}
+		if (profileImg != null && !profileImg.isEmpty()) {
+			FileDto profileImgPath = fileService.upload(profileImg);
+			File file = modelMapper.map(profileImgPath, File.class);
+			member.setProfileImg(file);
 		}
 
-		member.setUsername(username);
-		member.setIsKorean(isKorean);
-		member.setBio(bio);
-		member.setMbti(mbti);
+		if (username != null && !username.isEmpty()) member.setUsername(username);
+		if (isKorean != null && isKorean != member.getIsKorean()) member.setIsKorean(isKorean);
+		if (bio != null && !bio.isEmpty()) member.setBio(bio);
+		if (mbti != null && !mbti.equals(member.getMbti())) member.setMbti(mbti);
 
 		Set<String> safeHobbies = hobbies != null ? hobbies : Collections.emptySet();
 		Set<String> safeLanguages = languages != null ? languages : Collections.emptySet();
@@ -168,7 +165,7 @@ public class MemberService {
 
 		member.setLanguages(updatedLanguages);
 
-		member.setIsPublic(isPublic);
+		if (isPublic != null && isPublic != member.getIsPublic()) member.setIsPublic(isPublic);
 		memberRepository.save(member);
 
 		return memberModelMapper.map(member, MemberResponseDto.class);
@@ -204,7 +201,8 @@ public class MemberService {
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
 
-		responseDto.setProfilePresignUrl(fileService.getPresignUrl(member.getProfileFileName()));
+		responseDto.setProfilePresignUrl(
+				fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 		return responseDto;
 	}
 
@@ -212,7 +210,8 @@ public class MemberService {
 		Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
 
-		responseDto.setProfilePresignUrl(fileService.getPresignUrl(member.getProfileFileName()));
+		responseDto.setProfilePresignUrl(
+				fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 		return responseDto;
 	}
 
@@ -265,7 +264,8 @@ public class MemberService {
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : randomMembers) {
 			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
-			responseDto.setProfilePresignUrl(fileService.getPresignUrl(member.getProfileFileName()));
+			responseDto.setProfilePresignUrl(
+					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 			memberResponseDtos.add(responseDto);
 		}
 		return memberResponseDtos;
@@ -304,7 +304,8 @@ public class MemberService {
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : validMembers) {
 			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
-			responseDto.setProfilePresignUrl(fileService.getPresignUrl(member.getProfileFileName()));
+			responseDto.setProfilePresignUrl(
+					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 			memberResponseDtos.add(responseDto);
 		}
 		return memberResponseDtos;
@@ -324,7 +325,7 @@ public class MemberService {
 							MemberResponseDto responseDto =
 									memberModelMapper.map(member, MemberResponseDto.class);
 							responseDto.setProfilePresignUrl(
-									fileService.getPresignUrl(member.getProfileFileName()));
+									fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 							return responseDto;
 						})
 				.collect(Collectors.toList());

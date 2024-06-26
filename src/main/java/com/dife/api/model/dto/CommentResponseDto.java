@@ -23,8 +23,6 @@ public class CommentResponseDto {
 
 	private Integer likesCount;
 
-	private Integer viewCount;
-
 	@JsonProperty("writer")
 	private Member writer;
 

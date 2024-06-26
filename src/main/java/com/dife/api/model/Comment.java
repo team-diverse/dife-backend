@@ -22,8 +22,6 @@ public class Comment extends BaseTimeEntity {
 
 	private Boolean isPublic = true;
 
-	private Integer viewCount = 0;
-
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "writer_id")
 	private Member writer;

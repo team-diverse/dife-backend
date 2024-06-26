@@ -99,19 +99,15 @@ public class ChatroomService {
 
 		chatroomRepository.save(chatroom);
 
-		if ("empty".equals(setting.getProfileImgName())
-				&& (profileImg == null || profileImg.isEmpty())) {
-			setting.setProfileImgName("empty");
-		} else {
-			if (profileImg != null && !profileImg.isEmpty()) {
-				FileDto profileImgPath = fileService.upload(profileImg);
-				setting.setProfileImgName(profileImgPath.getOriginalName());
-			}
+		if (profileImg != null && !profileImg.isEmpty()) {
+			FileDto profileImgPath = fileService.upload(profileImg);
+			File file = modelMapper.map(profileImgPath, File.class);
+			setting.setProfileImg(file);
 		}
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public ChatroomResponseDto registerDetail(
+	public ChatroomResponseDto update(
 			GroupChatroomPutRequestDto requestDto, Long chatroomId, String memberEmail) {
 
 		Chatroom chatroom =
@@ -240,8 +236,9 @@ public class ChatroomService {
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 		ChatroomResponseDto responseDto = chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
+		responseDto.setProfilePresignUrl(
+				fileService.getPresignUrl(setting.getProfileImg().getOriginalName()));
 
-		responseDto.setProfilePresignUrl(fileService.getPresignUrl(setting.getProfileImgName()));
 		return responseDto;
 	}
 
@@ -353,7 +350,8 @@ public class ChatroomService {
 		for (Chatroom chatroom : validChatrooms) {
 			ChatroomResponseDto chatroomResponseDto =
 					chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
-			chatroomResponseDto.setProfilePresignUrl(chatroom.getChatroomSetting().getProfileImgName());
+			chatroomResponseDto.setProfilePresignUrl(
+					chatroom.getChatroomSetting().getProfileImg().getOriginalName());
 			chatroomResponseDtos.add(chatroomResponseDto);
 		}
 		return chatroomResponseDtos;
@@ -371,7 +369,8 @@ public class ChatroomService {
 							ChatroomResponseDto chatroomResponseDto =
 									chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 							chatroomResponseDto.setProfilePresignUrl(
-									fileService.getPresignUrl(chatroom.getChatroomSetting().getProfileImgName()));
+									fileService.getPresignUrl(
+											chatroom.getChatroomSetting().getProfileImg().getOriginalName()));
 							return chatroomResponseDto;
 						})
 				.collect(Collectors.toList());

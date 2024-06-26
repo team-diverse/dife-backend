@@ -36,7 +36,7 @@ public class Member extends BaseTimeEntity {
 
 	private String role = "user";
 
-	private String verificationFileName = "empty";
+	@OneToOne private File verificationFile;
 
 	private Boolean isKorean = true;
 
@@ -51,7 +51,7 @@ public class Member extends BaseTimeEntity {
 	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
 	private Set<Hobby> hobbies = new HashSet<>();
 
-	private String profileFileName = "empty";
+	@OneToOne private File profileImg;
 
 	@Size(max = 60, message = "자기소개는 최대 60자까지 입력 가능합니다.")
 	private String bio = "";

@@ -21,7 +21,7 @@ public class ChatroomSetting {
 	@Size(max = 60)
 	private String description = "";
 
-	private String profileImgName = "empty";
+	@OneToOne private File profileImg;
 
 	@OneToMany(mappedBy = "chatroomSetting", cascade = CascadeType.ALL)
 	private Set<Hobby> hobbies = new HashSet<>();
