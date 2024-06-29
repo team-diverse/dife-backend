@@ -1,5 +1,6 @@
 package com.dife.api.service;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import com.dife.api.config.RegisterValidator;
@@ -10,6 +11,7 @@ import com.dife.api.model.dto.*;
 import com.dife.api.repository.HobbyRepository;
 import com.dife.api.repository.LanguageRepository;
 import com.dife.api.repository.MemberRepository;
+import com.dife.api.repository.PostRepository;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -39,6 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberService {
 
 	private final MemberRepository memberRepository;
+	private final PostRepository postRepository;
 	private final LanguageRepository languageRepository;
 	private final HobbyRepository hobbyRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
@@ -328,5 +332,15 @@ public class MemberService {
 							return responseDto;
 						})
 				.collect(Collectors.toList());
+	}
+
+	public List<PostResponseDto> getMemberPosts(String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		Sort sort = Sort.by(Sort.Direction.DESC, "created");
+		List<Post> posts = postRepository.findPostsByMember(member, sort);
+
+		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
 	}
 }

@@ -13,4 +13,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 	List<Post> findPostsByBoardType(BoardCategory boardType, Sort sort);
 
 	Optional<Post> findByMemberAndId(@Param("member") Member member, @Param("postId") Long postId);
+
+	List<Post> findPostsByMember(Member member, Sort sort);
 }
