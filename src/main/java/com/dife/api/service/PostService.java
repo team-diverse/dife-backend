@@ -9,6 +9,7 @@ import com.dife.api.model.File;
 import com.dife.api.model.Member;
 import com.dife.api.model.Post;
 import com.dife.api.model.dto.*;
+import com.dife.api.repository.FileRepository;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
 	private final PostRepository postRepository;
+	private final FileRepository fileRepository;
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 
@@ -62,6 +64,12 @@ public class PostService {
 
 		post.getFiles().add(file);
 		postRepository.save(post);
+	}
+
+	public void deletePostFile(Post post, Long id) {
+		File file = fileRepository.getReferenceById(id);
+
+		post.getFiles().remove(file);
 	}
 
 	@Transactional(readOnly = true)

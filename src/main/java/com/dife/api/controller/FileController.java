@@ -1,6 +1,7 @@
 package com.dife.api.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.FileLocation;
 import com.dife.api.model.dto.FileDto;
@@ -31,5 +32,14 @@ public class FileController implements SwaggerFileController {
 	@GetMapping
 	public ResponseEntity<String> getFile(@RequestParam(name = "fileName") String fileName) {
 		return ResponseEntity.ok(fileService.getPresignUrl(fileName));
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteFile(
+			@PathVariable(name = "id") Long id,
+			@RequestParam(name = "fileLocation") FileLocation fileLocation,
+			Authentication auth) {
+		fileService.deleteFileLocation(id, fileLocation, auth.getName());
+		return new ResponseEntity<>(OK);
 	}
 }
