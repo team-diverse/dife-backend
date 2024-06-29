@@ -5,12 +5,14 @@ import static java.util.stream.Collectors.toList;
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.BoardCategory;
+import com.dife.api.model.File;
 import com.dife.api.model.Member;
 import com.dife.api.model.Post;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -45,6 +47,23 @@ public class PostService {
 		return modelMapper.map(post, PostResponseDto.class);
 	}
 
+	public Post checkPostMember(Long postId, String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		Post post =
+				postRepository.findByMemberAndId(member, postId).orElseThrow(PostNotFoundException::new);
+
+		return post;
+	}
+
+	public void uploadPostFile(Post post, FileDto fileDto) {
+		File file = modelMapper.map(fileDto, File.class);
+		file.setPost(post);
+
+		post.getFiles().add(file);
+		postRepository.save(post);
+	}
+
 	@Transactional(readOnly = true)
 	public List<PostResponseDto> getPostsByBoardType(BoardCategory boardCategory) {
 		Sort sort = Sort.by(Sort.Direction.DESC, "created");
@@ -59,6 +78,7 @@ public class PostService {
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
 		responseDto.setLikesCount(post.getPostLikes().size());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
+		responseDto.setFiles(post.getFiles().stream().collect(Collectors.toList()));
 
 		return responseDto;
 	}
