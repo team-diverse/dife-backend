@@ -12,13 +12,18 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/files")
-public class FileController {
+public class FileController implements SwaggerFileController {
 
 	private final FileService fileService;
 
-	@PostMapping("/")
-	ResponseEntity<FileDto> uploadFile(@RequestParam(name = "file") MultipartFile file) {
+	@PostMapping(consumes = "multipart/form-data")
+	public ResponseEntity<FileDto> uploadFile(@RequestParam(name = "file") MultipartFile file) {
 		FileDto dto = fileService.upload(file);
 		return ResponseEntity.status(CREATED).body(dto);
+	}
+
+	@GetMapping
+	public ResponseEntity<String> getFile(@RequestParam(name = "fileName") String fileName) {
+		return ResponseEntity.ok(fileService.getPresignUrl(fileName));
 	}
 }
