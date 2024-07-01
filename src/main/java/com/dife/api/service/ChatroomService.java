@@ -350,8 +350,9 @@ public class ChatroomService {
 		for (Chatroom chatroom : validChatrooms) {
 			ChatroomResponseDto chatroomResponseDto =
 					chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
-			chatroomResponseDto.setProfilePresignUrl(
-					chatroom.getChatroomSetting().getProfileImg().getOriginalName());
+			if (chatroom.getChatroomSetting().getProfileImg() != null)
+				chatroomResponseDto.setProfilePresignUrl(
+						chatroom.getChatroomSetting().getProfileImg().getOriginalName());
 			chatroomResponseDtos.add(chatroomResponseDto);
 		}
 		return chatroomResponseDtos;
