@@ -201,8 +201,9 @@ public class MemberService {
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
 
-		responseDto.setProfilePresignUrl(
-				fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+		if (responseDto.getProfileImg() != null)
+			responseDto.setProfilePresignUrl(
+					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 		return responseDto;
 	}
 
@@ -210,8 +211,9 @@ public class MemberService {
 		Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
 
-		responseDto.setProfilePresignUrl(
-				fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+		if (responseDto.getProfileImg() != null)
+			responseDto.setProfilePresignUrl(
+					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 		return responseDto;
 	}
 
@@ -264,8 +266,9 @@ public class MemberService {
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : randomMembers) {
 			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
-			responseDto.setProfilePresignUrl(
-					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+			if (responseDto.getProfileImg() != null)
+				responseDto.setProfilePresignUrl(
+						fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 			memberResponseDtos.add(responseDto);
 		}
 		return memberResponseDtos;
@@ -304,8 +307,9 @@ public class MemberService {
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : validMembers) {
 			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
-			responseDto.setProfilePresignUrl(
-					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+			if (responseDto.getProfileImg() != null)
+				responseDto.setProfilePresignUrl(
+						fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 			memberResponseDtos.add(responseDto);
 		}
 		return memberResponseDtos;
@@ -324,8 +328,9 @@ public class MemberService {
 						member -> {
 							MemberResponseDto responseDto =
 									memberModelMapper.map(member, MemberResponseDto.class);
-							responseDto.setProfilePresignUrl(
-									fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+							if (responseDto.getProfileImg() != null)
+								responseDto.setProfilePresignUrl(
+										fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 							return responseDto;
 						})
 				.collect(Collectors.toList());
