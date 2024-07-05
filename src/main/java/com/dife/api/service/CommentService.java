@@ -10,8 +10,8 @@ import com.dife.api.model.dto.CommentResponseDto;
 import com.dife.api.repository.CommentRepository;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -31,18 +31,18 @@ public class CommentService {
 
 	@Transactional(readOnly = true)
 	public List<CommentResponseDto> getCommentsByPostId(Long postId) {
-
 		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 		List<Comment> comments = commentRepository.findCommentsByPost(post);
+		Integer size = comments.size();
+		List<CommentResponseDto> dtoList = new ArrayList<>();
 
-		return comments.stream()
-				.map(
-						comment -> {
-							CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
-							dto.setLikesCount(comment.getCommentLikes().size());
-							return dto;
-						})
-				.collect(Collectors.toList());
+		for (int i = 0; i < size; i++) {
+			Comment comment = comments.get(i);
+			CommentResponseDto responseDto = getComment(comment);
+			dtoList.add(responseDto);
+		}
+
+		return dtoList;
 	}
 
 	public CommentResponseDto createComment(CommentCreateRequestDto requestDto, String memberEmail) {
@@ -56,7 +56,7 @@ public class CommentService {
 						? commentRepository.findById(requestDto.getParentCommentId()).orElse(null)
 						: null;
 		Comment comment = new Comment();
-		comment.setPost(parentComment == null ? post : null);
+		comment.setPost(post);
 		comment.setParentComment(parentComment);
 		comment.setWriter(writer);
 		comment.setContent(requestDto.getContent());
@@ -67,6 +67,20 @@ public class CommentService {
 
 		commentRepository.save(comment);
 
-		return modelMapper.map(comment, CommentResponseDto.class);
+		CommentResponseDto responseDto = modelMapper.map(comment, CommentResponseDto.class);
+		if (comment.getParentComment() != null)
+			responseDto.setParent_id(comment.getParentComment().getId());
+		return responseDto;
+	}
+
+	public CommentResponseDto getComment(Comment comment) {
+		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
+
+		dto.setLikesCount(comment.getCommentLikes().size());
+		dto.setBookmarkCount(comment.getBookmarks().size());
+
+		if (comment.getParentComment() != null) dto.setParent_id(comment.getParentComment().getId());
+
+		return dto;
 	}
 }

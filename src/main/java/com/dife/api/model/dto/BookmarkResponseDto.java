@@ -1,5 +1,6 @@
 package com.dife.api.model.dto;
 
+import com.dife.api.model.Comment;
 import com.dife.api.model.Post;
 import lombok.*;
 
@@ -13,4 +14,5 @@ public class BookmarkResponseDto {
 	private Long id;
 	private String message;
 	private Post post;
+	private Comment comment;
 }
