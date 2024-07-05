@@ -1,6 +1,7 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.BoardCategory;
+import com.dife.api.model.Comment;
 import com.dife.api.model.Member;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
@@ -38,4 +39,6 @@ public class PostResponseDto {
 	@NotNull
 	@JsonProperty("writer")
 	private Member Member;
+
+	private List<Comment> comments;
 }

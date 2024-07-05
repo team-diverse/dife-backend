@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController implements SwaggerCommentController {
 	private final CommentService commentService;
 
-	@PostMapping(value = "/{postId}", consumes = "application/json")
+	@PostMapping(consumes = "application/json")
 	public ResponseEntity<CommentResponseDto> createComment(
 			@RequestBody CommentCreateRequestDto requestDto, Authentication auth) {
 

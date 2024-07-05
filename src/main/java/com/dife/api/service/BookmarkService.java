@@ -59,8 +59,15 @@ public class BookmarkService {
 
 	public BookmarkResponseDto createBookmark(
 			BookmarkCreateRequestDto requestDto, String memberEmail) {
-		if (requestDto.getPostId() != null) return createBookmarkPost(requestDto, memberEmail);
-		return createBookmarkChat(requestDto, memberEmail);
+
+		switch (requestDto.getType()) {
+			case POST:
+				return createBookmarkPost(requestDto, memberEmail);
+			case COMMENT:
+				return createBookmarkComment(requestDto, memberEmail);
+			default:
+				return createBookmarkChat(requestDto, memberEmail);
+		}
 	}
 
 	public BookmarkResponseDto createBookmarkChat(
@@ -97,4 +104,27 @@ public class BookmarkService {
 
 		return modelMapper.map(bookmark, BookmarkResponseDto.class);
 	}
+
+	public BookmarkResponseDto createBookmarkComment(
+			BookmarkCreateRequestDto requestDto, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		Comment comment =
+				commentRepository
+						.findById(requestDto.getCommentId())
+						.orElseThrow(() -> new CommentNotFoundException());
+
+		if (bookmarkRepository.existsBookmarkByCommentAndMember(comment, member))
+			throw new DuplicateBookmarkException();
+
+		Bookmark bookmark = new Bookmark();
+		bookmark.setMember(member);
+		bookmark.setComment(comment);
+		bookmarkRepository.save(bookmark);
+
+		return modelMapper.map(bookmark, BookmarkResponseDto.class);
+	}
+
 }
