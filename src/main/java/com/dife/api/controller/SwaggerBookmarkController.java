@@ -51,4 +51,8 @@ public interface SwaggerBookmarkController {
 			})
 	ResponseEntity<List<BookmarkResponseDto>> getBookmarkChats(
 			@PathVariable(name = "chatroomId") Long chatroomId, Authentication authentication);
+
+	@Operation(summary = "북마크 취소 API", description = "사용자가 DTO를 작성해 게시글/댓글 북마크를 취소하는 API입니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<Void> deleteBookmarkPost(BookmarkCreateRequestDto requestDto, Authentication auth);
 }

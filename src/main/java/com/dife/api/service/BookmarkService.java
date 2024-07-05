@@ -133,4 +133,39 @@ public class BookmarkService {
 		return modelMapper.map(bookmark, BookmarkResponseDto.class);
 	}
 
+	public void deleteBookmark(BookmarkCreateRequestDto requestDto, String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		switch (requestDto.getType()) {
+			case POST:
+				Post post =
+						postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
+
+				Bookmark bookmarkPost =
+						bookmarkRepository
+								.findBookmarkByPostAndMember(post, member)
+								.orElseThrow(PostNotFoundException::new);
+
+				bookmarkPost.getPost().getBookmarks().remove(bookmarkPost);
+				member.getBookmarks().remove(bookmarkPost);
+				bookmarkRepository.delete(bookmarkPost);
+				break;
+
+			case COMMENT:
+				Comment comment =
+						commentRepository
+								.findById(requestDto.getCommentId())
+								.orElseThrow(CommentNotFoundException::new);
+
+				Bookmark bookmarkComment =
+						bookmarkRepository
+								.findBookmarkByCommentAndMember(comment, member)
+								.orElseThrow(LikeNotFoundException::new);
+
+				bookmarkComment.getComment().getBookmarks().remove(bookmarkComment);
+				bookmarkRepository.delete(bookmarkComment);
+				break;
+		}
+	}
 }
