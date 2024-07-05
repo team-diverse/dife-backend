@@ -24,6 +24,7 @@ public class BookmarkService {
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
 	private final PostRepository postRepository;
+	private final CommentRepository commentRepository;
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 
@@ -80,6 +81,8 @@ public class BookmarkService {
 						.findByChatroomIdAndId(requestDto.getChatroomId(), requestDto.getChatId())
 						.orElseThrow(() -> new ChatroomException("유효하지 않은 채팅입니다!"));
 
+		if (bookmarkRepository.existsBookmarkByMessage(chat.getMessage()))
+			throw new DuplicateBookmarkException();
 		Bookmark bookmark = new Bookmark();
 		bookmark.setMessage(chat.getMessage());
 		bookmark.setMember(member);
@@ -96,6 +99,9 @@ public class BookmarkService {
 		Post post =
 				postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
 		if (!post.getIsPublic()) throw new PostUnauthorizedException();
+
+		if (bookmarkRepository.existsBookmarkByPostAndMember(post, member))
+			throw new DuplicateBookmarkException();
 
 		Bookmark bookmark = new Bookmark();
 		bookmark.setPost(post);
