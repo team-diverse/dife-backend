@@ -6,6 +6,7 @@ import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.BoardCategory;
 import com.dife.api.model.Member;
+import com.dife.api.model.NotificationType;
 import com.dife.api.model.Post;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.MemberRepository;
@@ -27,6 +28,7 @@ public class PostService {
 	private final PostRepository postRepository;
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
+	private final NotificationService notificationService;
 
 	public PostResponseDto createPost(PostCreateRequestDto requestDto, String memberEmail) {
 
@@ -41,6 +43,7 @@ public class PostService {
 		post.setMember(member);
 
 		postRepository.save(post);
+		notificationService.sendNotification(memberEmail, NotificationType.POST, "게시글이 생성되었습니다!");
 
 		return modelMapper.map(post, PostResponseDto.class);
 	}
