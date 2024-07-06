@@ -93,14 +93,16 @@ public class MemberService {
 			MultipartFile verificationFile) {
 		Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 
-		if ((verificationFile.isEmpty() || verificationFile == null)
-				&& (member.getUsername().equals(""))) {
-			throw new MemberNotAddVerificationException();
-		} else {
-			if (verificationFile != null && !verificationFile.isEmpty()) {
-				FileDto verificationImgPath = fileService.upload(verificationFile);
-				File file = modelMapper.map(verificationImgPath, File.class);
-				member.setVerificationFile(file);
+		if (!member.getIsVerified()) {
+			if ((verificationFile.isEmpty() || verificationFile == null)
+					&& (member.getUsername().equals(""))) {
+				throw new MemberNotAddVerificationException();
+			} else {
+				if (verificationFile != null && !verificationFile.isEmpty()) {
+					FileDto verificationImgPath = fileService.upload(verificationFile);
+					File file = modelMapper.map(verificationImgPath, File.class);
+					member.setVerificationFile(file);
+				}
 			}
 		}
 
