@@ -1,6 +1,6 @@
 package com.dife.api.controller;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.dife.api.GlobalExceptionHandler;
 import com.dife.api.exception.DuplicateMemberException;
+import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.LoginDto;
 import com.dife.api.model.dto.LoginSuccessDto;
@@ -35,6 +36,9 @@ public class MemberControllerTest {
 	private MockMvc mockMvc;
 
 	@Mock private MemberService memberService;
+	@Mock private JWTUtil jwtUtil;
+	private static final long ACCESS_TOKEN_VALIDITY_DURATION = 60 * 60 * 1000L;
+	private static final long REFRESH_TOKEN_VALIDITY_DURATION = 90 * 24 * 60 * 1000L;
 
 	@InjectMocks private MemberController memberController;
 
@@ -101,11 +105,12 @@ public class MemberControllerTest {
 			requestDto.setPassword("password123");
 			String reqBody = new ObjectMapper().writeValueAsString(requestDto);
 
-			LoginSuccessDto responseDto =
-					new LoginSuccessDto(
-							1L,
-							"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-							"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
+			String accessToken =
+					jwtUtil.createJwt(1L, "accessToken", "dife", ACCESS_TOKEN_VALIDITY_DURATION);
+			String refreshToken =
+					jwtUtil.createJwt(1L, "refreshToken", "dife", REFRESH_TOKEN_VALIDITY_DURATION);
+
+			LoginSuccessDto responseDto = new LoginSuccessDto(1L, accessToken, refreshToken);
 
 			ResponseEntity<LoginSuccessDto> responseEntity =
 					new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -117,18 +122,12 @@ public class MemberControllerTest {
 							post("/api/members/login").contentType(MediaType.APPLICATION_JSON).content(reqBody))
 					.andExpect(status().isOk())
 					.andExpect(jsonPath("member_id").value(1L))
-					.andExpect(
-							jsonPath("$.accessToken")
-									.value(
-											"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"))
-					.andExpect(
-							jsonPath("$.refreshToken")
-									.value(
-											"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"));
+					.andExpect(jsonPath("$.accessToken").value(accessToken))
+					.andExpect(jsonPath("$.refreshToken").value(refreshToken));
 		}
 
 		@Test
-		public void shouldReturn500_WhenPasswordIsWrong() throws Exception {
+		public void shouldReturn401_WhenPasswordIsWrong() throws Exception {
 			LoginDto requestDto = new LoginDto();
 			requestDto.setEmail("email@gmail.com");
 			requestDto.setPassword("wrong_password");

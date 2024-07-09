@@ -1,7 +1,7 @@
 package com.dife.api.service;
 
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.config.RegisterValidator;
 import com.dife.api.exception.*;
@@ -196,8 +196,7 @@ public class MemberService {
 				jwtUtil.createJwt(memberId, "refreshToken", "dife", REFRESH_TOKEN_VALIDITY_DURATION);
 
 		ResponseEntity<LoginSuccessDto> responseEntity =
-				ResponseEntity.status(CREATED)
-						.body(new LoginSuccessDto(memberId, accessToken, refreshToken));
+				ResponseEntity.status(OK).body(new LoginSuccessDto(memberId, accessToken, refreshToken));
 
 		return responseEntity;
 	}
