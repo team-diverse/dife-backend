@@ -2,6 +2,7 @@ package com.dife.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,9 +17,9 @@ public class Post extends BaseTimeEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String title;
+	private String title = "";
 
-	private String content;
+	private String content = "";
 
 	private Boolean isPublic = true;
 
@@ -43,7 +44,7 @@ public class Post extends BaseTimeEntity {
 	@JsonIgnore
 	private List<Bookmark> Bookmarks;
 
-	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JsonIgnore
-	private List<File> files;
+	private List<File> files = new ArrayList<>();
 }

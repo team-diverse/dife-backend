@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Post API", description = "게시판/게시글 서비스 API")
 public interface SwaggerPostController {
@@ -24,7 +25,13 @@ public interface SwaggerPostController {
 			responseCode = "201",
 			description = "게시글 생성 성공 예시",
 			content = @Content(mediaType = "application/json"))
-	ResponseEntity<PostResponseDto> createPost(PostCreateRequestDto requestDto, Authentication auth);
+	ResponseEntity<PostResponseDto> createPost(
+			@RequestParam(name = "title") String title,
+			@RequestParam(name = "content") String content,
+			@RequestParam(name = "isPublic") Boolean isPublic,
+			@RequestParam(name = "boardType") BoardCategory boardType,
+			@RequestParam(name = "postFile") MultipartFile postFile,
+			Authentication auth);
 
 	@Operation(summary = "단일 게시글 조회 API", description = "게시글 ID를 이용해 게시글을 가져옵니다.")
 	@ApiResponse(
@@ -49,7 +56,13 @@ public interface SwaggerPostController {
 						schema = @Schema(implementation = PostResponseDto.class))
 			})
 	ResponseEntity<PostResponseDto> updatePost(
-			@PathVariable(name = "id") Long id, PostUpdateRequestDto request, Authentication auth);
+			@PathVariable(name = "id") Long id,
+			@RequestParam(name = "title") String title,
+			@RequestParam(name = "content") String content,
+			@RequestParam(name = "isPublic") Boolean isPublic,
+			@RequestParam(name = "boardType") BoardCategory boardType,
+			@RequestParam(name = "postFile", required = false) MultipartFile postFile,
+			Authentication auth);
 
 	@Operation(summary = "게시글 삭제 API", description = "게시글 ID를 이용해 게시글을 삭제합니다.")
 	@ApiResponse(

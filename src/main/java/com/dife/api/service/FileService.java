@@ -1,10 +1,7 @@
 package com.dife.api.service;
 
-import com.dife.api.exception.FileUploadException;
 import com.dife.api.model.File;
-import com.dife.api.model.FileLocation;
 import com.dife.api.model.Format;
-import com.dife.api.model.Post;
 import com.dife.api.model.dto.FileDto;
 import com.dife.api.repository.FileRepository;
 import java.io.IOException;
@@ -33,23 +30,8 @@ public class FileService {
 	private final S3Presigner presigner;
 	private final ModelMapper modelMapper;
 
-	private final PostService postService;
-
 	@Value("${spring.aws.bucket-name}")
 	private String bucketName;
-
-	public FileDto uploadFileLocation(
-			MultipartFile file, FileLocation fileLocation, Long id, String memberEmail) {
-		switch (fileLocation) {
-			case POST:
-				Post post = postService.checkPostMember(id, memberEmail);
-				FileDto fileDto = upload(file);
-				postService.uploadPostFile(post, fileDto);
-				return fileDto;
-			default:
-				throw new FileUploadException();
-		}
-	}
 
 	public FileDto upload(MultipartFile file) {
 		if (file.isEmpty()) {
@@ -77,7 +59,6 @@ public class FileService {
 		fileInfo.setOriginalName(originalFilename);
 		fileInfo.setName(fileName);
 		fileInfo.setSize(fileSize);
-		fileInfo.setUrl("https://");
 		fileInfo.setFormat(Format.JPG);
 		fileRepository.save(fileInfo);
 
@@ -106,15 +87,6 @@ public class FileService {
 		presigner.close();
 
 		return url;
-	}
-
-	public void deleteFileLocation(Long id, FileLocation fileLocation, String memberEmail) {
-		switch (fileLocation) {
-			case POST:
-				Post post = postService.checkPostMember(id, memberEmail);
-				postService.deletePostFile(post, id);
-				deleteFile(id);
-		}
 	}
 
 	public void deleteFile(Long id) {

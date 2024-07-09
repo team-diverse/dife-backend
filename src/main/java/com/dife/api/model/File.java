@@ -30,9 +30,6 @@ public class File {
 	@Column(nullable = false)
 	private Long size;
 
-	@Column(nullable = false)
-	private String url;
-
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Format format;
@@ -42,7 +39,7 @@ public class File {
 	private LocalDateTime createdAt;
 
 	@ManyToOne
-	@JoinColumn(name = "file_id")
+	@JoinColumn(name = "post_id")
 	@JsonIgnore
 	private Post post;
 }
