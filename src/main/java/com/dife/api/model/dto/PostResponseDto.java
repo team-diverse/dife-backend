@@ -1,7 +1,6 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.BoardCategory;
-import com.dife.api.model.File;
 import com.dife.api.model.Member;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
@@ -34,7 +33,7 @@ public class PostResponseDto {
 
 	private LocalDateTime modified;
 
-	private List<File> files;
+	private List<FileDto> files;
 
 	@NotNull
 	@JsonProperty("writer")
