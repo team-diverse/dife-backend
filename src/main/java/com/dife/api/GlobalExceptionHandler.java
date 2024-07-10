@@ -5,6 +5,7 @@ import static org.springframework.http.HttpStatus.*;
 import com.dife.api.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -22,6 +23,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(DuplicateException.class)
 	public ResponseEntity<ExceptionResonse> handleDuplicateException(DuplicateException exception) {
 		return ResponseEntity.status(CONFLICT.value())
+				.body(new ExceptionResonse(false, exception.getMessage()));
+	}
+
+	@ExceptionHandler(BadCredentialsException.class)
+	public ResponseEntity<ExceptionResonse> handleBadCredentialsException(
+			BadCredentialsException exception) {
+		return ResponseEntity.status(UNAUTHORIZED.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 

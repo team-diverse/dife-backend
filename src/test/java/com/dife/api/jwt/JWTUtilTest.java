@@ -52,7 +52,7 @@ public class JWTUtilTest {
 	}
 
 	@Test
-	public void getEmail_ShouldReturnEmail_WhenTokenPassed() {
+	public void getId_ShouldReturnId_WhenTokenPassed() {
 		Long id = 1L;
 		String token = jwtUtil.createJwt(id, "accessToken", "dife", 1000L * 60 * 60);
 
