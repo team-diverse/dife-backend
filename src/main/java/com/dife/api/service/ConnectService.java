@@ -76,9 +76,6 @@ public class ConnectService {
 	}
 
 	public void acceptConnect(ConnectPatchRequestDto requestDto, String currentMemberEmail) {
-		if (!isConnectRelevant(requestDto.getMemberId(), currentMemberEmail)) {
-			throw new ConnectUnauthorizedException();
-		}
 		Member currentMember =
 				memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
 		Member otherMember =
@@ -100,8 +97,9 @@ public class ConnectService {
 		connectRepository.deleteById(id);
 	}
 
-	public boolean isConnectRelevant(Long id, String email) {
-		Connect connect = connectRepository.findById(id).orElseThrow(ConnectNotFoundException::new);
+	public boolean isConnectRelevant(Long connectId, String email) {
+		Connect connect =
+				connectRepository.findById(connectId).orElseThrow(ConnectNotFoundException::new);
 		String fromMemberEmail = connect.getFromMember().getEmail();
 		String toMemberEmail = connect.getToMember().getEmail();
 		return fromMemberEmail.equals(email) || toMemberEmail.equals(email);
