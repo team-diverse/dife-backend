@@ -5,6 +5,7 @@ import com.dife.api.model.Member;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.*;
 
 @Getter
