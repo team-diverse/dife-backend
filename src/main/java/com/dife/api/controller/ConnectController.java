@@ -34,7 +34,7 @@ public class ConnectController implements SwaggerConnectController {
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
-	@PostMapping(value = "/", consumes = "application/json")
+	@PostMapping("/")
 	public ResponseEntity<ConnectResponseDto> createConnect(
 			@Valid @RequestBody ConnectRequestDto requestDto, Authentication auth) {
 		ConnectResponseDto responseDto = connectService.saveConnect(requestDto, auth.getName());

@@ -28,7 +28,7 @@ public class BookmarkController implements SwaggerBookmarkController {
 		return ResponseEntity.ok(bookmarks);
 	}
 
-	@PostMapping(consumes = "application/json")
+	@PostMapping
 	public ResponseEntity<BookmarkResponseDto> createBookmark(
 			@RequestBody BookmarkCreateRequestDto requestDto, Authentication auth) {
 		BookmarkResponseDto responseDto = bookmarkService.createBookmark(requestDto, auth.getName());

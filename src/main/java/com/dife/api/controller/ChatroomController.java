@@ -55,7 +55,7 @@ public class ChatroomController implements SwaggerChatroomController {
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 
-	@PutMapping(value = "/{id}", consumes = "application/json")
+	@PutMapping("/{id}")
 	public ResponseEntity<ChatroomResponseDto> update(
 			@RequestBody GroupChatroomPutRequestDto requestDto,
 			@PathVariable(name = "id") Long chatroomId,
