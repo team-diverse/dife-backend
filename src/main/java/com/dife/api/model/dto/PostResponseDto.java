@@ -1,12 +1,10 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.BoardCategory;
-import com.dife.api.model.Comment;
 import com.dife.api.model.Member;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.*;
 
 @Getter
@@ -39,6 +37,4 @@ public class PostResponseDto {
 	@NotNull
 	@JsonProperty("writer")
 	private Member Member;
-
-	private List<Comment> comments;
 }

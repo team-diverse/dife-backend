@@ -10,8 +10,8 @@ import com.dife.api.model.dto.CommentResponseDto;
 import com.dife.api.repository.CommentRepository;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,16 +33,8 @@ public class CommentService {
 	public List<CommentResponseDto> getCommentsByPostId(Long postId) {
 		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 		List<Comment> comments = commentRepository.findCommentsByPost(post);
-		Integer size = comments.size();
-		List<CommentResponseDto> dtoList = new ArrayList<>();
 
-		for (int i = 0; i < size; i++) {
-			Comment comment = comments.get(i);
-			CommentResponseDto responseDto = getComment(comment);
-			dtoList.add(responseDto);
-		}
-
-		return dtoList;
+		return comments.stream().map(this::getComment).collect(Collectors.toList());
 	}
 
 	public CommentResponseDto createComment(CommentCreateRequestDto requestDto, String memberEmail) {
@@ -69,7 +61,7 @@ public class CommentService {
 
 		CommentResponseDto responseDto = modelMapper.map(comment, CommentResponseDto.class);
 		if (comment.getParentComment() != null)
-			responseDto.setParent_id(comment.getParentComment().getId());
+			responseDto.setParentComment(comment.getParentComment());
 		return responseDto;
 	}
 
@@ -79,7 +71,7 @@ public class CommentService {
 		dto.setLikesCount(comment.getCommentLikes().size());
 		dto.setBookmarkCount(comment.getBookmarks().size());
 
-		if (comment.getParentComment() != null) dto.setParent_id(comment.getParentComment().getId());
+		if (comment.getParentComment() != null) dto.setParentComment(comment.getParentComment());
 
 		return dto;
 	}
