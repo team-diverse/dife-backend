@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -58,7 +59,6 @@ public class FileService {
 		fileInfo.setOriginalName(originalFilename);
 		fileInfo.setName(fileName);
 		fileInfo.setSize(fileSize);
-		fileInfo.setUrl("https://");
 		fileInfo.setFormat(Format.JPG);
 		fileRepository.save(fileInfo);
 
@@ -87,5 +87,16 @@ public class FileService {
 		presigner.close();
 
 		return url;
+	}
+
+	public void deleteFile(Long id) {
+
+		File file = fileRepository.getReferenceById(id);
+		fileRepository.delete(file);
+
+		DeleteObjectRequest deleteObjectRequest =
+				DeleteObjectRequest.builder().bucket(bucketName).key(file.getOriginalName()).build();
+
+		s3Client.deleteObject(deleteObjectRequest);
 	}
 }

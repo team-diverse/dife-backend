@@ -1,5 +1,6 @@
 package com.dife.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -29,9 +30,6 @@ public class File {
 	@Column(nullable = false)
 	private Long size;
 
-	@Column(nullable = false)
-	private String url;
-
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Format format;
@@ -39,4 +37,9 @@ public class File {
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false, nullable = false)
 	private LocalDateTime createdAt;
+
+	@ManyToOne
+	@JoinColumn(name = "post_id")
+	@JsonIgnore
+	private Post post;
 }

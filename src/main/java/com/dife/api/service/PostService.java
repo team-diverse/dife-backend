@@ -5,19 +5,23 @@ import static java.util.stream.Collectors.toList;
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.BoardCategory;
+import com.dife.api.model.File;
 import com.dife.api.model.Member;
 import com.dife.api.model.NotificationType;
 import com.dife.api.model.Post;
 import com.dife.api.model.dto.*;
+import com.dife.api.repository.FileRepository;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -26,24 +30,43 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
 	private final PostRepository postRepository;
+	private final FileService fileService;
+	private final FileRepository fileRepository;
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 	private final NotificationService notificationService;
 
-	public PostResponseDto createPost(PostCreateRequestDto requestDto, String memberEmail) {
+	public PostResponseDto createPost(
+			String title,
+			String content,
+			Boolean isPublic,
+			BoardCategory boardType,
+			MultipartFile postFile,
+			String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Post post = new Post();
-		post.setTitle(requestDto.getTitle());
-		post.setContent(requestDto.getContent());
-		post.setIsPublic(requestDto.getIsPublic());
-		post.setBoardType(requestDto.getBoardType());
+		post.setTitle(title);
+		post.setContent(content);
+		post.setIsPublic(isPublic);
+		post.setBoardType(boardType);
 		post.setMember(member);
 
 		postRepository.save(post);
 		notificationService.sendNotification(memberEmail, NotificationType.POST, "게시글이 생성되었습니다!");
+
+		if (!postFile.isEmpty()) {
+			FileDto fileDto = fileService.upload(postFile);
+			File file = modelMapper.map(fileDto, File.class);
+			file.setPost(post);
+			fileRepository.save(file);
+
+			post.getFiles().add(file);
+		}
+
+		postRepository.save(post);
 
 		return modelMapper.map(post, PostResponseDto.class);
 	}
@@ -63,10 +86,31 @@ public class PostService {
 		responseDto.setLikesCount(post.getPostLikes().size());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
 
+		List<File> files = post.getFiles().stream().collect(Collectors.toList());
+
+		List<FileDto> fileDtos =
+				files.stream()
+						.map(
+								file -> {
+									FileDto fileDto = modelMapper.map(file, FileDto.class);
+									fileDto.setUrl(fileService.getPresignUrl(file.getOriginalName()));
+									return fileDto;
+								})
+						.collect(Collectors.toList());
+
+		responseDto.setFiles(fileDtos);
+
 		return responseDto;
 	}
 
-	public PostResponseDto updatePost(Long id, PostUpdateRequestDto dto, String memberEmail) {
+	public PostResponseDto updatePost(
+			Long id,
+			String title,
+			String content,
+			Boolean isPublic,
+			BoardCategory boardType,
+			MultipartFile postFile,
+			String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -74,10 +118,24 @@ public class PostService {
 		Post post =
 				postRepository.findByMemberAndId(member, id).orElseThrow(PostNotFoundException::new);
 
-		post.setBoardType(dto.getBoardType());
-		post.setTitle(dto.getTitle());
-		post.setContent(dto.getContent());
-		post.setIsPublic(dto.getIsPublic());
+		post.setTitle((title != null && !title.isEmpty()) ? title : post.getTitle());
+		post.setContent((content != null && !content.isEmpty()) ? content : post.getContent());
+		post.setIsPublic(isPublic != null ? isPublic : post.getIsPublic());
+		post.setBoardType(boardType != null ? boardType : post.getBoardType());
+
+		postRepository.save(post);
+
+		if (!(post.getFiles().isEmpty() && (postFile == null || postFile.isEmpty()))) {
+			if (postFile != null && !postFile.isEmpty()) {
+				FileDto fileDto = fileService.upload(postFile);
+				File file = modelMapper.map(fileDto, File.class);
+				file.setPost(post);
+				fileRepository.save(file);
+
+				post.getFiles().add(file);
+			}
+		}
+
 		postRepository.save(post);
 
 		return modelMapper.map(post, PostResponseDto.class);
@@ -89,6 +147,10 @@ public class PostService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Post post =
 				postRepository.findByMemberAndId(member, id).orElseThrow(PostNotFoundException::new);
+
+		for (File file : post.getFiles()) {
+			fileService.deleteFile(file.getId());
+		}
 
 		postRepository.delete(post);
 	}

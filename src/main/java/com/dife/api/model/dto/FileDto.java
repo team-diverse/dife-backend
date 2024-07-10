@@ -21,7 +21,7 @@ public class FileDto {
 
 	@NotNull private String size;
 
-	@NotNull private String url;
+	private String url;
 
 	@NotNull private Format format;
 

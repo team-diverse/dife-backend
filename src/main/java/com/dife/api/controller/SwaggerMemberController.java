@@ -114,4 +114,8 @@ public interface SwaggerMemberController {
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<List<MemberResponseDto>> getSearchMembers(
 			@RequestParam(name = "keyword") String keyword);
+
+	@Operation(summary = "회원이 작성한 게시글 조회 API", description = "회원의 인가를 이용해 작성한 게시글을 조회하는 API입니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<List<PostResponseDto>> getMemberPosts(Authentication auth);
 }
