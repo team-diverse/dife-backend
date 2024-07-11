@@ -31,18 +31,10 @@ public class CommentService {
 
 	@Transactional(readOnly = true)
 	public List<CommentResponseDto> getCommentsByPostId(Long postId) {
-
 		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 		List<Comment> comments = commentRepository.findCommentsByPost(post);
 
-		return comments.stream()
-				.map(
-						comment -> {
-							CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
-							dto.setLikesCount(comment.getCommentLikes().size());
-							return dto;
-						})
-				.collect(Collectors.toList());
+		return comments.stream().map(this::getComment).collect(Collectors.toList());
 	}
 
 	public CommentResponseDto createComment(CommentCreateRequestDto requestDto, String memberEmail) {
@@ -56,7 +48,7 @@ public class CommentService {
 						? commentRepository.findById(requestDto.getParentCommentId()).orElse(null)
 						: null;
 		Comment comment = new Comment();
-		comment.setPost(parentComment == null ? post : null);
+		comment.setPost(post);
 		comment.setParentComment(parentComment);
 		comment.setWriter(writer);
 		comment.setContent(requestDto.getContent());
@@ -67,6 +59,20 @@ public class CommentService {
 
 		commentRepository.save(comment);
 
-		return modelMapper.map(comment, CommentResponseDto.class);
+		CommentResponseDto responseDto = modelMapper.map(comment, CommentResponseDto.class);
+		if (comment.getParentComment() != null)
+			responseDto.setParentComment(comment.getParentComment());
+		return responseDto;
+	}
+
+	public CommentResponseDto getComment(Comment comment) {
+		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
+
+		dto.setLikesCount(comment.getCommentLikes().size());
+		dto.setBookmarkCount(comment.getBookmarks().size());
+
+		if (comment.getParentComment() != null) dto.setParentComment(comment.getParentComment());
+
+		return dto;
 	}
 }

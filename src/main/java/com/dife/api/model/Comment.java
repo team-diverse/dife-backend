@@ -41,5 +41,10 @@ public class Comment extends BaseTimeEntity {
 	private List<Comment> childrenComments = new ArrayList<>();
 
 	@OneToMany(mappedBy = "comment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<LikeComment> CommentLikes;
+
+	@OneToMany(mappedBy = "comment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Bookmark> Bookmarks;
 }

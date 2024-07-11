@@ -1,6 +1,7 @@
 package com.dife.api.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.dto.BookmarkCreateRequestDto;
 import com.dife.api.model.dto.BookmarkResponseDto;
@@ -27,7 +28,7 @@ public class BookmarkController implements SwaggerBookmarkController {
 		return ResponseEntity.ok(bookmarks);
 	}
 
-	@PostMapping(consumes = "application/json")
+	@PostMapping
 	public ResponseEntity<BookmarkResponseDto> createBookmark(
 			@RequestBody BookmarkCreateRequestDto requestDto, Authentication auth) {
 		BookmarkResponseDto responseDto = bookmarkService.createBookmark(requestDto, auth.getName());
@@ -40,5 +41,12 @@ public class BookmarkController implements SwaggerBookmarkController {
 		List<BookmarkResponseDto> bookmarks =
 				bookmarkService.getBookmarks(chatroomId, authentication.getName());
 		return ResponseEntity.ok(bookmarks);
+	}
+
+	@DeleteMapping
+	public ResponseEntity<Void> deleteBookmarkPost(
+			@RequestBody BookmarkCreateRequestDto requestDto, Authentication auth) {
+		bookmarkService.deleteBookmark(requestDto, auth.getName());
+		return new ResponseEntity<>(OK);
 	}
 }

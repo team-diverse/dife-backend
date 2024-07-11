@@ -24,7 +24,7 @@ public class LikeController implements SwaggerLikeController {
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
-	@PostMapping(consumes = "application/json")
+	@PostMapping
 	public ResponseEntity<Void> createLike(
 			@RequestBody LikeCreateRequestDto requestDto, Authentication auth) {
 

@@ -24,6 +24,7 @@ public class BookmarkService {
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
 	private final PostRepository postRepository;
+	private final CommentRepository commentRepository;
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 
@@ -59,8 +60,15 @@ public class BookmarkService {
 
 	public BookmarkResponseDto createBookmark(
 			BookmarkCreateRequestDto requestDto, String memberEmail) {
-		if (requestDto.getPostId() != null) return createBookmarkPost(requestDto, memberEmail);
-		return createBookmarkChat(requestDto, memberEmail);
+
+		switch (requestDto.getType()) {
+			case POST:
+				return createBookmarkPost(requestDto, memberEmail);
+			case COMMENT:
+				return createBookmarkComment(requestDto, memberEmail);
+			default:
+				return createBookmarkChat(requestDto, memberEmail);
+		}
 	}
 
 	public BookmarkResponseDto createBookmarkChat(
@@ -73,6 +81,8 @@ public class BookmarkService {
 						.findByChatroomIdAndId(requestDto.getChatroomId(), requestDto.getChatId())
 						.orElseThrow(() -> new ChatroomException("유효하지 않은 채팅입니다!"));
 
+		if (bookmarkRepository.existsBookmarkByMessage(chat.getMessage()))
+			throw new DuplicateBookmarkException();
 		Bookmark bookmark = new Bookmark();
 		bookmark.setMessage(chat.getMessage());
 		bookmark.setMember(member);
@@ -90,11 +100,72 @@ public class BookmarkService {
 				postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
 		if (!post.getIsPublic()) throw new PostUnauthorizedException();
 
+		if (bookmarkRepository.existsBookmarkByPostAndMember(post, member))
+			throw new DuplicateBookmarkException();
+
 		Bookmark bookmark = new Bookmark();
 		bookmark.setPost(post);
 		bookmark.setMember(member);
 		bookmarkRepository.save(bookmark);
 
 		return modelMapper.map(bookmark, BookmarkResponseDto.class);
+	}
+
+	public BookmarkResponseDto createBookmarkComment(
+			BookmarkCreateRequestDto requestDto, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		Comment comment =
+				commentRepository
+						.findById(requestDto.getCommentId())
+						.orElseThrow(() -> new CommentNotFoundException());
+
+		if (bookmarkRepository.existsBookmarkByCommentAndMember(comment, member))
+			throw new DuplicateBookmarkException();
+
+		Bookmark bookmark = new Bookmark();
+		bookmark.setMember(member);
+		bookmark.setComment(comment);
+		bookmarkRepository.save(bookmark);
+
+		return modelMapper.map(bookmark, BookmarkResponseDto.class);
+	}
+
+	public void deleteBookmark(BookmarkCreateRequestDto requestDto, String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		switch (requestDto.getType()) {
+			case POST:
+				Post post =
+						postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
+
+				Bookmark bookmarkPost =
+						bookmarkRepository
+								.findBookmarkByPostAndMember(post, member)
+								.orElseThrow(PostNotFoundException::new);
+
+				bookmarkPost.getPost().getBookmarks().remove(bookmarkPost);
+				member.getBookmarks().remove(bookmarkPost);
+				bookmarkRepository.delete(bookmarkPost);
+				break;
+
+			case COMMENT:
+				Comment comment =
+						commentRepository
+								.findById(requestDto.getCommentId())
+								.orElseThrow(CommentNotFoundException::new);
+
+				Bookmark bookmarkComment =
+						bookmarkRepository
+								.findBookmarkByCommentAndMember(comment, member)
+								.orElseThrow(LikeNotFoundException::new);
+
+				bookmarkComment.getComment().getBookmarks().remove(bookmarkComment);
+				bookmarkRepository.delete(bookmarkComment);
+				break;
+		}
 	}
 }
