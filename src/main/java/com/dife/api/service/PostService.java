@@ -59,7 +59,7 @@ public class PostService {
 		postRepository.save(post);
 
 		NotificationToken notificationToken =
-				notificationTokenRepository.findById(tokenId).orElseThrow(NotificationException::new);
+				notificationTokenRepository.findByMember(member).orElseThrow(NotificationException::new);
 
 		Notification notification = new Notification();
 		notification.setType(NotificationType.POST);

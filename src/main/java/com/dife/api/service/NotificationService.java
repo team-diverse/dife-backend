@@ -56,9 +56,7 @@ public class NotificationService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		NotificationToken notificationToken =
-				notificationTokenRepository
-						.findById(requestDto.getTokenId())
-						.orElseThrow(NotificationException::new);
+				notificationTokenRepository.findByMember(member).orElseThrow(NotificationException::new);
 
 		Notification notification = new Notification();
 		notification.setNotificationToken(notificationToken);
