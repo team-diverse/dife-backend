@@ -1,5 +1,6 @@
 package com.dife.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +21,8 @@ public class Notification extends BaseTimeEntity {
 
 	private Boolean isRead = false;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member_id")
-	private Member member;
+	@ManyToOne
+	@JoinColumn(name = "notificationToken_id")
+	@JsonIgnore
+	private NotificationToken notificationToken;
 }
