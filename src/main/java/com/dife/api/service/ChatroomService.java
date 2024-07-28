@@ -66,7 +66,7 @@ public class ChatroomService {
 			case GROUP:
 				return createGroupChatroom(profileImg, name, description, memberEmail);
 			case SINGLE:
-				return createSingleChatroom(toMemberId, memberEmail);
+				return createSingleChatroom(toMemberId, name, memberEmail);
 		}
 		throw new ChatroomException("유효한 채팅방 생성 접근이 아닙니다!");
 	}
@@ -206,8 +206,8 @@ public class ChatroomService {
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public ChatroomResponseDto createSingleChatroom(Long toMemberId, String currentMemberEmail) {
-
+	public ChatroomResponseDto createSingleChatroom(
+			Long toMemberId, String name, String currentMemberEmail) {
 		Member currentMember =
 				memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
 		Member otherMember =
@@ -218,6 +218,7 @@ public class ChatroomService {
 			throw new SingleChatroomCreateDuplicateException();
 
 		Chatroom chatroom = new Chatroom();
+		chatroom.setName(name.trim());
 		ChatroomSetting setting = new ChatroomSetting();
 		chatroom.setChatroomType(ChatroomType.SINGLE);
 		Set<Member> memberSet = chatroom.getMembers();
