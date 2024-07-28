@@ -28,6 +28,7 @@ public class PostController implements SwaggerPostController {
 
 	@PostMapping(consumes = "multipart/form-data")
 	public ResponseEntity<PostResponseDto> createPost(
+			@RequestParam(name = "tokenId") Long tokenId,
 			@RequestParam(name = "title") String title,
 			@RequestParam(name = "content") String content,
 			@RequestParam(name = "isPublic") Boolean isPublic,
@@ -36,7 +37,7 @@ public class PostController implements SwaggerPostController {
 			Authentication auth) {
 
 		PostResponseDto responseDto =
-				postService.createPost(title, content, isPublic, boardType, postFile, auth.getName());
+				postService.createPost(tokenId, title, content, isPublic, boardType, postFile, auth.getName());
 
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}

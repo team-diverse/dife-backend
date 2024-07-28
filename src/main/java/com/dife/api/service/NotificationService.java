@@ -56,7 +56,7 @@ public class NotificationService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		NotificationToken notificationToken =
-				notificationTokenRepository.findByMember(member).orElseThrow(NotificationException::new);
+				notificationTokenRepository.findById(requestDto.getTokenId()).orElseThrow(NotificationException::new);
 
 		Notification notification = new Notification();
 		notification.setNotificationToken(notificationToken);
@@ -69,6 +69,16 @@ public class NotificationService {
 		notificationTokenRepository.save(notificationToken);
 
 		return modelMapper.map(notification, NotificationResponseDto.class);
+	}
+
+	public List<NotificationTokenResponseDto> getNotificationTokens(String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		List<NotificationToken> notifications = notificationTokenRepository.findAllByMember(member);
+
+		return notifications.stream()
+				.map(n -> modelMapper.map(n, NotificationTokenResponseDto.class))
+				.collect(toList());
 	}
 
 	public List<NotificationResponseDto> getNotifications(String memberEmail) {

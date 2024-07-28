@@ -38,6 +38,7 @@ public class PostService {
 	private final NotificationTokenRepository notificationTokenRepository;
 
 	public PostResponseDto createPost(
+			Long tokenId,
 			String title,
 			String content,
 			Boolean isPublic,
@@ -58,7 +59,7 @@ public class PostService {
 		postRepository.save(post);
 
 		NotificationToken notificationToken =
-				notificationTokenRepository.findByMember(member).orElseThrow(NotificationException::new);
+				notificationTokenRepository.findById(tokenId).orElseThrow(NotificationException::new);
 
 		Notification notification = new Notification();
 		notification.setType(NotificationType.POST);

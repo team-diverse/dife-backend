@@ -11,6 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NotificationRequestDto {
+
+	private Long tokenId;
 	private NotificationType type;
 	private String message;
 	private Boolean isRead = false;
