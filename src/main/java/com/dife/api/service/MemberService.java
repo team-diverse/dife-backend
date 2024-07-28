@@ -8,10 +8,7 @@ import com.dife.api.exception.*;
 import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
-import com.dife.api.repository.HobbyRepository;
-import com.dife.api.repository.LanguageRepository;
-import com.dife.api.repository.MemberRepository;
-import com.dife.api.repository.PostRepository;
+import com.dife.api.repository.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,6 +40,7 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final PostRepository postRepository;
+	private final CommentRepository commentRepository;
 	private final LanguageRepository languageRepository;
 	private final HobbyRepository hobbyRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
@@ -349,5 +347,17 @@ public class MemberService {
 		List<Post> posts = postRepository.findPostsByMember(member, sort);
 
 		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
+	}
+
+	public List<CommentResponseDto> getComments(String memberEmail) {
+		Member writer =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		Sort sort = Sort.by(Sort.Direction.DESC, "created");
+		List<Comment> comments = commentRepository.findCommentsByWriter(writer, sort);
+
+		return comments.stream()
+				.map(c -> modelMapper.map(c, CommentResponseDto.class))
+				.collect(toList());
 	}
 }
