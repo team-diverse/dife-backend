@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notifications")
-public class NotificationController implements SwaggerNotificationController{
+public class NotificationController implements SwaggerNotificationController {
 
 	private final NotificationService notificationService;
 
 	@GetMapping("/push")
-	public ResponseEntity<List<NotificationTokenResponseDto>> getNotificationTokens(Authentication auth) {
+	public ResponseEntity<List<NotificationTokenResponseDto>> getNotificationTokens(
+			Authentication auth) {
 		List<NotificationTokenResponseDto> responseDtos =
 				notificationService.getNotificationTokens(auth.getName());
 		return ResponseEntity.ok(responseDtos);

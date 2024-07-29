@@ -6,12 +6,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import java.util.List;
 
 @Tag(name = "Notification API", description = "알림 서비스 API")
 public interface SwaggerNotificationController {
@@ -34,7 +31,7 @@ public interface SwaggerNotificationController {
 			content = {
 				@Content(
 						mediaType = "application/json",
-						schema = @Schema(implementation =NotificationTokenResponseDto.class))
+						schema = @Schema(implementation = NotificationTokenResponseDto.class))
 			})
 	ResponseEntity<NotificationTokenResponseDto> createNotificationToken(
 			NotificationTokenRequestDto requestDto, Authentication auth);
@@ -44,9 +41,9 @@ public interface SwaggerNotificationController {
 			responseCode = "201",
 			description = "알림 생성 성공 예시",
 			content = {
-					@Content(
-							mediaType = "application/json",
-							schema = @Schema(implementation =NotificationResponseDto.class))
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = NotificationResponseDto.class))
 			})
 	ResponseEntity<NotificationResponseDto> createNotification(
 			NotificationRequestDto requestDto, Authentication auth);

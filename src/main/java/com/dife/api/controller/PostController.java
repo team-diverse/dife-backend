@@ -37,7 +37,8 @@ public class PostController implements SwaggerPostController {
 			Authentication auth) {
 
 		PostResponseDto responseDto =
-				postService.createPost(tokenId, title, content, isPublic, boardType, postFile, auth.getName());
+				postService.createPost(
+						tokenId, title, content, isPublic, boardType, postFile, auth.getName());
 
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
