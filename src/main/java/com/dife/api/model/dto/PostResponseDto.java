@@ -27,6 +27,8 @@ public class PostResponseDto {
 
 	private Integer likesCount;
 
+	private Boolean isLiked = false;
+
 	private Integer bookmarkCount;
 
 	private LocalDateTime created;

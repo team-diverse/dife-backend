@@ -33,7 +33,9 @@ public interface SwaggerPostController {
 			@RequestParam(name = "postFile") MultipartFile postFile,
 			Authentication auth);
 
-	@Operation(summary = "단일 게시글 조회 API", description = "게시글 ID를 이용해 게시글을 가져옵니다.")
+	@Operation(
+			summary = "단일 게시글 조회 API",
+			description = "게시글 ID를 이용해 게시글을 가져옵니다. 추가로 좋아요를 누른 게시물인지 여부도 표시됩니다.")
 	@ApiResponse(
 			responseCode = "200",
 			description = "게시글 조회 성공 예시",
@@ -42,7 +44,7 @@ public interface SwaggerPostController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = PostResponseDto.class))
 			})
-	ResponseEntity<PostResponseDto> getPost(@PathVariable(name = "id") Long id);
+	ResponseEntity<PostResponseDto> getPost(@PathVariable(name = "id") Long id, Authentication auth);
 
 	@Operation(
 			summary = "게시글 업데이트 API",
