@@ -29,4 +29,8 @@ public class Declaration extends BaseTimeEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "comment_id")
 	private Comment comment;
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "receiver_id")
+	private Member receiver;
 }
