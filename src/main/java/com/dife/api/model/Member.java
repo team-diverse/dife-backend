@@ -93,4 +93,8 @@ public class Member extends BaseTimeEntity {
 	@OneToMany(mappedBy = "receiver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Report> reports;
+
+	@OneToMany(mappedBy = "blacklistOwner", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<BlacklistedMember> blackList;
 }
