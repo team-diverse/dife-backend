@@ -51,6 +51,7 @@ public class SecurityConfig {
 											"/api/members/refresh-token",
 											"/api/members/change-password",
 											"/api/members/login",
+											"/health",
 											"/ws/**")
 									.permitAll();
 							requests.requestMatchers("/api/**").authenticated();
