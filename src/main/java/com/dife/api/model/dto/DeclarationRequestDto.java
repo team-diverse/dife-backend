@@ -15,5 +15,6 @@ public class DeclarationRequestDto {
 	private DeclarationType type;
 	private Long postId;
 	private Long commentId;
+	private Long receiverId;
 	private String message;
 }

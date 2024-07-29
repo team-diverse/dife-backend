@@ -21,6 +21,7 @@ public class DeclarationService {
 	private final PostRepository postRepository;
 	private final CommentRepository commentRepository;
 	private final MemberRepository memberRepository;
+	private final DeclarationRepository declarationRepository;
 
 	private final ModelMapper modelMapper;
 
@@ -34,18 +35,26 @@ public class DeclarationService {
 		declaration.setType(requestDto.getType());
 		declaration.setMember(member);
 
-		Optional.ofNullable(requestDto.getPostId())
-				.ifPresentOrElse(
-						postId ->
-								declaration.setPost(
-										postRepository.findById(postId).orElseThrow(PostNotFoundException::new)),
-						() ->
-								declaration.setComment(
-										commentRepository
-												.findById(requestDto.getCommentId())
-												.orElseThrow(CommentNotFoundException::new)));
+		if (requestDto.getPostId() != null) {
+			declaration.setPost(
+					postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new));
+		} else if (requestDto.getCommentId() != null) {
+			declaration.setComment(
+					commentRepository
+							.findById(requestDto.getCommentId())
+							.orElseThrow(CommentNotFoundException::new));
+		} else if (requestDto.getReceiverId() != null) {
+
+			if (requestDto.getReceiverId() == member.getId()) throw new MemberSendingSelfException();
+			declaration.setReceiver(
+					memberRepository
+							.findById(requestDto.getReceiverId())
+							.orElseThrow(MemberNotFoundException::new));
+		}
 
 		Optional.ofNullable(requestDto.getMessage()).ifPresent(declaration::setMessage);
+
+		declarationRepository.save(declaration);
 
 		return modelMapper.map(declaration, DeclarationResponseDto.class);
 	}
