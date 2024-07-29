@@ -28,8 +28,9 @@ public class CommentController implements SwaggerCommentController {
 
 	@GetMapping("/{postId}")
 	public ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(
-			@PathVariable(name = "postId") Long postId) {
-		List<CommentResponseDto> responseDto = commentService.getCommentsByPostId(postId);
+			@PathVariable(name = "postId") Long postId, Authentication auth) {
+		List<CommentResponseDto> responseDto =
+				commentService.getCommentsByPostId(postId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 }
