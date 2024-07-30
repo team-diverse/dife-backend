@@ -50,6 +50,7 @@ public class MemberService {
 	private final JavaMailSender javaMailSender;
 	private final FileService fileService;
 	private final ModelMapper modelMapper;
+	private final ConnectService connectSerivce;
 
 	@Autowired
 	@Qualifier("memberModelMapper")
@@ -226,6 +227,10 @@ public class MemberService {
 		return memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 	}
 
+	public Member getMemberEntityByEmail(String email) {
+		return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+	}
+
 	public void changePassword(String email) {
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 
@@ -256,17 +261,23 @@ public class MemberService {
 	}
 
 	public List<MemberResponseDto> getRandomMembers(int count, String email) {
-		List<Member> validMembers =
+		Member currentMember = getMemberEntityByEmail(email);
+
+		List<Member> validRandomMembers =
 				memberRepository.findAll().stream()
 						.filter(member -> !member.getEmail().equals(email))
+						.filter(Member::getIsVerified)
+						.filter(Member::getIsPublic)
+						.filter(member -> !connectSerivce.isConnected(currentMember, member))
+						.filter(member -> !connectSerivce.hasPendingConnect(currentMember, member))
 						.collect(Collectors.toList());
 
-		if (validMembers.isEmpty()) {
+		if (validRandomMembers.isEmpty()) {
 			return new ArrayList<>();
 		}
 
-		Collections.shuffle(validMembers);
-		List<Member> randomMembers = validMembers.stream().limit(count).toList();
+		Collections.shuffle(validRandomMembers);
+		List<Member> randomMembers = validRandomMembers.stream().limit(count).toList();
 
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : randomMembers) {

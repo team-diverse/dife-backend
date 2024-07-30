@@ -104,4 +104,18 @@ public class ConnectService {
 		String toMemberEmail = connect.getToMember().getEmail();
 		return fromMemberEmail.equals(email) || toMemberEmail.equals(email);
 	}
+
+	public boolean isConnected(Member member1, Member member2) {
+		return connectRepository
+				.findByMemberPair(member1, member2)
+				.map(connect -> connect.getStatus().equals(ConnectStatus.ACCEPTED))
+				.orElse(false);
+	}
+
+	public boolean hasPendingConnect(Member fromMember, Member toMember) {
+		return connectRepository
+				.findByFromMemberAndToMember(fromMember, toMember)
+				.map(connect -> connect.getStatus().equals(ConnectStatus.PENDING))
+				.orElse(false);
+	}
 }
