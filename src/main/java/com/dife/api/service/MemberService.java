@@ -355,7 +355,7 @@ public class MemberService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Sort sort = Sort.by(Sort.Direction.DESC, "created");
-		List<Post> posts = postRepository.findPostsByMember(member, sort);
+		List<Post> posts = postRepository.findPostsByWriter(member, sort);
 
 		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
 	}
