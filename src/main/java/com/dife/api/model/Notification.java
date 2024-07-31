@@ -22,7 +22,7 @@ public class Notification extends BaseTimeEntity {
 	private Boolean isRead = false;
 
 	@ManyToOne
-	@JoinColumn(name = "notificationToken_id")
+	@JoinColumn(name = "notification_token_id")
 	@JsonIgnore
 	private NotificationToken notificationToken;
 }
