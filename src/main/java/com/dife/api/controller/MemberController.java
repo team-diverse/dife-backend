@@ -138,4 +138,10 @@ public class MemberController implements SwaggerMemberController {
 		List<PostResponseDto> responseDto = memberService.getMemberPosts(auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
+
+	@GetMapping("/comments")
+	public ResponseEntity<List<CommentResponseDto>> getMemberComments(Authentication auth) {
+		List<CommentResponseDto> responseDto = memberService.getComments(auth.getName());
+		return ResponseEntity.status(OK).body(responseDto);
+	}
 }
