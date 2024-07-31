@@ -7,16 +7,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "Declaration")
-public class Declaration extends BaseTimeEntity {
+@Table(name = "Report")
+public class Report extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private DeclarationType type;
+	private ReportType type;
 
-	private String message;
+	private String description;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "member_id")

@@ -1,6 +1,6 @@
 package com.dife.api.model;
 
-public enum DeclarationType {
+public enum ReportType {
 	CONTENT,
 	CURSE,
 	IMPERSONATION,

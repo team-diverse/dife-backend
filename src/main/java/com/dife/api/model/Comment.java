@@ -50,5 +50,5 @@ public class Comment extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "comment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
-	private List<Declaration> declarations;
+	private List<Report> reports;
 }

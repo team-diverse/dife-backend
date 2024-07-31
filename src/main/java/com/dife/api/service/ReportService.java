@@ -2,8 +2,8 @@ package com.dife.api.service;
 
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
-import com.dife.api.model.dto.DeclarationRequestDto;
-import com.dife.api.model.dto.DeclarationResponseDto;
+import com.dife.api.model.dto.ReportRequestDto;
+import com.dife.api.model.dto.ReportResponseDto;
 import com.dife.api.repository.*;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -16,46 +16,45 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class DeclarationService {
+public class ReportService {
 
 	private final PostRepository postRepository;
 	private final CommentRepository commentRepository;
 	private final MemberRepository memberRepository;
-	private final DeclarationRepository declarationRepository;
+	private final ReportRepository reportRepository;
 
 	private final ModelMapper modelMapper;
 
-	public DeclarationResponseDto createDeclaration(
-			DeclarationRequestDto requestDto, String memberEmail) {
+	public ReportResponseDto createDeclaration(ReportRequestDto requestDto, String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		Declaration declaration = new Declaration();
-		declaration.setType(requestDto.getType());
-		declaration.setMember(member);
+		Report report = new Report();
+		report.setType(requestDto.getType());
+		report.setMember(member);
 
 		if (requestDto.getPostId() != null) {
-			declaration.setPost(
+			report.setPost(
 					postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new));
 		} else if (requestDto.getCommentId() != null) {
-			declaration.setComment(
+			report.setComment(
 					commentRepository
 							.findById(requestDto.getCommentId())
 							.orElseThrow(CommentNotFoundException::new));
 		} else if (requestDto.getReceiverId() != null) {
 
 			if (requestDto.getReceiverId() == member.getId()) throw new MemberSendingSelfException();
-			declaration.setReceiver(
+			report.setReceiver(
 					memberRepository
 							.findById(requestDto.getReceiverId())
 							.orElseThrow(MemberNotFoundException::new));
 		}
 
-		Optional.ofNullable(requestDto.getMessage()).ifPresent(declaration::setMessage);
+		Optional.ofNullable(requestDto.getMessage()).ifPresent(report::setDescription);
 
-		declarationRepository.save(declaration);
+		reportRepository.save(report);
 
-		return modelMapper.map(declaration, DeclarationResponseDto.class);
+		return modelMapper.map(report, ReportResponseDto.class);
 	}
 }

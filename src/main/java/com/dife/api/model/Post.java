@@ -48,5 +48,5 @@ public class Post extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
-	private List<Declaration> declarations;
+	private List<Report> reports;
 }
