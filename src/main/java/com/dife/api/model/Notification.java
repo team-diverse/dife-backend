@@ -17,6 +17,8 @@ public class Notification extends BaseTimeEntity {
 
 	private NotificationType type;
 
+	private String chatMemberEmail;
+
 	private String message;
 
 	private Boolean isRead = false;
