@@ -8,6 +8,7 @@ import com.dife.api.model.Post;
 import com.dife.api.model.dto.CommentCreateRequestDto;
 import com.dife.api.model.dto.CommentResponseDto;
 import com.dife.api.repository.CommentRepository;
+import com.dife.api.repository.LikeCommentRepository;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
@@ -28,13 +29,19 @@ public class CommentService {
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 	private final CommentRepository commentRepository;
+	private final LikeCommentRepository likeCommentRepository;
 
 	@Transactional(readOnly = true)
-	public List<CommentResponseDto> getCommentsByPostId(Long postId) {
+	public List<CommentResponseDto> getCommentsByPostId(Long postId, String memberEmail) {
 		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		List<Comment> comments = commentRepository.findCommentsByPost(post);
 
-		return comments.stream().map(this::getComment).collect(Collectors.toList());
+		return comments.stream()
+				.map(comment -> getComment(comment, member))
+				.collect(Collectors.toList());
 	}
 
 	public CommentResponseDto createComment(CommentCreateRequestDto requestDto, String memberEmail) {
@@ -65,13 +72,16 @@ public class CommentService {
 		return responseDto;
 	}
 
-	public CommentResponseDto getComment(Comment comment) {
+	public CommentResponseDto getComment(Comment comment, Member member) {
 		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
 
 		dto.setLikesCount(comment.getCommentLikes().size());
 		dto.setBookmarkCount(comment.getBookmarks().size());
 
 		if (comment.getParentComment() != null) dto.setParentComment(comment.getParentComment());
+
+		boolean isLiked = likeCommentRepository.existsByCommentAndMember(comment, member);
+		dto.setIsLiked(isLiked);
 
 		return dto;
 	}

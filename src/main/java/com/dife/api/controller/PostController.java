@@ -42,8 +42,9 @@ public class PostController implements SwaggerPostController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<PostResponseDto> getPost(@PathVariable(name = "id") Long id) {
-		PostResponseDto responseDto = postService.getPost(id);
+	public ResponseEntity<PostResponseDto> getPost(
+			@PathVariable(name = "id") Long id, Authentication auth) {
+		PostResponseDto responseDto = postService.getPost(id, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 

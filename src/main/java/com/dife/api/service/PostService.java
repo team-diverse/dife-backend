@@ -11,6 +11,7 @@ import com.dife.api.model.NotificationType;
 import com.dife.api.model.Post;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.FileRepository;
+import com.dife.api.repository.LikePostRepository;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class PostService {
 
 	private final PostRepository postRepository;
+	private final LikePostRepository likePostRepository;
 	private final FileService fileService;
 	private final FileRepository fileRepository;
 	private final MemberRepository memberRepository;
@@ -80,11 +82,18 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public PostResponseDto getPost(Long id) {
+	public PostResponseDto getPost(Long id, String memberEmail) {
 		Post post = postRepository.findById(id).orElseThrow(PostNotFoundException::new);
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
 		responseDto.setLikesCount(post.getPostLikes().size());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
+
+		if (likePostRepository.existsByPostAndMember(post, member)) responseDto.setIsLiked(true);
+		else responseDto.setIsLiked(false);
 
 		List<File> files = post.getFiles().stream().collect(Collectors.toList());
 
