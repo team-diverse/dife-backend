@@ -26,6 +26,7 @@ public interface SwaggerPostController {
 			description = "게시글 생성 성공 예시",
 			content = @Content(mediaType = "application/json"))
 	ResponseEntity<PostResponseDto> createPost(
+			@RequestParam(name = "tokenId") Long tokenId,
 			@RequestParam(name = "title") String title,
 			@RequestParam(name = "content") String content,
 			@RequestParam(name = "isPublic") Boolean isPublic,

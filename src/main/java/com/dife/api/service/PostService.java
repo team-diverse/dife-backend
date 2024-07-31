@@ -3,16 +3,14 @@ package com.dife.api.service;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.MemberNotFoundException;
+import com.dife.api.exception.NotificationException;
 import com.dife.api.exception.PostNotFoundException;
-import com.dife.api.model.BoardCategory;
-import com.dife.api.model.File;
-import com.dife.api.model.Member;
-import com.dife.api.model.NotificationType;
-import com.dife.api.model.Post;
+import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.FileRepository;
 import com.dife.api.repository.LikePostRepository;
 import com.dife.api.repository.MemberRepository;
+import com.dife.api.repository.NotificationTokenRepository;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,8 +35,10 @@ public class PostService {
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 	private final NotificationService notificationService;
+	private final NotificationTokenRepository notificationTokenRepository;
 
 	public PostResponseDto createPost(
+			Long tokenId,
 			String title,
 			String content,
 			Boolean isPublic,
@@ -57,7 +57,17 @@ public class PostService {
 		post.setMember(member);
 
 		postRepository.save(post);
-		notificationService.sendNotification(memberEmail, NotificationType.POST, "게시글이 생성되었습니다!");
+
+		NotificationToken notificationToken =
+				notificationTokenRepository.findById(tokenId).orElseThrow(NotificationException::new);
+
+		Notification notification = new Notification();
+		notification.setType(NotificationType.POST);
+		notification.setMessage("NEW POST IS CREATED!");
+		notification.setNotificationToken(notificationToken);
+
+		NotificationRequestDto requestDto = modelMapper.map(notification, NotificationRequestDto.class);
+		notificationService.sendNotification(memberEmail, requestDto);
 
 		if (!postFile.isEmpty()) {
 			FileDto fileDto = fileService.upload(postFile);

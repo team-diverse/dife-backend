@@ -6,21 +6,19 @@ import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.NotificationException;
 import com.dife.api.model.Member;
 import com.dife.api.model.Notification;
-import com.dife.api.model.NotificationType;
+import com.dife.api.model.NotificationToken;
+import com.dife.api.model.dto.NotificationRequestDto;
 import com.dife.api.model.dto.NotificationResponseDto;
+import com.dife.api.model.dto.NotificationTokenRequestDto;
+import com.dife.api.model.dto.NotificationTokenResponseDto;
 import com.dife.api.repository.MemberRepository;
-import com.dife.api.repository.NotificationRepository;
-import java.io.IOException;
+import com.dife.api.repository.NotificationTokenRepository;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 @RequiredArgsConstructor
@@ -28,72 +26,67 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Slf4j
 public class NotificationService {
 
-	private final Map<Long, SseEmitter> memberEmitters = new ConcurrentHashMap<>();
-	private static final long RECONNECTION_TIMEOUT = 1000L;
 	private final ModelMapper modelMapper;
 
 	private final MemberRepository memberRepository;
-	private final NotificationRepository notificationRepository;
+	private final NotificationTokenRepository notificationTokenRepository;
 
-	public SseEmitter createEmitter(String memberEmail) {
+	public NotificationTokenResponseDto sendNotificationToken(
+			String memberEmail, NotificationTokenRequestDto requestDto) {
+
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-		memberEmitters.put(member.getId(), emitter);
 
-		emitter.onCompletion(() -> memberEmitters.remove(member.getId()));
-		emitter.onTimeout(() -> memberEmitters.remove(member.getId()));
-		emitter.onError((e) -> memberEmitters.remove(member.getId()));
+		NotificationToken notificationToken = new NotificationToken();
+		notificationToken.setPushToken(requestDto.getPushToken());
+		notificationToken.setDeviceId(requestDto.getDeviceId());
+		notificationToken.setMember(member);
 
-		try {
-			SseEmitter.SseEventBuilder event =
-					SseEmitter.event()
-							.name("notification")
-							.id(String.valueOf("id-1"))
-							.data("SSE connected")
-							.reconnectTime(RECONNECTION_TIMEOUT);
-			emitter.send(event);
-		} catch (IOException e) {
-			throw new NotificationException();
-		}
+		member.getNotificationTokens().add(notificationToken);
 
-		return emitter;
+		notificationTokenRepository.save(notificationToken);
+
+		return modelMapper.map(notificationToken, NotificationTokenResponseDto.class);
 	}
 
-	public void sendNotification(String memberEmail, NotificationType type, String message) {
+	public NotificationResponseDto sendNotification(
+			String memberEmail, NotificationRequestDto requestDto) {
+
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		NotificationToken notificationToken =
+				notificationTokenRepository
+						.findById(requestDto.getTokenId())
+						.orElseThrow(NotificationException::new);
 
 		Notification notification = new Notification();
-		notification.setType(type);
-		notification.setMessage(message);
-		notification.setMember(member);
-		notificationRepository.save(notification);
+		notification.setNotificationToken(notificationToken);
+		notification.setType(requestDto.getType());
+		notification.setMessage(requestDto.getMessage());
+		notification.setIsRead(requestDto.getIsRead());
 
-		sendRealTimeNotification(notification, member.getId());
+		notificationToken.getNotifications().add(notification);
+
+		notificationTokenRepository.save(notificationToken);
+
+		return modelMapper.map(notification, NotificationResponseDto.class);
 	}
 
-	private void sendRealTimeNotification(Notification notification, Long memberId) {
-		SseEmitter emitter = memberEmitters.get(memberId);
+	public List<NotificationTokenResponseDto> getNotificationTokens(String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		List<NotificationToken> notifications = notificationTokenRepository.findAllByMember(member);
 
-		if (emitter != null) {
-			Executors.newSingleThreadExecutor()
-					.execute(
-							() -> {
-								try {
-									emitter.send(
-											SseEmitter.event().name("notification").data(notification.getMessage()));
-								} catch (Exception e) {
-									throw new NotificationException();
-								}
-							});
-		}
+		return notifications.stream()
+				.map(n -> modelMapper.map(n, NotificationTokenResponseDto.class))
+				.collect(toList());
 	}
 
 	public List<NotificationResponseDto> getNotifications(String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		List<Notification> notifications = notificationRepository.findAllByMember(member);
+		List<NotificationToken> notifications = notificationTokenRepository.findAllByMember(member);
 
 		return notifications.stream()
 				.map(n -> modelMapper.map(n, NotificationResponseDto.class))

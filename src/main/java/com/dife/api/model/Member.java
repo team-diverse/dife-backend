@@ -86,7 +86,7 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private List<PostLike> PostLikes;
 
-	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
-	private List<Notification> notifications;
+	private List<NotificationToken> notificationTokens;
 }
