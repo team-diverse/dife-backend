@@ -3,9 +3,7 @@ package com.dife.api.service;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.*;
-import com.dife.api.model.Connect;
-import com.dife.api.model.ConnectStatus;
-import com.dife.api.model.Member;
+import com.dife.api.model.*;
 import com.dife.api.model.dto.ConnectPatchRequestDto;
 import com.dife.api.model.dto.ConnectRequestDto;
 import com.dife.api.model.dto.ConnectResponseDto;
@@ -72,6 +70,17 @@ public class ConnectService {
 		connect.setStatus(ConnectStatus.PENDING);
 		connectRepository.save(connect);
 
+		List<NotificationToken> notificationTokens = toMember.getNotificationTokens();
+
+		for (NotificationToken notificationToken : notificationTokens) {
+			Notification notification = new Notification();
+			notification.setNotificationToken(notificationToken);
+			notification.setType(NotificationType.CONNECT);
+			notification.setMessage("Hi!🤝 " + currentMember.getEmail() + "님이 회원님과의 커넥트를 맺고 싶어해요!");
+			notification.setIsRead(false);
+			notificationToken.getNotifications().add(notification);
+		}
+
 		return modelMapper.map(connect, ConnectResponseDto.class);
 	}
 
@@ -88,6 +97,10 @@ public class ConnectService {
 						.findByFromMemberAndToMember(otherMember, currentMember)
 						.orElseThrow(ConnectNotFoundException::new);
 		connect.setStatus(ConnectStatus.ACCEPTED);
+
+		createNotifications(currentMember, otherMember.getEmail());
+
+		createNotifications(otherMember, currentMember.getEmail());
 	}
 
 	public void deleteConnect(Long id, String email) {
@@ -117,5 +130,17 @@ public class ConnectService {
 				.findByFromMemberAndToMember(fromMember, toMember)
 				.map(connect -> connect.getStatus().equals(ConnectStatus.PENDING))
 				.orElse(false);
+	}
+
+	private void createNotifications(Member member, String otherMemberEmail) {
+		List<NotificationToken> notificationTokens = member.getNotificationTokens();
+		for (NotificationToken notificationToken : notificationTokens) {
+			Notification notification = new Notification();
+			notification.setNotificationToken(notificationToken);
+			notification.setType(NotificationType.CONNECT);
+			notification.setMessage("YEAH!🙌 " + otherMemberEmail + "님과의 커넥트가 성사되었어요!");
+			notification.setIsRead(false);
+			notificationToken.getNotifications().add(notification);
+		}
 	}
 }
