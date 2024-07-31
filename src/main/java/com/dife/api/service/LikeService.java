@@ -141,7 +141,7 @@ public class LikeService {
 				Notification notification = new Notification();
 				notification.setNotificationToken(notificationToken);
 				notification.setType(NotificationType.COMMUNITY);
-				notification.setMessage("WOW!😆\n" + member.getEmail() + "님이 회원님의 댓글을 좋아해요!");
+				notification.setMessage("WOW!😆 " + member.getEmail() + "님이 회원님의 댓글을 좋아해요!");
 				notification.setIsRead(false);
 				notificationToken.getNotifications().add(notification);
 			}
