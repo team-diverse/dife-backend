@@ -80,8 +80,8 @@ public class CommentService {
 
 		if (comment.getParentComment() != null) dto.setParentComment(comment.getParentComment());
 
-		if (likeCommentRepository.existsByCommentAndMember(comment, member)) dto.setIsLiked(true);
-		else dto.setIsLiked(false);
+		boolean isLiked = likeCommentRepository.existsByCommentAndMember(comment, member);
+		dto.setIsLiked(isLiked);
 
 		return dto;
 	}
