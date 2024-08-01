@@ -16,7 +16,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(MemberException.class)
 	public ResponseEntity<ExceptionResonse> handleMemberException(MemberException exception) {
-		return ResponseEntity.status(INTERNAL_SERVER_ERROR.value())
+		return ResponseEntity.status(UNAUTHORIZED.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 

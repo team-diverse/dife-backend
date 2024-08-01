@@ -1,6 +1,6 @@
 package com.dife.api.exception;
 
-public class MemberException extends RuntimeException {
+public class MemberException extends IllegalArgumentException {
 
 	public MemberException(String message) {
 		super(message);
