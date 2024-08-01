@@ -75,6 +75,7 @@ public class CommentService {
 	public CommentResponseDto getComment(Comment comment, Member member) {
 		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
 
+		dto.setPost(comment.getPost());
 		dto.setLikesCount(comment.getCommentLikes().size());
 		dto.setBookmarkCount(comment.getBookmarks().size());
 
