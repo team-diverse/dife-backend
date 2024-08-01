@@ -23,11 +23,13 @@ public class PostResponseDto {
 
 	private BoardCategory boardType;
 
-	private Boolean isPublic;
-
-	private Integer likesCount;
+	private Boolean isPublic = true;
 
 	private Boolean isLiked = false;
+
+	private Integer commentCount;
+
+	private Integer likesCount;
 
 	private Integer bookmarkCount;
 

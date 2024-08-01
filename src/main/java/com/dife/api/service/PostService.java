@@ -72,7 +72,16 @@ public class PostService {
 		Sort sort = Sort.by(Sort.Direction.DESC, "created");
 		List<Post> posts = postRepository.findPostsByBoardType(boardCategory, sort);
 
-		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
+		return posts.stream()
+				.map(
+						post -> {
+							PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
+							responseDto.setCommentCount(post.getComments().size());
+							responseDto.setLikesCount(post.getPostLikes().size());
+							responseDto.setBookmarkCount(post.getBookmarks().size());
+							return responseDto;
+						})
+				.collect(toList());
 	}
 
 	@Transactional(readOnly = true)
@@ -83,6 +92,7 @@ public class PostService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
+		responseDto.setCommentCount(post.getComments().size());
 		responseDto.setLikesCount(post.getPostLikes().size());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
 
