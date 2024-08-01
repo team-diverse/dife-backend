@@ -39,5 +39,5 @@ public class PostResponseDto {
 
 	@NotNull
 	@JsonProperty("writer")
-	private Member Member;
+	private Member writer;
 }

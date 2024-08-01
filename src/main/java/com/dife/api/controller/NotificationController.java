@@ -2,7 +2,6 @@ package com.dife.api.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
-import com.dife.api.model.dto.NotificationRequestDto;
 import com.dife.api.model.dto.NotificationResponseDto;
 import com.dife.api.model.dto.NotificationTokenRequestDto;
 import com.dife.api.model.dto.NotificationTokenResponseDto;
@@ -40,14 +39,6 @@ public class NotificationController implements SwaggerNotificationController {
 			@RequestBody NotificationTokenRequestDto requestDto, Authentication auth) {
 		NotificationTokenResponseDto responseDto =
 				notificationService.sendNotificationToken(auth.getName(), requestDto);
-		return ResponseEntity.status(CREATED).body(responseDto);
-	}
-
-	@PostMapping("/send")
-	public ResponseEntity<NotificationResponseDto> createNotification(
-			@RequestBody NotificationRequestDto requestDto, Authentication auth) {
-		NotificationResponseDto responseDto =
-				notificationService.sendNotification(auth.getName(), requestDto);
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 }

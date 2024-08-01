@@ -20,13 +20,15 @@ public interface SwaggerPostController {
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardCategory boardCategory);
 
-	@Operation(summary = "게시글 생성 API", description = "DTO를 작성해 게시글을 생성합니다.")
+	@Operation(
+			summary = "게시글 생성 API",
+			description =
+					"DTO를 작성해 게시글을 생성합니다. \n 만약 알림 전송 문제가 있다는 500에러가 뜬다면 /notifications/push API를 통해 알림 토큰인 pushToken을 생성했는지 확인해주세요!")
 	@ApiResponse(
 			responseCode = "201",
 			description = "게시글 생성 성공 예시",
 			content = @Content(mediaType = "application/json"))
 	ResponseEntity<PostResponseDto> createPost(
-			@RequestParam(name = "tokenId") Long tokenId,
 			@RequestParam(name = "title") String title,
 			@RequestParam(name = "content") String content,
 			@RequestParam(name = "isPublic") Boolean isPublic,

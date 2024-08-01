@@ -10,6 +10,9 @@ import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -73,6 +76,25 @@ public class ChatService {
 
 		String enterMessage = username + "님이 입장하셨습니다!";
 		Chat chat = saveChat(member, chatroom, enterMessage);
+
+		Set<Member> chatroomMembers = chatroom.getMembers();
+
+		for (Member chatroomMember : chatroomMembers) {
+			if (!Objects.equals(chatroomMember.getId(), member.getId())) {
+				List<NotificationToken> notificationTokens = chatroomMember.getNotificationTokens();
+
+				for (NotificationToken notificationToken : notificationTokens) {
+					Notification notification = new Notification();
+					notification.setNotificationToken(notificationToken);
+					notification.setType(NotificationType.CHAT);
+					notification.setMessage(
+							"WELCOME! 😊 " + chatroom.getName() + "방에 " + member.getEmail() + "님이 입장하셨습니다!");
+					notification.setIsRead(false);
+					notificationToken.getNotifications().add(notification);
+				}
+			}
+		}
+
 		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
 		redisPublisher.publish(chatRedisDto);
 		chatroomRepository.save(chatroom);
@@ -89,6 +111,30 @@ public class ChatService {
 
 		if (dto.getMessage().length() <= 300) {
 			Chat chat = saveChat(member, chatroom, dto.getMessage());
+
+			Set<Member> chatroomMembers = chatroom.getMembers();
+
+			for (Member chatroomMember : chatroomMembers) {
+				if (!Objects.equals(chatroomMember.getId(), member.getId())) {
+					List<NotificationToken> notificationTokens = chatroomMember.getNotificationTokens();
+
+					for (NotificationToken notificationToken : notificationTokens) {
+						Notification notification = new Notification();
+						notification.setNotificationToken(notificationToken);
+						notification.setType(NotificationType.CHAT);
+						notification.setChatMemberEmail(member.getEmail());
+
+						String message = chat.getMessage();
+						if (message.length() > 30) {
+							message = message.substring(0, 30) + "...";
+						}
+						notification.setMessage(message);
+						notification.setIsRead(false);
+						notificationToken.getNotifications().add(notification);
+					}
+				}
+			}
+
 			ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
 			redisPublisher.publish(chatRedisDto);
 		}

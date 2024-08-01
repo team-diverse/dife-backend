@@ -35,16 +35,4 @@ public interface SwaggerNotificationController {
 			})
 	ResponseEntity<NotificationTokenResponseDto> createNotificationToken(
 			NotificationTokenRequestDto requestDto, Authentication auth);
-
-	@Operation(summary = "알림 생성 API", description = "알림을 생성하는 API입니다.")
-	@ApiResponse(
-			responseCode = "201",
-			description = "알림 생성 성공 예시",
-			content = {
-				@Content(
-						mediaType = "application/json",
-						schema = @Schema(implementation = NotificationResponseDto.class))
-			})
-	ResponseEntity<NotificationResponseDto> createNotification(
-			NotificationRequestDto requestDto, Authentication auth);
 }

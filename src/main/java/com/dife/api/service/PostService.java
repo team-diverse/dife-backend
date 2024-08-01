@@ -3,14 +3,12 @@ package com.dife.api.service;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.MemberNotFoundException;
-import com.dife.api.exception.NotificationException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.FileRepository;
 import com.dife.api.repository.LikePostRepository;
 import com.dife.api.repository.MemberRepository;
-import com.dife.api.repository.NotificationTokenRepository;
 import com.dife.api.repository.PostRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,11 +32,8 @@ public class PostService {
 	private final FileRepository fileRepository;
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
-	private final NotificationService notificationService;
-	private final NotificationTokenRepository notificationTokenRepository;
 
 	public PostResponseDto createPost(
-			Long tokenId,
 			String title,
 			String content,
 			Boolean isPublic,
@@ -54,20 +49,9 @@ public class PostService {
 		post.setContent(content);
 		post.setIsPublic(isPublic);
 		post.setBoardType(boardType);
-		post.setMember(member);
+		post.setWriter(member);
 
 		postRepository.save(post);
-
-		NotificationToken notificationToken =
-				notificationTokenRepository.findById(tokenId).orElseThrow(NotificationException::new);
-
-		Notification notification = new Notification();
-		notification.setType(NotificationType.POST);
-		notification.setMessage("NEW POST IS CREATED!");
-		notification.setNotificationToken(notificationToken);
-
-		NotificationRequestDto requestDto = modelMapper.map(notification, NotificationRequestDto.class);
-		notificationService.sendNotification(memberEmail, requestDto);
 
 		if (!postFile.isEmpty()) {
 			FileDto fileDto = fileService.upload(postFile);
@@ -135,7 +119,7 @@ public class PostService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Post post =
-				postRepository.findByMemberAndId(member, id).orElseThrow(PostNotFoundException::new);
+				postRepository.findByWriterAndId(member, id).orElseThrow(PostNotFoundException::new);
 
 		post.setTitle((title != null && !title.isEmpty()) ? title : post.getTitle());
 		post.setContent((content != null && !content.isEmpty()) ? content : post.getContent());
@@ -165,7 +149,7 @@ public class PostService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Post post =
-				postRepository.findByMemberAndId(member, id).orElseThrow(PostNotFoundException::new);
+				postRepository.findByWriterAndId(member, id).orElseThrow(PostNotFoundException::new);
 
 		for (File file : post.getFiles()) {
 			fileService.deleteFile(file.getId());

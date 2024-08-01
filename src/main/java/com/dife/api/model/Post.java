@@ -28,7 +28,7 @@ public class Post extends BaseTimeEntity {
 
 	@ManyToOne
 	@JoinColumn(name = "member_id")
-	private Member member;
+	private Member writer;
 
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore

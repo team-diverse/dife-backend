@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "notificationToken")
+@Table(name = "notification_token")
 public class NotificationToken extends BaseTimeEntity {
 
 	@Id

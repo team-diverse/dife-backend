@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PostRepository extends JpaRepository<Post, Long> {
 	List<Post> findPostsByBoardType(BoardCategory boardType, Sort sort);
 
-	Optional<Post> findByMemberAndId(Member member, Long id);
+	Optional<Post> findByWriterAndId(Member writer, Long id);
 
-	List<Post> findPostsByMember(Member member, Sort sort);
+	List<Post> findPostsByWriter(Member writer, Sort sort);
 }

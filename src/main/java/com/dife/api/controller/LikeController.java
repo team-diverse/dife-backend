@@ -1,5 +1,6 @@
 package com.dife.api.controller;
 
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.dto.LikeCreateRequestDto;
@@ -29,7 +30,7 @@ public class LikeController implements SwaggerLikeController {
 			@RequestBody LikeCreateRequestDto requestDto, Authentication auth) {
 
 		likeService.createLike(requestDto, auth.getName());
-		return new ResponseEntity<>(OK);
+		return new ResponseEntity<>(CREATED);
 	}
 
 	@DeleteMapping

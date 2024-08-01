@@ -3,11 +3,8 @@ package com.dife.api.service;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.MemberNotFoundException;
-import com.dife.api.exception.NotificationException;
 import com.dife.api.model.Member;
-import com.dife.api.model.Notification;
 import com.dife.api.model.NotificationToken;
-import com.dife.api.model.dto.NotificationRequestDto;
 import com.dife.api.model.dto.NotificationResponseDto;
 import com.dife.api.model.dto.NotificationTokenRequestDto;
 import com.dife.api.model.dto.NotificationTokenResponseDto;
@@ -47,30 +44,6 @@ public class NotificationService {
 		notificationTokenRepository.save(notificationToken);
 
 		return modelMapper.map(notificationToken, NotificationTokenResponseDto.class);
-	}
-
-	public NotificationResponseDto sendNotification(
-			String memberEmail, NotificationRequestDto requestDto) {
-
-		Member member =
-				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-
-		NotificationToken notificationToken =
-				notificationTokenRepository
-						.findById(requestDto.getTokenId())
-						.orElseThrow(NotificationException::new);
-
-		Notification notification = new Notification();
-		notification.setNotificationToken(notificationToken);
-		notification.setType(requestDto.getType());
-		notification.setMessage(requestDto.getMessage());
-		notification.setIsRead(requestDto.getIsRead());
-
-		notificationToken.getNotifications().add(notification);
-
-		notificationTokenRepository.save(notificationToken);
-
-		return modelMapper.map(notification, NotificationResponseDto.class);
 	}
 
 	public List<NotificationTokenResponseDto> getNotificationTokens(String memberEmail) {

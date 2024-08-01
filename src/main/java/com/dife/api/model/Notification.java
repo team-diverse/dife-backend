@@ -17,12 +17,14 @@ public class Notification extends BaseTimeEntity {
 
 	private NotificationType type;
 
+	private String chatMemberEmail;
+
 	private String message;
 
 	private Boolean isRead = false;
 
 	@ManyToOne
-	@JoinColumn(name = "notificationToken_id")
+	@JoinColumn(name = "notification_token_id")
 	@JsonIgnore
 	private NotificationToken notificationToken;
 }
