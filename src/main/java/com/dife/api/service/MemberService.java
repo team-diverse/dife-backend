@@ -91,10 +91,11 @@ public class MemberService {
 			Set<String> hobbies,
 			Set<String> languages,
 			Boolean isPublic,
-			Long id,
 			MultipartFile profileImg,
-			MultipartFile verificationFile) {
-		Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
+			MultipartFile verificationFile,
+			String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		if (!member.getIsVerified()) {
 			if ((verificationFile.isEmpty() || verificationFile == null)
@@ -120,55 +121,62 @@ public class MemberService {
 		if (bio != null && !bio.isEmpty()) member.setBio(bio);
 		if (mbti != null && !mbti.equals(member.getMbti())) member.setMbti(mbti);
 
-		Set<String> safeHobbies = hobbies != null ? hobbies : Collections.emptySet();
-		Set<String> safeLanguages = languages != null ? languages : Collections.emptySet();
+		if (hobbies != null && !hobbies.isEmpty()) {
+			Set<String> safeHobbies = hobbies;
 
-		Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByMember(member);
-		Map<String, Hobby> nameToHobbyMap =
-				existingHobbies.stream().collect(Collectors.toMap(Hobby::getName, Function.identity()));
+			Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByMember(member);
+			Map<String, Hobby> nameToHobbyMap =
+					existingHobbies.stream().collect(Collectors.toMap(Hobby::getName, Function.identity()));
 
-		Set<Hobby> updatedHobbies = new HashSet<>();
+			Set<Hobby> updatedHobbies = new HashSet<>();
 
-		for (String hobbyName : safeHobbies) {
-			if (nameToHobbyMap.containsKey(hobbyName)) {
-				updatedHobbies.add(nameToHobbyMap.get(hobbyName));
-			} else {
-				Hobby nHobby = new Hobby();
-				nHobby.setName(hobbyName);
-				nHobby.setMember(member);
-				hobbyRepository.save(nHobby);
-				updatedHobbies.add(nHobby);
+			for (String hobbyName : safeHobbies) {
+				if (nameToHobbyMap.containsKey(hobbyName)) {
+					updatedHobbies.add(nameToHobbyMap.get(hobbyName));
+				} else {
+					Hobby nHobby = new Hobby();
+					nHobby.setName(hobbyName);
+					nHobby.setMember(member);
+					hobbyRepository.save(nHobby);
+					updatedHobbies.add(nHobby);
+				}
 			}
+			existingHobbies.stream()
+					.filter(hobby -> !hobbies.contains(hobby.getName()))
+					.forEach(hobbyRepository::delete);
+
+			member.setHobbies(updatedHobbies);
 		}
-		existingHobbies.stream()
-				.filter(hobby -> !hobbies.contains(hobby.getName()))
-				.forEach(hobbyRepository::delete);
+		member.setHobbies(member.getHobbies());
 
-		member.setHobbies(updatedHobbies);
+		if (languages != null && !languages.isEmpty()) {
+			Set<String> safeLanguages = languages;
 
-		Set<Language> existingLanguages = languageRepository.findLanguagesByMember(member);
-		Map<String, Language> nameToLanguageMap =
-				existingLanguages.stream()
-						.collect(Collectors.toMap(Language::getName, Function.identity()));
+			Set<Language> existingLanguages = languageRepository.findLanguagesByMember(member);
+			Map<String, Language> nameToLanguageMap =
+					existingLanguages.stream()
+							.collect(Collectors.toMap(Language::getName, Function.identity()));
 
-		Set<Language> updatedLanguages = new HashSet<>();
+			Set<Language> updatedLanguages = new HashSet<>();
 
-		for (String languageName : safeLanguages) {
-			if (nameToLanguageMap.containsKey(languageName)) {
-				updatedLanguages.add(nameToLanguageMap.get(languageName));
-			} else {
-				Language nLanguage = new Language();
-				nLanguage.setName(languageName);
-				nLanguage.setMember(member);
-				languageRepository.save(nLanguage);
-				updatedLanguages.add(nLanguage);
+			for (String languageName : safeLanguages) {
+				if (nameToLanguageMap.containsKey(languageName)) {
+					updatedLanguages.add(nameToLanguageMap.get(languageName));
+				} else {
+					Language nLanguage = new Language();
+					nLanguage.setName(languageName);
+					nLanguage.setMember(member);
+					languageRepository.save(nLanguage);
+					updatedLanguages.add(nLanguage);
+				}
 			}
-		}
-		existingLanguages.stream()
-				.filter(language -> !languages.contains(language.getName()))
-				.forEach(languageRepository::delete);
+			existingLanguages.stream()
+					.filter(language -> !languages.contains(language.getName()))
+					.forEach(languageRepository::delete);
 
-		member.setLanguages(updatedLanguages);
+			member.setLanguages(updatedLanguages);
+		}
+		member.setLanguages(member.getLanguages());
 
 		if (isPublic != null && isPublic != member.getIsPublic()) member.setIsPublic(isPublic);
 		memberRepository.save(member);

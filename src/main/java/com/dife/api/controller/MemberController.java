@@ -47,7 +47,7 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.status(CONFLICT).build();
 	}
 
-	@PutMapping(value = "/{id}", consumes = "multipart/form-data")
+	@PutMapping(consumes = "multipart/form-data")
 	public ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
@@ -58,7 +58,7 @@ public class MemberController implements SwaggerMemberController {
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
-			@PathVariable(name = "id") Long id) {
+			Authentication auth) {
 
 		MemberResponseDto responseDto =
 				memberService.update(
@@ -69,16 +69,10 @@ public class MemberController implements SwaggerMemberController {
 						hobbies,
 						languages,
 						isPublic,
-						id,
 						profileImg,
-						verificationFile);
+						verificationFile,
+						auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
-	}
-
-	@GetMapping("/{id}")
-	public ResponseEntity<MemberResponseDto> getMember(@PathVariable(name = "id") Long memberId) {
-		MemberResponseDto responseDto = memberService.getMemberById(memberId);
-		return ResponseEntity.ok(responseDto);
 	}
 
 	@GetMapping("/profile")
