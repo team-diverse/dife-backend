@@ -268,6 +268,7 @@ public class MemberService {
 						.filter(Member::getIsPublic)
 						.filter(member -> !connectSerivce.isConnected(currentMember, member))
 						.filter(member -> !connectSerivce.hasPendingConnect(currentMember, member))
+						.filter(member -> !blockService.isBlackListMember(currentMember, member))
 						.collect(Collectors.toList());
 
 		if (validRandomMembers.isEmpty()) {
@@ -298,7 +299,7 @@ public class MemberService {
 
 		List<Member> validMembers =
 				memberRepository.findAll().stream()
-						.filter(member -> member.getIsPublic().equals(true))
+						.filter(this::isValidMember)
 						.filter(
 								member ->
 										safeLanguages.isEmpty()

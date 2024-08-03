@@ -64,4 +64,9 @@ public class BlockService {
 				.map(bl -> modelMapper.map(bl, MemberResponseDto.class))
 				.collect(Collectors.toList());
 	}
+
+	public boolean isBlackListMember(Member currentMember, Member checkMember) {
+		return currentMember.getBlackList().stream()
+				.anyMatch(blacklistedMember -> blacklistedMember.equals(checkMember));
+	}
 }
