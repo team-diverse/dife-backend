@@ -47,6 +47,7 @@ public class MemberService {
 	private final RegisterValidator registerValidator;
 	private final JavaMailSender javaMailSender;
 	private final FileService fileService;
+	private final BlockService blockService;
 	private final ModelMapper modelMapper;
 	private final ConnectService connectSerivce;
 
@@ -211,16 +212,6 @@ public class MemberService {
 		return responseDto;
 	}
 
-	public MemberResponseDto getMemberById(Long memberId) {
-		Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
-
-		if (responseDto.getProfileImg() != null)
-			responseDto.setProfilePresignUrl(
-					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
-		return responseDto;
-	}
-
 	public Member getMemberEntityById(Long id) {
 		return memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 	}
@@ -264,8 +255,7 @@ public class MemberService {
 		List<Member> validRandomMembers =
 				memberRepository.findAll().stream()
 						.filter(member -> !member.getEmail().equals(email))
-						.filter(Member::getIsVerified)
-						.filter(Member::getIsPublic)
+						.filter(this::isValidMember)
 						.filter(member -> !connectSerivce.isConnected(currentMember, member))
 						.filter(member -> !connectSerivce.hasPendingConnect(currentMember, member))
 						.filter(member -> !blockService.isBlackListMember(currentMember, member))
@@ -339,6 +329,7 @@ public class MemberService {
 		}
 
 		return members.stream()
+				.filter(this::isValidMember)
 				.map(
 						member -> {
 							MemberResponseDto responseDto =
@@ -349,6 +340,10 @@ public class MemberService {
 							return responseDto;
 						})
 				.collect(Collectors.toList());
+	}
+
+	public boolean isValidMember(Member member) {
+		return member.getIsPublic() && member.getIsVerified();
 	}
 
 	public List<PostResponseDto> getMemberPosts(String memberEmail) {
