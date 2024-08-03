@@ -1,7 +1,6 @@
 package com.dife.api.service;
 
 import com.dife.api.exception.*;
-import com.dife.api.model.BlacklistedMember;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.BlockMemberRequestDto;
 import com.dife.api.model.dto.MemberResponseDto;
@@ -37,23 +36,23 @@ public class BlockService {
 			throw new MemberSendingSelfException();
 		}
 
-		boolean isAlreadyBlacklisted =
-				member.getBlackList().stream()
-						.anyMatch(bl -> bl.getBlacklistedMember().equals(blackMember));
+		boolean isAlreadyBlacklisted = false;
+
+		List<Member> blackList = member.getBlackList();
+		if (blackList != null) {
+			isAlreadyBlacklisted = blackList.stream().anyMatch(bl -> bl.equals(blackMember));
+		}
 
 		if (isAlreadyBlacklisted) {
 			throw new DuplicateMemberException("이미 블랙리스트에 존재하는 회원입니다!");
 		}
 
-		BlacklistedMember blacklistedMember = new BlacklistedMember();
-		blacklistedMember.setBlacklistOwner(member);
-		blacklistedMember.setBlacklistedMember(blackMember);
+		member.getBlackList().add(blackMember);
 
-		member.getBlackList().add(blacklistedMember);
 		memberRepository.save(member);
 
 		return member.getBlackList().stream()
-				.map(bl -> modelMapper.map(bl.getBlacklistedMember(), MemberResponseDto.class))
+				.map(bl -> modelMapper.map(bl, MemberResponseDto.class))
 				.collect(Collectors.toList());
 	}
 
@@ -62,7 +61,7 @@ public class BlockService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		return member.getBlackList().stream()
-				.map(bl -> modelMapper.map(bl.getBlacklistedMember(), MemberResponseDto.class))
+				.map(bl -> modelMapper.map(bl, MemberResponseDto.class))
 				.collect(Collectors.toList());
 	}
 }

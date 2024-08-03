@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -94,7 +95,10 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private List<Report> reports;
 
-	@OneToMany(mappedBy = "blacklistOwner", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<BlacklistedMember> blackList;
+	@ManyToMany
+	@JoinTable(
+			name = "MEMBER_BLACKLIST",
+			joinColumns = @JoinColumn(name = "MEMBER_ID"),
+			inverseJoinColumns = @JoinColumn(name = "BLACKLISTED_MEMBER_ID"))
+	private List<Member> blackList = new ArrayList<>();
 }
