@@ -95,7 +95,7 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private List<Report> reports;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany
 	@JoinTable(
 			name = "member_blacklist",
 			joinColumns = @JoinColumn(name = "member_id"),
