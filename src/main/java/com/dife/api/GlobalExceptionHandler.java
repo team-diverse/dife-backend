@@ -120,4 +120,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(BAD_REQUEST)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
+
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<ExceptionResonse> handleRuntimeException(RuntimeException exception) {
+		return ResponseEntity.status(UNAUTHORIZED.value())
+				.body(new ExceptionResonse(false, exception.getMessage()));
+	}
 }
