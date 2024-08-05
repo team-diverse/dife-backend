@@ -1,5 +1,6 @@
 package com.dife.api.service;
 
+import com.dife.api.exception.CommentDuplicateException;
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.Comment;
@@ -49,6 +50,9 @@ public class CommentService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Post post =
 				postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
+
+		if (commentRepository.existsByWriterAndPostAndParentCommentIsNull(writer, post)
+				&& requestDto.getParentCommentId() == null) throw new CommentDuplicateException();
 
 		Comment parentComment =
 				(requestDto.getParentCommentId() != null)

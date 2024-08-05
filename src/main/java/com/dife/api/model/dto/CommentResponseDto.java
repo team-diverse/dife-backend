@@ -4,7 +4,6 @@ import com.dife.api.model.Comment;
 import com.dife.api.model.Member;
 import com.dife.api.model.Post;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.*;
 
@@ -34,9 +33,7 @@ public class CommentResponseDto {
 	@JsonProperty("writer")
 	private Member writer;
 
-	@Schema(description = "프로필 생성 일시")
 	private LocalDateTime created;
 
-	@Schema(description = "프로필 수정 일시")
 	private LocalDateTime modified;
 }
