@@ -97,8 +97,8 @@ public class Member extends BaseTimeEntity {
 
 	@ManyToMany
 	@JoinTable(
-			name = "MEMBER_BLACKLIST",
-			joinColumns = @JoinColumn(name = "MEMBER_ID"),
-			inverseJoinColumns = @JoinColumn(name = "BLACKLISTED_MEMBER_ID"))
+			name = "member_blacklist",
+			joinColumns = @JoinColumn(name = "member_id"),
+			inverseJoinColumns = @JoinColumn(name = "blacklisted_member_id"))
 	private List<Member> blackList = new ArrayList<>();
 }
