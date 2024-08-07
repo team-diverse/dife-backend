@@ -18,5 +18,8 @@ spring:
     allow-bean-definition-overriding: true
   aws:
     bucket-name: test
+
+  profiles:
+    include: testTranslationApiKey
 jwt:
   secret: 001b8ec844c5353413ba8b8c0025c94499eb25ae7486652efb2a89535b2d1a4f
