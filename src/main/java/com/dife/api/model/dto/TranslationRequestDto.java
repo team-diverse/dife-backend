@@ -14,4 +14,5 @@ public class TranslationRequestDto {
 
 	private List<String> text;
 	private String target_lang;
+	private Long bookmarkId;
 }
