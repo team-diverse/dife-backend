@@ -46,6 +46,7 @@ public class SecurityConfig {
 							requests
 									.requestMatchers(
 											"/swagger-ui/**",
+											"/favicon.ico",
 											"/api/v1/api-docs/**",
 											"/api/members/register",
 											"/api/members/refresh-token",
