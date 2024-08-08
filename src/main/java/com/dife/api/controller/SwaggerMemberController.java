@@ -33,7 +33,9 @@ public interface SwaggerMemberController {
 
 	@Operation(summary = "중복 이메일/닉네임 확인", description = "회원가입 세부사항을 입력하기에 앞서 중복 이메일/닉네임 여부를 확인합니다.")
 	@ApiResponse(responseCode = "200", description = "중복 이메일/닉네임 확인 성공 예시")
-	ResponseEntity<Void> checkUsername(CheckDuplicateRequestDto requestDto);
+	ResponseEntity<Void> checkUsername(
+			@RequestParam(name = "email", required = false) String email,
+			@RequestParam(name = "username", required = false) String username);
 
 	@Operation(summary = "회원정보 업데이트 API", description = "회원가입 세부사항을 입력해 회원등록을 업데이트 합니다.")
 	@ApiResponse(

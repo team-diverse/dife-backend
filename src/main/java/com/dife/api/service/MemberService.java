@@ -77,11 +77,10 @@ public class MemberService {
 		return modelMapper.map(member, RegisterResponseDto.class);
 	}
 
-	public Boolean checkDuplicate(CheckDuplicateRequestDto requestDto) {
+	public Boolean isDuplicate(String email, String username) {
 
-		if (requestDto.getUsername() != null)
-			return memberRepository.existsByUsername(requestDto.getUsername());
-		return memberRepository.existsByEmail(requestDto.getEmail());
+		if (username != null) return memberRepository.existsByUsername(username);
+		return memberRepository.existsByEmail(email);
 	}
 
 	public MemberResponseDto update(

@@ -49,6 +49,7 @@ public class SecurityConfig {
 											"/favicon.ico",
 											"/api/v1/api-docs/**",
 											"/api/members/register",
+											"/api/members/check/**",
 											"/api/members/refresh-token",
 											"/api/members/change-password",
 											"/api/members/login",

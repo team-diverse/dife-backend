@@ -36,14 +36,16 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 
-	@GetMapping
-	public ResponseEntity<Void> checkUsername(@RequestBody CheckDuplicateRequestDto requestDto) {
-		Boolean isValid = memberService.checkDuplicate(requestDto);
+	@RequestMapping(value = "/check", method = RequestMethod.HEAD)
+	public ResponseEntity<Void> checkUsername(
+			@RequestParam(name = "email", required = false) String email,
+			@RequestParam(name = "username", required = false) String username) {
+		Boolean isDuplicate = memberService.isDuplicate(email, username);
 
-		if (isValid) {
-			return ResponseEntity.ok().build();
+		if (isDuplicate) {
+			return ResponseEntity.status(CONFLICT).build();
 		}
-		return ResponseEntity.status(CONFLICT).build();
+		return ResponseEntity.ok().build();
 	}
 
 	@PutMapping(consumes = "multipart/form-data")
