@@ -52,6 +52,13 @@ public interface SwaggerChatroomController {
 			@PathVariable(name = "id") Long chatroomId,
 			Authentication auth);
 
+	@Operation(summary = "채팅방 회원 강퇴 API", description = "채팅방 방장만이 회원 강퇴 권한을 갖는 API입니다.")
+	@ApiResponse(responseCode = "200", description = "그룹 채팅방 강퇴 성공 예시")
+	ResponseEntity<Void> kickoutMember(
+			@PathVariable(name = "roomId") Long roomId,
+			@PathVariable(name = "memberId") Long memberId,
+			Authentication auth);
+
 	@Operation(
 			summary = "채팅방 전체 조회 API",
 			description =
