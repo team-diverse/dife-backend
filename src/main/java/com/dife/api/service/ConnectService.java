@@ -24,6 +24,8 @@ public class ConnectService {
 
 	private final ModelMapper modelMapper;
 
+	private final NotificationService notificationService;
+
 	@Transactional(readOnly = true)
 	public List<ConnectResponseDto> getConnects(String currentMemberEmail) {
 		Member currentMember =
@@ -70,16 +72,9 @@ public class ConnectService {
 		connect.setStatus(ConnectStatus.PENDING);
 		connectRepository.save(connect);
 
-		List<NotificationToken> notificationTokens = toMember.getNotificationTokens();
-
-		for (NotificationToken notificationToken : notificationTokens) {
-			Notification notification = new Notification();
-			notification.setNotificationToken(notificationToken);
-			notification.setType(NotificationType.CONNECT);
-			notification.setMessage("Hi!🤝 " + currentMember.getEmail() + "님이 회원님과의 커넥트를 맺고 싶어해요!");
-			notification.setIsRead(false);
-			notificationToken.getNotifications().add(notification);
-		}
+		String message = "Hi!🤝 " + currentMember.getUsername() + "님이 회원님과의 커넥트를 맺고 싶어해요!";
+		notificationService.addNotifications(
+				toMember, currentMember, message, NotificationType.CONNECT);
 
 		return modelMapper.map(connect, ConnectResponseDto.class);
 	}
@@ -134,13 +129,11 @@ public class ConnectService {
 
 	private void createNotifications(Member member, String otherMemberEmail) {
 		List<NotificationToken> notificationTokens = member.getNotificationTokens();
-		for (NotificationToken notificationToken : notificationTokens) {
-			Notification notification = new Notification();
-			notification.setNotificationToken(notificationToken);
-			notification.setType(NotificationType.CONNECT);
-			notification.setMessage("YEAH!🙌 " + otherMemberEmail + "님과의 커넥트가 성사되었어요!");
-			notification.setIsRead(false);
-			notificationToken.getNotifications().add(notification);
-		}
+
+		Member otherMember =
+				memberRepository.findByEmail(otherMemberEmail).orElseThrow(MemberNotFoundException::new);
+		String message = "YEAH!🙌 " + otherMember.getUsername() + "님과의 커넥트가 성사되었어요!";
+
+		notificationService.addNotifications(member, otherMember, message, NotificationType.CONNECT);
 	}
 }

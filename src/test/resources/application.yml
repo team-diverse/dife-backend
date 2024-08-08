@@ -8,6 +8,12 @@ spring:
     hibernate:
       ddl-auto: create
     show-sql: true
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+
   main:
     allow-bean-definition-overriding: true
   aws:
