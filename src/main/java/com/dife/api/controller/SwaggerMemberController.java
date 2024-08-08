@@ -31,9 +31,9 @@ public interface SwaggerMemberController {
 	ResponseEntity<RegisterResponseDto> registerEmailAndPassword(
 			@Valid @RequestBody RegisterEmailAndPasswordRequestDto dto);
 
-	@Operation(summary = "중복 닉네임 확인", description = "회원가입 세부사항을 입력하기에 앞서 중복 닉네임 여부를 확인합니다.")
-	@ApiResponse(responseCode = "200", description = "중복 닉네임 확인 성공 예시")
-	ResponseEntity<Void> checkUsername(@RequestParam(name = "username") String username);
+	@Operation(summary = "중복 이메일/닉네임 확인", description = "회원가입 세부사항을 입력하기에 앞서 중복 이메일/닉네임 여부를 확인합니다.")
+	@ApiResponse(responseCode = "200", description = "중복 이메일/닉네임 확인 성공 예시")
+	ResponseEntity<Void> checkUsername(CheckDuplicateRequestDto requestDto);
 
 	@Operation(summary = "회원정보 업데이트 API", description = "회원가입 세부사항을 입력해 회원등록을 업데이트 합니다.")
 	@ApiResponse(

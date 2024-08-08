@@ -6,7 +6,6 @@ import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.MemberService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -38,8 +37,8 @@ public class MemberController implements SwaggerMemberController {
 	}
 
 	@GetMapping
-	public ResponseEntity<Void> checkUsername(@RequestParam(name = "username") String username) {
-		Boolean isValid = memberService.checkUsername(username);
+	public ResponseEntity<Void> checkUsername(@RequestBody CheckDuplicateRequestDto requestDto) {
+		Boolean isValid = memberService.checkDuplicate(requestDto);
 
 		if (isValid) {
 			return ResponseEntity.ok().build();
