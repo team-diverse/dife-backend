@@ -3,8 +3,8 @@ package com.dife.api.service;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.MemberNotFoundException;
-import com.dife.api.exception.NotificationException;
 import com.dife.api.exception.NotificationAuthorizationException;
+import com.dife.api.exception.NotificationException;
 import com.dife.api.model.Member;
 import com.dife.api.model.Notification;
 import com.dife.api.model.NotificationToken;
@@ -76,6 +76,7 @@ public class NotificationService {
 				.map(n -> modelMapper.map(n, NotificationResponseDto.class))
 				.collect(toList());
 	}
+
 	public void sendPushNotification(String expoToken, String message) {
 		String expoPushUrl = "https://exp.host/--/api/v2/push/send";
 
