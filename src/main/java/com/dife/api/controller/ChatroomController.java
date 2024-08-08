@@ -34,8 +34,8 @@ public class ChatroomController implements SwaggerChatroomController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(
-			@PathVariable(name = "id") Long chatroomId) {
-		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId);
+			@PathVariable(name = "id") Long chatroomId, Authentication auth) {
+		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 

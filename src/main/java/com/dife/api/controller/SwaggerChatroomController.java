@@ -76,7 +76,8 @@ public interface SwaggerChatroomController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
-	ResponseEntity<ChatroomResponseDto> getGroupChatroom(@PathVariable(name = "id") Long id);
+	ResponseEntity<ChatroomResponseDto> getGroupChatroom(
+			@PathVariable(name = "id") Long id, Authentication auth);
 
 	@Operation(
 			summary = "그룹 채팅방 필터 검색 조회 API",

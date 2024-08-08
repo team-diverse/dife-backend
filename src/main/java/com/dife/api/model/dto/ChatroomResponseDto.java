@@ -39,6 +39,8 @@ public class ChatroomResponseDto {
 
 	private Boolean isPublic;
 
+	private Boolean isLiked = false;
+
 	private String password;
 
 	private LocalDateTime created;

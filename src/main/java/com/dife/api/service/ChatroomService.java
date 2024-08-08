@@ -28,6 +28,7 @@ public class ChatroomService {
 	private final HobbyRepository hobbyRepository;
 	private final LanguageRepository languageRepository;
 	private final GroupPurposesRepository groupPurposesRepository;
+	private final LikeChatroomRepository likeChatroomRepository;
 	private final MemberRepository memberRepository;
 	private final ChatRepository chatRepository;
 
@@ -43,15 +44,29 @@ public class ChatroomService {
 
 		List<Chatroom> chatrooms;
 
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
 		if (chatroomType == ChatroomType.GROUP)
 			chatrooms = chatroomRepository.findAllByChatroomType(chatroomType);
 		else {
-			Member member =
-					memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 			chatrooms = chatroomRepository.findAllByChatroomTypeAndMember(chatroomType, member);
 		}
 		return chatrooms.stream()
-				.map(c -> modelMapper.map(c, ChatroomResponseDto.class))
+				.filter(c -> c.getChatroomSetting().getIsPublic())
+				.map(
+						c -> {
+							ChatroomResponseDto responseDto =
+									modelMapper.map(c.getChatroomSetting(), ChatroomResponseDto.class);
+							if (c.getChatroomSetting().getProfileImg() != null) {
+								responseDto.setProfilePresignUrl(
+										fileService.getPresignUrl(
+												c.getChatroomSetting().getProfileImg().getOriginalName()));
+							}
+							boolean isLiked = likeChatroomRepository.existsByChatroomAndMember(c, member);
+							responseDto.setIsLiked(isLiked);
+							return responseDto;
+						})
 				.collect(toList());
 	}
 
@@ -232,14 +247,25 @@ public class ChatroomService {
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public ChatroomResponseDto getChatroom(Long id) {
+	public ChatroomResponseDto getChatroom(Long id, String memberEmail) {
 
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
+
+		if (!chatroom.getChatroomSetting().getIsPublic()) throw new ChatroomNotFoundException();
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 		ChatroomResponseDto responseDto = chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
-		responseDto.setProfilePresignUrl(
-				fileService.getPresignUrl(setting.getProfileImg().getOriginalName()));
 
+		if (chatroom.getChatroomSetting().getProfileImg() != null) {
+			responseDto.setProfilePresignUrl(
+					fileService.getPresignUrl(setting.getProfileImg().getOriginalName()));
+		}
+
+		boolean isLiked = likeChatroomRepository.existsByChatroomAndMember(chatroom, member);
+		responseDto.setIsLiked(isLiked);
 		return responseDto;
 	}
 
