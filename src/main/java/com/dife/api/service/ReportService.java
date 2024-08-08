@@ -25,7 +25,7 @@ public class ReportService {
 
 	private final ModelMapper modelMapper;
 
-	public ReportResponseDto createDeclaration(ReportRequestDto requestDto, String memberEmail) {
+	public ReportResponseDto createReport(ReportRequestDto requestDto, String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);

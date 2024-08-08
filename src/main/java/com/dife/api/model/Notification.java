@@ -21,8 +21,6 @@ public class Notification extends BaseTimeEntity {
 
 	private String message;
 
-	private Boolean isRead = false;
-
 	@ManyToOne
 	@JoinColumn(name = "notification_token_id")
 	@JsonIgnore

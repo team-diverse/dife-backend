@@ -21,7 +21,7 @@ public class ReportController {
 	public ResponseEntity<ReportResponseDto> createDeclaration(
 			@RequestBody ReportRequestDto requestDto, Authentication auth) {
 
-		ReportResponseDto responseDto = reportService.createDeclaration(requestDto, auth.getName());
+		ReportResponseDto responseDto = reportService.createReport(requestDto, auth.getName());
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 }
