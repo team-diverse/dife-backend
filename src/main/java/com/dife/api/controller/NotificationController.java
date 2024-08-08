@@ -1,6 +1,7 @@
 package com.dife.api.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.dto.NotificationResponseDto;
 import com.dife.api.model.dto.NotificationTokenRequestDto;
@@ -32,6 +33,12 @@ public class NotificationController implements SwaggerNotificationController {
 		List<NotificationResponseDto> responseDtos =
 				notificationService.getNotifications(auth.getName());
 		return ResponseEntity.ok(responseDtos);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteNotification(@PathVariable("id") Long id, Authentication auth) {
+		notificationService.deleteNotification(id, auth.getName());
+		return new ResponseEntity<>(OK);
 	}
 
 	@PostMapping("/push")
