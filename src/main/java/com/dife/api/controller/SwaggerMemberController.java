@@ -46,7 +46,7 @@ public interface SwaggerMemberController {
 			})
 	ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
-			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
+			@RequestParam(name = "country", required = false) String country,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,

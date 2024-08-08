@@ -96,7 +96,7 @@ public class MapperConfig {
 				.addMappings(
 						mapper -> {
 							mapper.map(Member::getUsername, MemberResponseDto::setUsername);
-							mapper.map(Member::getIsKorean, MemberResponseDto::setIsKorean);
+							mapper.map(Member::getCountry, MemberResponseDto::setCountry);
 							mapper.map(Member::getBio, MemberResponseDto::setBio);
 							mapper.map(Member::getMbti, MemberResponseDto::setMbti);
 							mapper.map(Member::getIsPublic, MemberResponseDto::setIsPublic);

@@ -86,7 +86,7 @@ public class MemberService {
 
 	public MemberResponseDto update(
 			String username,
-			Boolean isKorean,
+			String country,
 			String bio,
 			MbtiCategory mbti,
 			Set<String> hobbies,
@@ -118,7 +118,7 @@ public class MemberService {
 		}
 
 		if (username != null && !username.isEmpty()) member.setUsername(username);
-		if (isKorean != null && isKorean != member.getIsKorean()) member.setIsKorean(isKorean);
+		if (country != null && country != member.getCountry()) member.setCountry(country);
 		if (bio != null && !bio.isEmpty()) member.setBio(bio);
 		if (mbti != null && !mbti.equals(member.getMbti())) member.setMbti(mbti);
 

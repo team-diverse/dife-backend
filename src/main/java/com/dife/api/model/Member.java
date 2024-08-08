@@ -39,7 +39,7 @@ public class Member extends BaseTimeEntity {
 
 	@OneToOne private File verificationFile;
 
-	private Boolean isKorean = true;
+	private String country = "KO";
 
 	private Boolean isPublic = true;
 
