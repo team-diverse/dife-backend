@@ -1,6 +1,5 @@
 package com.dife.api.service;
 
-import com.dife.api.exception.CommentDuplicateException;
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,9 +49,6 @@ public class CommentService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Post post =
 				postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
-
-		if (commentRepository.existsByWriterAndPostAndParentCommentIsNull(writer, post)
-				&& requestDto.getParentCommentId() == null) throw new CommentDuplicateException();
 
 		Comment parentComment =
 				(requestDto.getParentCommentId() != null)
