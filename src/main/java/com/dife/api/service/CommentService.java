@@ -93,7 +93,6 @@ public class CommentService {
 
 		dto.setPost(comment.getPost());
 		dto.setLikesCount(comment.getCommentLikes().size());
-		dto.setBookmarkCount(comment.getBookmarks().size());
 
 		if (comment.getParentComment() != null) dto.setParentComment(comment.getParentComment());
 

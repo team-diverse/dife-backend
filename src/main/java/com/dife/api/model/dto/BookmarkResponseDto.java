@@ -1,6 +1,5 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.Comment;
 import com.dife.api.model.Post;
 import com.dife.api.model.Translation;
 import java.util.List;
@@ -17,5 +16,4 @@ public class BookmarkResponseDto {
 	private String message;
 	private List<Translation> translations;
 	private Post post;
-	private Comment comment;
 }

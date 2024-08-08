@@ -14,5 +14,4 @@ public class BookmarkCreateRequestDto {
 	private Long chatroomId;
 	private Long chatId;
 	private Long postId;
-	private Long commentId;
 }
