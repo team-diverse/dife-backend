@@ -4,8 +4,16 @@ spring:
       on-profile: local
 
   jpa:
+    open-in-view: true
     hibernate:
       ddl-auto: create
+    defer-datasource-initialization: true
+
+
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:import.sql
 
   aws:
     access-key: ${AWS_ACCESS_KEY_ID}

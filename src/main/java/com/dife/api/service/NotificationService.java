@@ -65,4 +65,24 @@ public class NotificationService {
 				.map(n -> modelMapper.map(n, NotificationResponseDto.class))
 				.collect(toList());
 	}
+
+	public void sendPushNotification(String expoToken, String message) {
+		String expoPushUrl = "https://exp.host/--/api/v2/push/send";
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("to", expoToken);
+		body.put("sound", "default");
+		body.put("body", message);
+
+		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<String> response =
+				restTemplate.exchange(expoPushUrl, HttpMethod.POST, entity, String.class);
+
+		if (response.getStatusCode() != HttpStatus.OK) throw new NotificationException();
+	}
 }
