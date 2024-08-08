@@ -35,6 +35,7 @@ public class ChatService {
 	private final DisconnectHandler disconnectHandler;
 	private final NotificationHandler notificationHandler;
 	private final MemberService memberService;
+	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
 
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
@@ -80,19 +81,10 @@ public class ChatService {
 		Set<Member> chatroomMembers = chatroom.getMembers();
 
 		for (Member chatroomMember : chatroomMembers) {
-			if (!Objects.equals(chatroomMember.getId(), member.getId())) {
-				List<NotificationToken> notificationTokens = chatroomMember.getNotificationTokens();
 
-				for (NotificationToken notificationToken : notificationTokens) {
-					Notification notification = new Notification();
-					notification.setNotificationToken(notificationToken);
-					notification.setType(NotificationType.CHAT);
-					notification.setMessage(
-							"WELCOME! 😊 " + chatroom.getName() + "방에 " + member.getEmail() + "님이 입장하셨습니다!");
-					notification.setIsRead(false);
-					notificationToken.getNotifications().add(notification);
-				}
-			}
+			String message =
+					"WELCOME! 😊 " + chatroom.getName() + "방에 " + member.getUsername() + "님이 입장하셨습니다!";
+			notificationService.addNotifications(chatroomMember, member, message, NotificationType.CHAT);
 		}
 
 		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
@@ -129,8 +121,9 @@ public class ChatService {
 							message = message.substring(0, 30) + "...";
 						}
 						notification.setMessage(message);
-						notification.setIsRead(false);
 						notificationToken.getNotifications().add(notification);
+
+						notificationService.sendPushNotification(notificationToken.getPushToken(), message);
 					}
 				}
 			}

@@ -3,19 +3,27 @@ package com.dife.api.service;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.MemberNotFoundException;
+import com.dife.api.exception.NotificationException;
 import com.dife.api.model.Member;
+import com.dife.api.model.Notification;
 import com.dife.api.model.NotificationToken;
+import com.dife.api.model.NotificationType;
 import com.dife.api.model.dto.NotificationResponseDto;
 import com.dife.api.model.dto.NotificationTokenRequestDto;
 import com.dife.api.model.dto.NotificationTokenResponseDto;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.NotificationTokenRepository;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -84,5 +92,25 @@ public class NotificationService {
 				restTemplate.exchange(expoPushUrl, HttpMethod.POST, entity, String.class);
 
 		if (response.getStatusCode() != HttpStatus.OK) throw new NotificationException();
+	}
+
+	public void addNotifications(
+			Member toMember, Member currentMember, String messageTemplate, NotificationType type) {
+		if (!Objects.equals(toMember.getId(), currentMember.getId())
+				&& type != NotificationType.CONNECT) {
+			List<NotificationToken> notificationTokens = currentMember.getNotificationTokens();
+
+			for (NotificationToken notificationToken : notificationTokens) {
+				Notification notification = new Notification();
+				notification.setNotificationToken(notificationToken);
+				notification.setType(type);
+
+				String message = String.format(messageTemplate, currentMember.getUsername());
+				notification.setMessage(message);
+				notificationToken.getNotifications().add(notification);
+
+				sendPushNotification(notificationToken.getPushToken(), message);
+			}
+		}
 	}
 }

@@ -9,7 +9,6 @@ import com.dife.api.model.dto.LikeCreateRequestDto;
 import com.dife.api.model.dto.PostResponseDto;
 import com.dife.api.repository.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +29,7 @@ public class LikeService {
 	private final LikeCommentRepository likeCommentRepository;
 
 	private final ModelMapper modelMapper;
+	private final NotificationService notificationService;
 
 	public List<PostResponseDto> getLikedPosts(String memberEmail) {
 		Member member =
@@ -67,19 +67,8 @@ public class LikeService {
 		likePostRepository.save(postLike);
 
 		Member writer = post.getWriter();
-
-		if (!Objects.equals(writer.getId(), member.getId())) {
-			List<NotificationToken> notificationTokens = writer.getNotificationTokens();
-
-			for (NotificationToken notificationToken : notificationTokens) {
-				Notification notification = new Notification();
-				notification.setNotificationToken(notificationToken);
-				notification.setType(NotificationType.COMMUNITY);
-				notification.setMessage("WOW!😆 " + member.getEmail() + "님이 회원님의 게시글을 좋아해요!");
-				notification.setIsRead(false);
-				notificationToken.getNotifications().add(notification);
-			}
-		}
+		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 게시글을 좋아해요!";
+		notificationService.addNotifications(writer, member, message, NotificationType.COMMUNITY);
 	}
 
 	public void deleteLikePost(LikeCreateRequestDto dto, String memberEmail) {
@@ -133,18 +122,7 @@ public class LikeService {
 		likeCommentRepository.save(likeComment);
 
 		Member writer = comment.getWriter();
-
-		if (!Objects.equals(writer.getId(), member.getId())) {
-			List<NotificationToken> notificationTokens = writer.getNotificationTokens();
-
-			for (NotificationToken notificationToken : notificationTokens) {
-				Notification notification = new Notification();
-				notification.setNotificationToken(notificationToken);
-				notification.setType(NotificationType.COMMUNITY);
-				notification.setMessage("WOW!😆 " + member.getEmail() + "님이 회원님의 댓글을 좋아해요!");
-				notification.setIsRead(false);
-				notificationToken.getNotifications().add(notification);
-			}
-		}
+		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 댓글을 좋아해요!";
+		notificationService.addNotifications(writer, member, message, NotificationType.COMMUNITY);
 	}
 }

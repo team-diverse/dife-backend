@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,8 @@ public class CommentService {
 	private final ModelMapper modelMapper;
 	private final CommentRepository commentRepository;
 	private final LikeCommentRepository likeCommentRepository;
+
+	private final NotificationService notificationService;
 
 	@Transactional(readOnly = true)
 	public List<CommentResponseDto> getCommentsByPostId(Long postId, String memberEmail) {
@@ -74,12 +77,12 @@ public class CommentService {
 			List<NotificationToken> parentCommentTokens =
 					comment.getParentComment().getWriter().getNotificationTokens();
 			String parentMessage =
-					"WOW!😆 " + comment.getWriter().getEmail() + "님이 회원님이 댓글을 남긴 게시글에 댓글이 추가되었어요!";
+					"WOW!😆 " + comment.getWriter().getUsername() + "님이 회원님이 댓글을 남긴 게시글에 다른 댓글이 추가되었어요!";
 			addNotifications(parentCommentTokens, parentMessage, NotificationType.COMMUNITY);
 		}
 
 		List<NotificationToken> postTokens = post.getWriter().getNotificationTokens();
-		String postMessage = "WOW!😆 " + comment.getWriter().getEmail() + "님이 회원님의 게시글에 댓글이 추가되었어요!";
+		String postMessage = "WOW!😆 " + comment.getWriter().getUsername() + "님이 회원님의 게시글에 댓글이 추가되었어요!";
 		addNotifications(postTokens, postMessage, NotificationType.COMMUNITY);
 
 		return responseDto;
@@ -107,8 +110,9 @@ public class CommentService {
 			notification.setNotificationToken(token);
 			notification.setType(type);
 			notification.setMessage(message);
-			notification.setIsRead(false);
 			token.getNotifications().add(notification);
+
+			notificationService.sendPushNotification(token.getPushToken(), message);
 		}
 	}
 }
