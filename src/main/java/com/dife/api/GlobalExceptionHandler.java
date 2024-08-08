@@ -16,7 +16,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(MemberException.class)
 	public ResponseEntity<ExceptionResonse> handleMemberException(MemberException exception) {
-		return ResponseEntity.status(UNAUTHORIZED.value())
+		return ResponseEntity.status(FORBIDDEN.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(BadCredentialsException.class)
 	public ResponseEntity<ExceptionResonse> handleBadCredentialsException(
 			BadCredentialsException exception) {
-		return ResponseEntity.status(UNAUTHORIZED.value())
+		return ResponseEntity.status(FORBIDDEN.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 
@@ -48,14 +48,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ExceptionResonse> handleIllegalArgumentException(
 			IllegalArgumentException exception) {
-		return ResponseEntity.status(UNAUTHORIZED.value())
+		return ResponseEntity.status(FORBIDDEN.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 
 	@ExceptionHandler(MemberNullException.class)
 	public ResponseEntity<ExceptionResonse> handleNullPointerException(
 			NullPointerException exception) {
-		return ResponseEntity.status(UNAUTHORIZED.value())
+		return ResponseEntity.status(FORBIDDEN.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(PostNotFoundException.class)
 	public ResponseEntity<ExceptionResonse> handlePostNotFoundException(
 			PostNotFoundException exception) {
-		return ResponseEntity.status(UNAUTHORIZED.value())
+		return ResponseEntity.status(FORBIDDEN.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 
@@ -83,7 +83,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(ConnectUnauthorizedException.class)
 	public ResponseEntity<ExceptionResonse> handleConnectException(
 			ConnectUnauthorizedException exception) {
-		return ResponseEntity.status(UNAUTHORIZED)
+		return ResponseEntity.status(FORBIDDEN)
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 
@@ -118,6 +118,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<ExceptionResonse> handleChatroomNotFoundException(
 			ChatroomNotFoundException exception) {
 		return ResponseEntity.status(BAD_REQUEST)
+				.body(new ExceptionResonse(false, exception.getMessage()));
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<ExceptionResonse> handleRuntimeException(RuntimeException exception) {
+		return ResponseEntity.status(FORBIDDEN.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 }

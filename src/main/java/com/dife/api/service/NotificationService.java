@@ -3,6 +3,7 @@ package com.dife.api.service;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.MemberNotFoundException;
+import com.dife.api.exception.NotificationAuthorizationException;
 import com.dife.api.exception.NotificationException;
 import com.dife.api.model.Member;
 import com.dife.api.model.Notification;
@@ -12,6 +13,7 @@ import com.dife.api.model.dto.NotificationResponseDto;
 import com.dife.api.model.dto.NotificationTokenRequestDto;
 import com.dife.api.model.dto.NotificationTokenResponseDto;
 import com.dife.api.repository.MemberRepository;
+import com.dife.api.repository.NotificationRepository;
 import com.dife.api.repository.NotificationTokenRepository;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +37,7 @@ public class NotificationService {
 
 	private final MemberRepository memberRepository;
 	private final NotificationTokenRepository notificationTokenRepository;
+	private final NotificationRepository notificationRepository;
 
 	public NotificationTokenResponseDto sendNotificationToken(
 			String memberEmail, NotificationTokenRequestDto requestDto) {
@@ -110,6 +113,24 @@ public class NotificationService {
 				notificationToken.getNotifications().add(notification);
 
 				sendPushNotification(notificationToken.getPushToken(), message);
+			}
+		}
+	}
+
+	public void deleteNotification(Long id, String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		List<NotificationToken> notifications = notificationTokenRepository.findAllByMember(member);
+
+		for (NotificationToken notificationToken : notifications) {
+			if (!notificationRepository.existsByNotificationToken(notificationToken))
+				throw new NotificationAuthorizationException();
+			for (Notification notification : notificationToken.getNotifications()) {
+				if (Objects.equals(notification.getId(), id)) {
+					notificationToken.getNotifications().remove(notification);
+					notificationRepository.delete(notification);
+					break;
+				}
 			}
 		}
 	}
