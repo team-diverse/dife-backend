@@ -27,6 +27,8 @@ public class LikeService {
 	private final MemberRepository memberRepository;
 	private final LikePostRepository likePostRepository;
 	private final LikeCommentRepository likeCommentRepository;
+	private final LikeChatroomRepository likeChatroomRepository;
+	private final ChatroomRepository chatroomRepository;
 
 	private final ModelMapper modelMapper;
 	private final NotificationService notificationService;
@@ -50,6 +52,9 @@ public class LikeService {
 				break;
 			case COMMENT:
 				createLikeComment(dto.getCommentId(), memberEmail);
+				break;
+			case CHATROOM:
+				createLikeChatroom(dto.getChatroomId(), memberEmail);
 		}
 	}
 
@@ -69,6 +74,42 @@ public class LikeService {
 		Member writer = post.getWriter();
 		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 게시글을 좋아해요!";
 		notificationService.addNotifications(writer, member, message, NotificationType.COMMUNITY);
+	}
+
+	public void createLikeComment(Long commentId, String memberEmail) {
+		Comment comment =
+				commentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		if (likeCommentRepository.existsByCommentAndMember(comment, member)) {
+			throw new DuplicateLikeException();
+		}
+		LikeComment likeComment = new LikeComment();
+		likeComment.setComment(comment);
+		likeComment.setMember(member);
+		likeCommentRepository.save(likeComment);
+
+		Member writer = comment.getWriter();
+		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 댓글을 좋아해요!";
+		notificationService.addNotifications(writer, member, message, NotificationType.COMMUNITY);
+	}
+
+	public void createLikeChatroom(Long chatroomId, String memberEmail) {
+		Chatroom chatroom =
+				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		if (likeChatroomRepository.existsByChatroomAndMember(chatroom, member)) {
+			throw new DuplicateLikeException();
+		}
+		ChatroomLike chatroomLike = new ChatroomLike();
+		chatroomLike.setChatroom(chatroom);
+		chatroomLike.setMember(member);
+
+		likeChatroomRepository.save(chatroomLike);
 	}
 
 	public void deleteLikePost(LikeCreateRequestDto dto, String memberEmail) {
@@ -104,25 +145,20 @@ public class LikeService {
 				likeComment.getComment().getCommentLikes().remove(likeComment);
 				likeCommentRepository.delete(likeComment);
 				break;
+
+			case CHATROOM:
+				Chatroom chatroom =
+						chatroomRepository
+								.findById(dto.getChatroomId())
+								.orElseThrow(ChatroomNotFoundException::new);
+
+				ChatroomLike chatroomLike =
+						likeChatroomRepository
+								.findByChatroomAndMember(chatroom, member)
+								.orElseThrow(LikeNotFoundException::new);
+
+				likeChatroomRepository.delete(chatroomLike);
+				break;
 		}
-	}
-
-	public void createLikeComment(Long commentId, String memberEmail) {
-		Comment comment =
-				commentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
-		Member member =
-				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-
-		if (likeCommentRepository.existsByCommentAndMember(comment, member)) {
-			throw new DuplicateLikeException();
-		}
-		LikeComment likeComment = new LikeComment();
-		likeComment.setComment(comment);
-		likeComment.setMember(member);
-		likeCommentRepository.save(likeComment);
-
-		Member writer = comment.getWriter();
-		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 댓글을 좋아해요!";
-		notificationService.addNotifications(writer, member, message, NotificationType.COMMUNITY);
 	}
 }
