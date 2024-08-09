@@ -53,12 +53,11 @@ public class PostService {
 
 		postRepository.save(post);
 
-		if (!postFile.isEmpty()) {
+		if (isFileValid(postFile)) {
 			FileDto fileDto = fileService.upload(postFile);
 			File file = modelMapper.map(fileDto, File.class);
 			file.setPost(post);
 			fileRepository.save(file);
-
 			post.getFiles().add(file);
 		}
 
@@ -166,5 +165,9 @@ public class PostService {
 		}
 
 		postRepository.delete(post);
+	}
+
+	private boolean isFileValid(MultipartFile file) {
+		return file != null && !file.isEmpty();
 	}
 }
