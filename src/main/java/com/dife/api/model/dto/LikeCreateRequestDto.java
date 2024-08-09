@@ -12,9 +12,5 @@ public class LikeCreateRequestDto {
 
 	private LikeType type;
 
-	private Long postId;
-
-	private Long commentId;
-
-	private Long chatroomId;
+	private Long id;
 }

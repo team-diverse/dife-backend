@@ -107,14 +107,15 @@ public interface SwaggerMemberController {
 	ResponseEntity<List<MemberResponseDto>> getFilterMembers(
 			@RequestParam(name = "mbtis", required = false) Set<MbtiCategory> mbtiCategories,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
-			@RequestParam(name = "languages", required = false) Set<String> languages);
+			@RequestParam(name = "languages", required = false) Set<String> languages,
+			Authentication auth);
 
 	@Operation(
 			summary = "회원 필터 검색 조회 API",
 			description = "회원의 이름, 닉네임, 전공, 학번, 한줄 소개에 해당 검색어가 포함되는 회원들을 조회하는 API입니다.")
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<List<MemberResponseDto>> getSearchMembers(
-			@RequestParam(name = "keyword") String keyword);
+			@RequestParam(name = "keyword") String keyword, Authentication auth);
 
 	@Operation(summary = "회원이 작성한 게시글 조회 API", description = "회원의 인가를 이용해 작성한 게시글을 조회하는 API입니다.")
 	@ApiResponse(responseCode = "200")
