@@ -48,13 +48,17 @@ public class LikeService {
 	public void createLike(LikeCreateRequestDto dto, String memberEmail) {
 		switch (dto.getType()) {
 			case POST:
-				createLikePost(dto.getPostId(), memberEmail);
+				createLikePost(dto.getId(), memberEmail);
 				break;
 			case COMMENT:
-				createLikeComment(dto.getCommentId(), memberEmail);
+				createLikeComment(dto.getId(), memberEmail);
 				break;
 			case CHATROOM:
-				createLikeChatroom(dto.getChatroomId(), memberEmail);
+				createLikeChatroom(dto.getId(), memberEmail);
+				break;
+			case MEMBER:
+				createLikeMember(dto.getId(), memberEmail);
+				break;
 		}
 	}
 
@@ -112,14 +116,39 @@ public class LikeService {
 		likeChatroomRepository.save(chatroomLike);
 	}
 
+	public void createLikeMember(Long memberId, String memberEmail) {
+		Member likeMember =
+				memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		boolean isAlreadyLikelisted = false;
+
+		List<Member> likeList = member.getLikeList();
+		if (likeList != null) {
+			isAlreadyLikelisted = likeList.stream().anyMatch(bl -> bl.equals(likeMember));
+		}
+
+		if (isAlreadyLikelisted) {
+			throw new DuplicateMemberException("이미 좋아요리스트에 존재하는 회원입니다!");
+		}
+
+		member.getLikeList().add(likeMember);
+	}
+
+	public boolean isLikeListMember(Member currentMember, Member checkMember) {
+		return currentMember.getLikeList().stream()
+				.anyMatch(likelistedMember -> likelistedMember.equals(checkMember));
+	}
+
 	public void deleteLikePost(LikeCreateRequestDto dto, String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		switch (dto.getType()) {
 			case POST:
-				Post post =
-						postRepository.findById(dto.getPostId()).orElseThrow(PostNotFoundException::new);
+				Post post = postRepository.findById(dto.getId()).orElseThrow(PostNotFoundException::new);
 
 				PostLike likePost =
 						likePostRepository
@@ -133,9 +162,7 @@ public class LikeService {
 
 			case COMMENT:
 				Comment comment =
-						commentRepository
-								.findById(dto.getCommentId())
-								.orElseThrow(CommentNotFoundException::new);
+						commentRepository.findById(dto.getId()).orElseThrow(CommentNotFoundException::new);
 
 				LikeComment likeComment =
 						likeCommentRepository
@@ -148,9 +175,7 @@ public class LikeService {
 
 			case CHATROOM:
 				Chatroom chatroom =
-						chatroomRepository
-								.findById(dto.getChatroomId())
-								.orElseThrow(ChatroomNotFoundException::new);
+						chatroomRepository.findById(dto.getId()).orElseThrow(ChatroomNotFoundException::new);
 
 				ChatroomLike chatroomLike =
 						likeChatroomRepository
@@ -159,6 +184,23 @@ public class LikeService {
 
 				likeChatroomRepository.delete(chatroomLike);
 				break;
+
+			case MEMBER:
+				Member likedMember =
+						memberRepository.findById(dto.getId()).orElseThrow(MemberNotFoundException::new);
+
+				boolean isAlreadyLikelisted = false;
+
+				List<Member> likeList = member.getLikeList();
+				if (likeList != null) {
+					isAlreadyLikelisted =
+							likeList.stream().anyMatch(liked -> liked.getId().equals(likedMember.getId()));
+				}
+
+				if (!isAlreadyLikelisted) throw new LikeNotFoundException();
+
+				member.getLikeList().remove(likedMember);
+				memberRepository.save(member);
 		}
 	}
 }

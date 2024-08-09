@@ -50,6 +50,7 @@ public class MemberService {
 	private final BlockService blockService;
 	private final ModelMapper modelMapper;
 	private final ConnectService connectSerivce;
+	private final LikeService likeService;
 
 	@Autowired
 	@Qualifier("memberModelMapper")
@@ -278,6 +279,7 @@ public class MemberService {
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : randomMembers) {
 			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+			responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
 			if (responseDto.getProfileImg() != null)
 				responseDto.setProfilePresignUrl(
 						fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
@@ -287,7 +289,13 @@ public class MemberService {
 	}
 
 	public List<MemberResponseDto> getFilterMembers(
-			Set<MbtiCategory> mbtiCategories, Set<String> hobbies, Set<String> languages) {
+			Set<MbtiCategory> mbtiCategories,
+			Set<String> hobbies,
+			Set<String> languages,
+			String memberEmail) {
+
+		Member currentMember =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Set<MbtiCategory> safeMbtiCategories =
 				mbtiCategories != null ? mbtiCategories : Collections.emptySet();
@@ -319,6 +327,7 @@ public class MemberService {
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : validMembers) {
 			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+			responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
 			if (responseDto.getProfileImg() != null)
 				responseDto.setProfilePresignUrl(
 						fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
@@ -327,7 +336,11 @@ public class MemberService {
 		return memberResponseDtos;
 	}
 
-	public List<MemberResponseDto> getSearchMembers(String keyword) {
+	public List<MemberResponseDto> getSearchMembers(String keyword, String memberEmail) {
+
+		Member currentMember =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
 		String trimmedKeyword = keyword.trim();
 		List<Member> members = memberRepository.findAllByKeywordSearch(trimmedKeyword);
 
@@ -341,6 +354,7 @@ public class MemberService {
 						member -> {
 							MemberResponseDto responseDto =
 									memberModelMapper.map(member, MemberResponseDto.class);
+							responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
 							if (responseDto.getProfileImg() != null)
 								responseDto.setProfilePresignUrl(
 										fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
