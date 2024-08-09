@@ -29,11 +29,16 @@ public class TranslationService {
 	private final BookmarkRepository bookmarkRepository;
 	private final TranslationRepository translationRepository;
 
-	@Value("${spring.profiles.include}")
+	@Value("${DEEPL_TRANSLATE_API_KEY}")
 	private String authKey;
 
 	public TranslationResponseDto translate(TranslationRequestDto requestDto) {
-		String targetLang = requestDto.getTarget_lang();
+		if (requestDto.getBookmarkId() != null) return translateBookmark(requestDto);
+		return translateBasic(requestDto);
+	}
+
+	public TranslationResponseDto translateBasic(TranslationRequestDto requestDto) {
+		String targetLang = requestDto.getTargetLang();
 
 		String apiUrl = deeplApiUrl + "?target_lang=" + targetLang;
 		RestTemplate restTemplate = new RestTemplate();
@@ -46,21 +51,26 @@ public class TranslationService {
 		TranslationResponseDto response =
 				restTemplate.postForObject(
 						apiUrl, createHttpEntity(requestDto, headers), TranslationResponseDto.class);
+		return response;
+	}
 
-		if (requestDto.getBookmarkId() != null) {
-			Bookmark bookmark =
-					bookmarkRepository
-							.findById(requestDto.getBookmarkId())
-							.orElseThrow(BookmarkNotFoundException::new);
-			assert response != null;
-			List<Translation> savedTranslations = new ArrayList<>();
-			for (Translation translation : response.getTranslations()) {
-				Translation savedTranslation = translationRepository.save(translation);
-				savedTranslations.add(savedTranslation);
-			}
-			bookmark.setTranslations(savedTranslations);
-			bookmarkRepository.save(bookmark);
+	public TranslationResponseDto translateBookmark(TranslationRequestDto requestDto) {
+		Bookmark bookmark =
+				bookmarkRepository
+						.findById(requestDto.getBookmarkId())
+						.orElseThrow(BookmarkNotFoundException::new);
+
+		TranslationResponseDto response = translateBasic(requestDto);
+
+		List<Translation> savedTranslations = new ArrayList<>();
+		for (Translation translation : response.getTranslations()) {
+			Translation savedTranslation = translationRepository.save(translation);
+			savedTranslations.add(savedTranslation);
 		}
+
+		bookmark.setTranslations(savedTranslations);
+		bookmarkRepository.save(bookmark);
+
 		return response;
 	}
 

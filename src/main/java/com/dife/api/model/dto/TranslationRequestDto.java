@@ -13,6 +13,6 @@ import lombok.Setter;
 public class TranslationRequestDto {
 
 	private List<String> text;
-	private String target_lang;
+	private String targetLang;
 	private Long bookmarkId;
 }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/translates")
+@RequestMapping("/api/translations")
 @Slf4j
 public class TranslationController implements SwaggerTranslationController {
 
