@@ -50,6 +50,7 @@ public class MemberService {
 	private final BlockService blockService;
 	private final ModelMapper modelMapper;
 	private final ConnectService connectSerivce;
+	private final LikeService likeService;
 
 	@Autowired
 	@Qualifier("memberModelMapper")
@@ -77,16 +78,15 @@ public class MemberService {
 		return modelMapper.map(member, RegisterResponseDto.class);
 	}
 
-	public Boolean checkUsername(String username) {
-		if (memberRepository.existsByUsername(username)) {
-			return false;
-		}
-		return true;
+	public Boolean isDuplicate(String email, String username) {
+
+		if (username != null) return memberRepository.existsByUsername(username);
+		return memberRepository.existsByEmail(email);
 	}
 
 	public MemberResponseDto update(
 			String username,
-			Boolean isKorean,
+			String country,
 			String bio,
 			MbtiCategory mbti,
 			Set<String> hobbies,
@@ -118,7 +118,7 @@ public class MemberService {
 		}
 
 		if (username != null && !username.isEmpty()) member.setUsername(username);
-		if (isKorean != null && isKorean != member.getIsKorean()) member.setIsKorean(isKorean);
+		if (country != null && country != member.getCountry()) member.setCountry(country);
 		if (bio != null && !bio.isEmpty()) member.setBio(bio);
 		if (mbti != null && !mbti.equals(member.getMbti())) member.setMbti(mbti);
 
@@ -279,6 +279,7 @@ public class MemberService {
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : randomMembers) {
 			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+			responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
 			if (responseDto.getProfileImg() != null)
 				responseDto.setProfilePresignUrl(
 						fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
@@ -288,7 +289,13 @@ public class MemberService {
 	}
 
 	public List<MemberResponseDto> getFilterMembers(
-			Set<MbtiCategory> mbtiCategories, Set<String> hobbies, Set<String> languages) {
+			Set<MbtiCategory> mbtiCategories,
+			Set<String> hobbies,
+			Set<String> languages,
+			String memberEmail) {
+
+		Member currentMember =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Set<MbtiCategory> safeMbtiCategories =
 				mbtiCategories != null ? mbtiCategories : Collections.emptySet();
@@ -320,6 +327,7 @@ public class MemberService {
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
 		for (Member member : validMembers) {
 			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+			responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
 			if (responseDto.getProfileImg() != null)
 				responseDto.setProfilePresignUrl(
 						fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
@@ -328,7 +336,11 @@ public class MemberService {
 		return memberResponseDtos;
 	}
 
-	public List<MemberResponseDto> getSearchMembers(String keyword) {
+	public List<MemberResponseDto> getSearchMembers(String keyword, String memberEmail) {
+
+		Member currentMember =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
 		String trimmedKeyword = keyword.trim();
 		List<Member> members = memberRepository.findAllByKeywordSearch(trimmedKeyword);
 
@@ -342,6 +354,7 @@ public class MemberService {
 						member -> {
 							MemberResponseDto responseDto =
 									memberModelMapper.map(member, MemberResponseDto.class);
+							responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
 							if (responseDto.getProfileImg() != null)
 								responseDto.setProfilePresignUrl(
 										fileService.getPresignUrl(member.getProfileImg().getOriginalName()));

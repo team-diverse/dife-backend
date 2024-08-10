@@ -32,11 +32,14 @@ public class MemberResponseDto {
 	@Schema(description = "닉네임", example = "sooya")
 	private String username;
 
-	@Schema(description = "내국인 여부", example = "true")
-	private Boolean isKorean;
+	@Schema(description = "국가코드", example = "KO")
+	private String country;
 
 	@Schema(description = "프로필 공개 여부", example = "true")
 	private Boolean isPublic;
+
+	@Schema(description = "프로필 좋아요 여부", example = "true")
+	private Boolean isLiked = false;
 
 	@Schema(description = "MBTI", example = "ENTJ")
 	private MbtiCategory mbti;

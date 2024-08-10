@@ -31,9 +31,11 @@ public interface SwaggerMemberController {
 	ResponseEntity<RegisterResponseDto> registerEmailAndPassword(
 			@Valid @RequestBody RegisterEmailAndPasswordRequestDto dto);
 
-	@Operation(summary = "중복 닉네임 확인", description = "회원가입 세부사항을 입력하기에 앞서 중복 닉네임 여부를 확인합니다.")
-	@ApiResponse(responseCode = "200", description = "중복 닉네임 확인 성공 예시")
-	ResponseEntity<Void> checkUsername(@RequestParam(name = "username") String username);
+	@Operation(summary = "중복 이메일/닉네임 확인", description = "회원가입 세부사항을 입력하기에 앞서 중복 이메일/닉네임 여부를 확인합니다.")
+	@ApiResponse(responseCode = "200", description = "중복 이메일/닉네임 확인 성공 예시")
+	ResponseEntity<Void> checkUsername(
+			@RequestParam(name = "email", required = false) String email,
+			@RequestParam(name = "username", required = false) String username);
 
 	@Operation(summary = "회원정보 업데이트 API", description = "회원가입 세부사항을 입력해 회원등록을 업데이트 합니다.")
 	@ApiResponse(
@@ -46,7 +48,7 @@ public interface SwaggerMemberController {
 			})
 	ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
-			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
+			@RequestParam(name = "country", required = false) String country,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
@@ -105,14 +107,15 @@ public interface SwaggerMemberController {
 	ResponseEntity<List<MemberResponseDto>> getFilterMembers(
 			@RequestParam(name = "mbtis", required = false) Set<MbtiCategory> mbtiCategories,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
-			@RequestParam(name = "languages", required = false) Set<String> languages);
+			@RequestParam(name = "languages", required = false) Set<String> languages,
+			Authentication auth);
 
 	@Operation(
 			summary = "회원 필터 검색 조회 API",
 			description = "회원의 이름, 닉네임, 전공, 학번, 한줄 소개에 해당 검색어가 포함되는 회원들을 조회하는 API입니다.")
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<List<MemberResponseDto>> getSearchMembers(
-			@RequestParam(name = "keyword") String keyword);
+			@RequestParam(name = "keyword") String keyword, Authentication auth);
 
 	@Operation(summary = "회원이 작성한 게시글 조회 API", description = "회원의 인가를 이용해 작성한 게시글을 조회하는 API입니다.")
 	@ApiResponse(responseCode = "200")

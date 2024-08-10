@@ -39,9 +39,5 @@ public class Bookmark extends BaseTimeEntity {
 	@JoinColumn(name = "post_id")
 	private Post post;
 
-	@ManyToOne
-	@JoinColumn(name = "comment_id")
-	private Comment comment;
-
 	private LocalDateTime created;
 }
