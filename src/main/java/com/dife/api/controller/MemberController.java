@@ -76,6 +76,13 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
+	@GetMapping("/{id}")
+	public ResponseEntity<MemberResponseDto> getById(
+			@PathVariable(name = "id") Long id, Authentication auth) {
+		MemberResponseDto responseDto = memberService.getMemberById(id, auth.getName());
+		return ResponseEntity.ok(responseDto);
+	}
+
 	@GetMapping("/profile")
 	public ResponseEntity<MemberResponseDto> profile(Authentication auth) {
 		MemberResponseDto responseDto = memberService.getMember(auth.getName());
