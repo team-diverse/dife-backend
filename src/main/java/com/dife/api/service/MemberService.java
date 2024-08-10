@@ -228,7 +228,7 @@ public class MemberService {
 
 		if (!findMember.getIsPublic()) throw new MemberException("프로필 비공개 회원은 id 엔드포인트 접근 불가입니다!");
 
-		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+		MemberResponseDto responseDto = memberModelMapper.map(findMember, MemberResponseDto.class);
 
 		responseDto.setIsLiked(likeService.isLikeListMember(member, findMember));
 
