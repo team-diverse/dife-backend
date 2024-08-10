@@ -90,6 +90,8 @@ public class CommentService {
 		dto.setLikesCount(comment.getCommentLikes().size());
 
 		if (comment.getParentComment() != null) dto.setParentComment(comment.getParentComment());
+		if (comment.getChildrenComments() != null)
+			dto.setCommentsCount(comment.getChildrenComments().size());
 
 		boolean isLiked = likeCommentRepository.existsByCommentAndMember(comment, member);
 		dto.setIsLiked(isLiked);

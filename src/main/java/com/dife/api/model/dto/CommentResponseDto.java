@@ -28,6 +28,8 @@ public class CommentResponseDto {
 
 	private Integer likesCount;
 
+	private Integer commentsCount;
+
 	private Integer bookmarkCount;
 
 	@JsonProperty("writer")
