@@ -2,6 +2,8 @@ package com.dife.api.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "bookmark")
-public class Bookmark {
+public class Bookmark extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +23,13 @@ public class Bookmark {
 
 	@Size(max = 300)
 	private String message;
+
+	@ManyToMany
+	@JoinTable(
+			name = "bookmark_translation",
+			joinColumns = @JoinColumn(name = "bookmark_id"),
+			inverseJoinColumns = @JoinColumn(name = "translation_id"))
+	private List<Translation> translations;
 
 	@ManyToOne
 	@JoinColumn(name = "member_id")
@@ -33,4 +42,6 @@ public class Bookmark {
 	@ManyToOne
 	@JoinColumn(name = "comment_id")
 	private Comment comment;
+
+	private LocalDateTime created;
 }

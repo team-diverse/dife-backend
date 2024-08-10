@@ -100,5 +100,6 @@ public class Member extends BaseTimeEntity {
 			name = "member_blacklist",
 			joinColumns = @JoinColumn(name = "member_id"),
 			inverseJoinColumns = @JoinColumn(name = "blacklisted_member_id"))
+	@JsonIgnore
 	private List<Member> blackList = new ArrayList<>();
 }
