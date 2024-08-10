@@ -15,4 +15,6 @@ public class LikeCreateRequestDto {
 	private Long postId;
 
 	private Long commentId;
+
+	private Long chatroomId;
 }
