@@ -29,7 +29,7 @@ public class TranslationService {
 	private final BookmarkRepository bookmarkRepository;
 	private final TranslationRepository translationRepository;
 
-	@Value("${DEEPL_TRANSLATE_API_KEY}")
+	@Value("${translation.api-key}")
 	private String authKey;
 
 	public TranslationResponseDto translate(TranslationRequestDto requestDto) {

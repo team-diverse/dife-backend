@@ -102,16 +102,10 @@ VALUES ('9', 0, '5', '1', '1', '비공개 대댓글 내용', NOW());
 INSERT INTO comment (ID, IS_PUBLIC, WRITER_ID, POST_ID, PARENT_ID, CONTENT, CREATED)
 VALUES ('10', 0, '5', '1', '2', '비공개 대댓글 내용', NOW());
 
-
 INSERT INTO comment (ID, IS_PUBLIC, WRITER_ID, POST_ID, PARENT_ID, CONTENT, CREATED)
 VALUES ('11', 0, '5', '2', '1', '비공개 대댓글 내용', NOW());
 INSERT INTO comment (ID, IS_PUBLIC, WRITER_ID, POST_ID, PARENT_ID, CONTENT, CREATED)
 VALUES ('12', 1, '5', '2', '1', '비공개 대댓글 내용', NOW());
-
-INSERT INTO bookmark (ID, POST_ID, MEMBER_ID, CREATED)
-VALUES ('1', '1', '5', NOW());
-INSERT INTO bookmark (ID, POST_ID, MEMBER_ID, CREATED)
-VALUES ('2', '1', '2', NOW());
 
 INSERT INTO post_likes(ID, MEMBER_ID, POST_ID, CREATED)
 VALUES ('1', '5', '1', NOW());
@@ -130,3 +124,8 @@ INSERT INTO comment_likes(ID, MEMBER_ID, COMMENT_ID, CREATED)
 VALUES ('3', '5', '7', NOW());
 INSERT INTO comment_likes(ID, MEMBER_ID, COMMENT_ID, CREATED)
 VALUES ('4', '2', '1', NOW());
+
+INSERT INTO bookmark (ID, POST_ID, MEMBER_ID, CREATED)
+VALUES ('1', '1', '5', NOW());
+INSERT INTO bookmark (ID, POST_ID, MEMBER_ID, CREATED)
+VALUES ('2', '1', '2', NOW());
