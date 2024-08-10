@@ -220,6 +220,24 @@ public class MemberService {
 		return responseDto;
 	}
 
+	public MemberResponseDto getMemberById(Long id, String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		Member findMember = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
+
+		if (!findMember.getIsPublic()) throw new MemberException("프로필 비공개 회원은 id 엔드포인트 접근 불가입니다!");
+
+		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+
+		responseDto.setIsLiked(likeService.isLikeListMember(member, findMember));
+
+		if (responseDto.getProfileImg() != null)
+			responseDto.setProfilePresignUrl(
+					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+		return responseDto;
+	}
+
 	public Member getMemberEntityById(Long id) {
 		return memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
 	}

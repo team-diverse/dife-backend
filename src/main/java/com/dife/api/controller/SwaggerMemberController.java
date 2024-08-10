@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,6 +58,20 @@ public interface SwaggerMemberController {
 			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			Authentication auth);
+
+	@Operation(
+			summary = "회원 ID별 조회 API",
+			description = "공개 회원에 한해 로그인한 회원이 회원의 상세 페이지를 볼 수 있는 API입니다.")
+	@ApiResponse(
+			responseCode = "200",
+			description = "마이페이지 정보 예시",
+			content = {
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = MemberResponseDto.class))
+			})
+	ResponseEntity<MemberResponseDto> getById(
+			@PathVariable(name = "id") Long id, Authentication auth);
 
 	@Operation(summary = "마이페이지 API", description = "로그인 한 유저의 개인 정보를 확인할 수 있는 마이페이지 입니다.")
 	@ApiResponse(
