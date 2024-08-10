@@ -24,7 +24,6 @@ public class BookmarkService {
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
 	private final PostRepository postRepository;
-	private final CommentRepository commentRepository;
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 
@@ -64,8 +63,6 @@ public class BookmarkService {
 		switch (requestDto.getType()) {
 			case POST:
 				return createBookmarkPost(requestDto, memberEmail);
-			case COMMENT:
-				return createBookmarkComment(requestDto, memberEmail);
 			default:
 				return createBookmarkChat(requestDto, memberEmail);
 		}
@@ -111,28 +108,6 @@ public class BookmarkService {
 		return modelMapper.map(bookmark, BookmarkResponseDto.class);
 	}
 
-	public BookmarkResponseDto createBookmarkComment(
-			BookmarkCreateRequestDto requestDto, String memberEmail) {
-
-		Member member =
-				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-
-		Comment comment =
-				commentRepository
-						.findById(requestDto.getCommentId())
-						.orElseThrow(() -> new CommentNotFoundException());
-
-		if (bookmarkRepository.existsBookmarkByCommentAndMember(comment, member))
-			throw new DuplicateBookmarkException();
-
-		Bookmark bookmark = new Bookmark();
-		bookmark.setMember(member);
-		bookmark.setComment(comment);
-		bookmarkRepository.save(bookmark);
-
-		return modelMapper.map(bookmark, BookmarkResponseDto.class);
-	}
-
 	public void deleteBookmark(BookmarkCreateRequestDto requestDto, String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -150,21 +125,6 @@ public class BookmarkService {
 				bookmarkPost.getPost().getBookmarks().remove(bookmarkPost);
 				member.getBookmarks().remove(bookmarkPost);
 				bookmarkRepository.delete(bookmarkPost);
-				break;
-
-			case COMMENT:
-				Comment comment =
-						commentRepository
-								.findById(requestDto.getCommentId())
-								.orElseThrow(CommentNotFoundException::new);
-
-				Bookmark bookmarkComment =
-						bookmarkRepository
-								.findBookmarkByCommentAndMember(comment, member)
-								.orElseThrow(LikeNotFoundException::new);
-
-				bookmarkComment.getComment().getBookmarks().remove(bookmarkComment);
-				bookmarkRepository.delete(bookmarkComment);
 				break;
 		}
 	}

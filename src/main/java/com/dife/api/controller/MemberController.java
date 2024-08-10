@@ -6,7 +6,6 @@ import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.MemberService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -37,20 +36,22 @@ public class MemberController implements SwaggerMemberController {
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 
-	@GetMapping
-	public ResponseEntity<Void> checkUsername(@RequestParam(name = "username") String username) {
-		Boolean isValid = memberService.checkUsername(username);
+	@RequestMapping(value = "/check", method = RequestMethod.HEAD)
+	public ResponseEntity<Void> checkUsername(
+			@RequestParam(name = "email", required = false) String email,
+			@RequestParam(name = "username", required = false) String username) {
+		Boolean isDuplicate = memberService.isDuplicate(email, username);
 
-		if (isValid) {
-			return ResponseEntity.ok().build();
+		if (isDuplicate) {
+			return ResponseEntity.status(CONFLICT).build();
 		}
-		return ResponseEntity.status(CONFLICT).build();
+		return ResponseEntity.ok().build();
 	}
 
 	@PutMapping(consumes = "multipart/form-data")
 	public ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
-			@RequestParam(name = "isKorean", required = false) Boolean isKorean,
+			@RequestParam(name = "country", required = false) String country,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
@@ -63,7 +64,7 @@ public class MemberController implements SwaggerMemberController {
 		MemberResponseDto responseDto =
 				memberService.update(
 						username,
-						isKorean,
+						country,
 						bio,
 						mbti,
 						hobbies,
@@ -114,16 +115,17 @@ public class MemberController implements SwaggerMemberController {
 	public ResponseEntity<List<MemberResponseDto>> getFilterMembers(
 			@RequestParam(name = "mbtis", required = false) Set<MbtiCategory> mbtiCategories,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
-			@RequestParam(name = "languages", required = false) Set<String> languages) {
+			@RequestParam(name = "languages", required = false) Set<String> languages,
+			Authentication auth) {
 		List<MemberResponseDto> responseDto =
-				memberService.getFilterMembers(mbtiCategories, hobbies, languages);
+				memberService.getFilterMembers(mbtiCategories, hobbies, languages, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 
 	@GetMapping("/search")
 	public ResponseEntity<List<MemberResponseDto>> getSearchMembers(
-			@RequestParam(name = "keyword") String keyword) {
-		List<MemberResponseDto> responseDto = memberService.getSearchMembers(keyword);
+			@RequestParam(name = "keyword") String keyword, Authentication auth) {
+		List<MemberResponseDto> responseDto = memberService.getSearchMembers(keyword, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 

@@ -1,7 +1,6 @@
 package com.dife.api.repository;
 
 import com.dife.api.model.Bookmark;
-import com.dife.api.model.Comment;
 import com.dife.api.model.Member;
 import com.dife.api.model.Post;
 import java.util.List;
@@ -24,10 +23,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 	boolean existsBookmarkByPostAndMember(Post post, Member member);
 
 	Optional<Bookmark> findBookmarkByPostAndMember(Post post, Member member);
-
-	boolean existsBookmarkByCommentAndMember(Comment comment, Member member);
-
-	Optional<Bookmark> findBookmarkByCommentAndMember(Comment comment, Member member);
 
 	boolean existsBookmarkByMessage(@Param("message") String message);
 }

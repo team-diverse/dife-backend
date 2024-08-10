@@ -1,6 +1,5 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.LikeType;
 import lombok.*;
 
 @Getter
@@ -8,9 +7,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class LikeCreateRequestDto {
-
-	private LikeType type;
-
-	private Long id;
+public class CheckDuplicateRequestDto {
+	private String email;
+	private String username;
 }

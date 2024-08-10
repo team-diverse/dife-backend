@@ -39,7 +39,7 @@ public class Member extends BaseTimeEntity {
 
 	@OneToOne private File verificationFile;
 
-	private Boolean isKorean = true;
+	private String country = "KO";
 
 	private Boolean isPublic = true;
 
@@ -105,4 +105,12 @@ public class Member extends BaseTimeEntity {
 			inverseJoinColumns = @JoinColumn(name = "blacklisted_member_id"))
 	@JsonIgnore
 	private List<Member> blackList = new ArrayList<>();
+
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(
+			name = "member_likelist",
+			joinColumns = @JoinColumn(name = "member_id"),
+			inverseJoinColumns = @JoinColumn(name = "likelisted_member_id"))
+	@JsonIgnore
+	private List<Member> likeList = new ArrayList<>();
 }
