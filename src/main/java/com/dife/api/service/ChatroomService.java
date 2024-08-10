@@ -28,6 +28,7 @@ public class ChatroomService {
 	private final HobbyRepository hobbyRepository;
 	private final LanguageRepository languageRepository;
 	private final GroupPurposesRepository groupPurposesRepository;
+	private final LikeChatroomRepository likeChatroomRepository;
 	private final MemberRepository memberRepository;
 	private final ChatRepository chatRepository;
 
@@ -43,15 +44,29 @@ public class ChatroomService {
 
 		List<Chatroom> chatrooms;
 
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
 		if (chatroomType == ChatroomType.GROUP)
 			chatrooms = chatroomRepository.findAllByChatroomType(chatroomType);
 		else {
-			Member member =
-					memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 			chatrooms = chatroomRepository.findAllByChatroomTypeAndMember(chatroomType, member);
 		}
 		return chatrooms.stream()
-				.map(c -> modelMapper.map(c, ChatroomResponseDto.class))
+				.filter(c -> c.getChatroomSetting().getIsPublic())
+				.map(
+						c -> {
+							ChatroomResponseDto responseDto =
+									modelMapper.map(c.getChatroomSetting(), ChatroomResponseDto.class);
+							if (c.getChatroomSetting().getProfileImg() != null) {
+								responseDto.setProfilePresignUrl(
+										fileService.getPresignUrl(
+												c.getChatroomSetting().getProfileImg().getOriginalName()));
+							}
+							boolean isLiked = likeChatroomRepository.existsByChatroomAndMember(c, member);
+							responseDto.setIsLiked(isLiked);
+							return responseDto;
+						})
 				.collect(toList());
 	}
 
@@ -83,6 +98,7 @@ public class ChatroomService {
 
 		Chatroom chatroom = new Chatroom();
 
+		chatroom.setManager(member);
 		chatroom.getMembers().add(member);
 
 		chatroom.setName(trimmedName);
@@ -114,7 +130,7 @@ public class ChatroomService {
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		if (!chatroom.getMembers().contains(member)) throw new MemberException("수정 권한이 있는 회원이 아닙니다!");
+		if (!chatroom.getManager().equals(member)) throw new MemberException("방장만이 채팅방 수정권한을 가집니다!");
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
@@ -232,14 +248,25 @@ public class ChatroomService {
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public ChatroomResponseDto getChatroom(Long id) {
+	public ChatroomResponseDto getChatroom(Long id, String memberEmail) {
 
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
+
+		if (!chatroom.getChatroomSetting().getIsPublic()) throw new ChatroomNotFoundException();
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 		ChatroomResponseDto responseDto = chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
-		responseDto.setProfilePresignUrl(
-				fileService.getPresignUrl(setting.getProfileImg().getOriginalName()));
 
+		if (chatroom.getChatroomSetting().getProfileImg() != null) {
+			responseDto.setProfilePresignUrl(
+					fileService.getPresignUrl(setting.getProfileImg().getOriginalName()));
+		}
+
+		boolean isLiked = likeChatroomRepository.existsByChatroomAndMember(chatroom, member);
+		responseDto.setIsLiked(isLiked);
 		return responseDto;
 	}
 
@@ -376,5 +403,20 @@ public class ChatroomService {
 							return chatroomResponseDto;
 						})
 				.collect(Collectors.toList());
+	}
+
+	public void kickout(Long roomId, Long memberId, String memberEmail) {
+		Chatroom chatroom =
+				chatroomRepository.findById(roomId).orElseThrow(ChatroomNotFoundException::new);
+		Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+		Member manager =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		if (!chatroom.getMembers().contains(member)) throw new MemberException("채팅방에 존재하는 회원이 아닙니다!");
+		if (!manager.equals(chatroom.getManager())) throw new MemberException("방장만이 강퇴할 수 있습니다!");
+
+		member.getChatrooms().remove(chatroom);
+		chatroom.getMembers().remove(member);
 	}
 }

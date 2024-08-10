@@ -9,7 +9,10 @@ SELECT * FROM comment_likes;
 SELECT * FROM language;
 SELECT * FROM hobby;
 SELECT * FROM bookmark;
-
+SELECT * FROM chatroom;
+SELECT * FROM chatroom_setting;
+SELECT * FROM chatroom_member;
+SELECT * FROM group_purpose;
 
 INSERT INTO member (ID, EMAIL, PASSWORD, USERNAME, NAME, STUDENT_ID, MAJOR, IS_KOREAN, IS_PUBLIC, MBTI, ROLE, BIO, IS_VERIFIED)
 VALUES ('1', 'poream3387@kookmin.ac.kr', '$2a$10$Y/3KpS26JfwZl/.MCmpXd.n56NnFwfjkwaHQ5726.j69UQQ/gzgWi', 'poream', '이승호', '20181663', '소프트웨어학과', 1, 1, 'INTJ', 'ADMIN', 'hiiii', 1);
@@ -129,3 +132,23 @@ INSERT INTO bookmark (ID, POST_ID, MEMBER_ID, CREATED)
 VALUES ('1', '1', '5', NOW());
 INSERT INTO bookmark (ID, POST_ID, MEMBER_ID, CREATED)
 VALUES ('2', '1', '2', NOW());
+
+
+INSERT INTO chatroom(ID, NAME, CHATROOM_TYPE, MANAGER_ID, CREATED)
+VALUES ('1', 'name', 0, '5', NOW());
+INSERT INTO chatroom_setting(ID, IS_PUBLIC, DESCRIPTION)
+VALUES ('1', 0, 'description');
+
+INSERT INTO chatroom_member(CHATROOM_ID, MEMBER_ID)
+VALUES ('1', '5');
+INSERT INTO chatroom_member(CHATROOM_ID, MEMBER_ID)
+VALUES ('1', '3');
+
+UPDATE chatroom
+SET CHATROOM_SETTING_ID = 1
+WHERE ID = 1;
+
+INSERT INTO language(ID,CHATROOM_SETTING_ID, NAME)
+VALUES ('6', '1', 'SPANISH');
+INSERT INTO group_purpose(ID,CHATROOM_SETTING_ID, NAME)
+VALUES ('1', '1', 'COMMUNICATION');

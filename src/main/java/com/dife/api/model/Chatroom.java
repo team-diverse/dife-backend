@@ -31,6 +31,11 @@ public class Chatroom extends BaseTimeEntity {
 	@JoinColumn(name = "chatroom_setting_id")
 	private ChatroomSetting chatroomSetting;
 
+	@ManyToOne
+	@JoinColumn(name = "manager_id")
+	@JsonIgnore
+	private Member manager;
+
 	@ManyToMany
 	@JoinTable(
 			name = "chatroom_member",

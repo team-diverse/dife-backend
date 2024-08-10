@@ -2,6 +2,7 @@ package com.dife.api.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.ResponseEntity.ok;
 
 import com.dife.api.model.ChatroomType;
 import com.dife.api.model.dto.*;
@@ -34,8 +35,8 @@ public class ChatroomController implements SwaggerChatroomController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(
-			@PathVariable(name = "id") Long chatroomId) {
-		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId);
+			@PathVariable(name = "id") Long chatroomId, Authentication auth) {
+		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
@@ -66,6 +67,16 @@ public class ChatroomController implements SwaggerChatroomController {
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
+	@GetMapping("/{roomId}/{memberId}")
+	public ResponseEntity<Void> kickoutMember(
+			@PathVariable(name = "roomId") Long roomId,
+			@PathVariable(name = "memberId") Long memberId,
+			Authentication auth) {
+		chatroomService.kickout(roomId, memberId, auth.getName());
+
+		return new ResponseEntity<>(OK);
+	}
+
 	@GetMapping("/filter")
 	public ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
@@ -75,13 +86,13 @@ public class ChatroomController implements SwaggerChatroomController {
 			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount) {
 		List<ChatroomResponseDto> responseDto =
 				chatroomService.getFilterChatrooms(hobbies, languages, purposes, minCount, maxCount);
-		return ResponseEntity.ok(responseDto);
+		return ok(responseDto);
 	}
 
 	@GetMapping("/search")
 	public ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
 			@RequestParam(name = "keyword") String keyword) {
 		List<ChatroomResponseDto> responseDto = chatroomService.getSearchChatrooms(keyword);
-		return ResponseEntity.ok(responseDto);
+		return ok(responseDto);
 	}
 }
