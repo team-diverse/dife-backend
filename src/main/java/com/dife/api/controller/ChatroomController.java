@@ -95,4 +95,10 @@ public class ChatroomController implements SwaggerChatroomController {
 		List<ChatroomResponseDto> responseDto = chatroomService.getSearchChatrooms(keyword);
 		return ok(responseDto);
 	}
+
+	@GetMapping("/likes")
+	public ResponseEntity<List<ChatroomResponseDto>> getLikeChatrooms(Authentication auth) {
+		List<ChatroomResponseDto> responseDto = chatroomService.getLikedChatrooms(auth.getName());
+		return ResponseEntity.ok(responseDto);
+	}
 }

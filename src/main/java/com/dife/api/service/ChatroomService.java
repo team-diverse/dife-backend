@@ -405,6 +405,23 @@ public class ChatroomService {
 				.collect(Collectors.toList());
 	}
 
+	public List<ChatroomResponseDto> getLikedChatrooms(String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		List<ChatroomLike> chatroomLikes = likeChatroomRepository.findChatroomLikeByMember(member);
+
+		List<Chatroom> chatrooms =
+				chatroomLikes.stream()
+						.map(ChatroomLike::getChatroom)
+						.distinct()
+						.collect(Collectors.toList());
+
+		return chatrooms.stream()
+				.map(c -> modelMapper.map(c, ChatroomResponseDto.class))
+				.collect(toList());
+	}
+
 	public void kickout(Long roomId, Long memberId, String memberEmail) {
 		Chatroom chatroom =
 				chatroomRepository.findById(roomId).orElseThrow(ChatroomNotFoundException::new);

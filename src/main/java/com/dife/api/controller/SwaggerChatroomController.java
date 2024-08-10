@@ -118,4 +118,15 @@ public interface SwaggerChatroomController {
 			})
 	ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
 			@RequestParam(name = "keyword") String keyword);
+
+	@Operation(summary = "회원이 좋아요 누른 그룹 채팅방 목록 조회 API")
+	@ApiResponse(
+			responseCode = "200",
+			description = "채팅방 조회 성공 예시",
+			content = {
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = ChatroomResponseDto.class))
+			})
+	ResponseEntity<List<ChatroomResponseDto>> getLikeChatrooms(Authentication auth);
 }
