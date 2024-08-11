@@ -13,6 +13,7 @@ SELECT * FROM chatroom;
 SELECT * FROM chatroom_setting;
 SELECT * FROM chatroom_member;
 SELECT * FROM group_purpose;
+SELECT * FROM member_likelist;
 
 INSERT INTO member (ID, EMAIL, PASSWORD, USERNAME, NAME, STUDENT_ID, MAJOR, COUNTRY, IS_PUBLIC, MBTI, ROLE, BIO, IS_VERIFIED)
 VALUES ('1', 'poream3387@kookmin.ac.kr', '$2a$10$Y/3KpS26JfwZl/.MCmpXd.n56NnFwfjkwaHQ5726.j69UQQ/gzgWi', 'poream', '이승호', '20181663', '소프트웨어학과', 'KO', 1, 'INTJ', 'ADMIN', 'hiiii', 1);
@@ -152,3 +153,11 @@ INSERT INTO language(ID,CHATROOM_SETTING_ID, NAME)
 VALUES ('6', '1', 'SPANISH');
 INSERT INTO group_purpose(ID,CHATROOM_SETTING_ID, NAME)
 VALUES ('1', '1', 'COMMUNICATION');
+
+INSERT INTO member_likelist(LIKELISTED_MEMBER_ID, MEMBER_ID)
+VALUES ('1', '5');
+INSERT INTO member_likelist(LIKELISTED_MEMBER_ID, MEMBER_ID)
+VALUES ('2', '5');
+INSERT INTO member_likelist(LIKELISTED_MEMBER_ID, MEMBER_ID)
+VALUES ('3', '5');
+

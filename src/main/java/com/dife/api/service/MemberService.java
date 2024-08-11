@@ -406,4 +406,14 @@ public class MemberService {
 				.map(c -> modelMapper.map(c, CommentResponseDto.class))
 				.collect(toList());
 	}
+
+	public List<MemberResponseDto> getLikeMembers(String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		return member.getLikeList().stream()
+				.map(ll -> modelMapper.map(ll, MemberResponseDto.class))
+				.collect(Collectors.toList());
+	}
 }
