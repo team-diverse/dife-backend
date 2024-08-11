@@ -59,6 +59,8 @@ public class Member extends BaseTimeEntity {
 
 	private Boolean isVerified = false;
 
+	private Boolean isDeleted = false;
+
 	@JsonIgnore
 	@OneToMany(mappedBy = "fromMember")
 	private Set<Connect> sent;
