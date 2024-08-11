@@ -15,13 +15,13 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @Profile("!test")
 public class AWSConfig {
 
-	@Value("${spring.aws.access-key:#{null}")
+	@Value("${spring.aws.access-key}")
 	private String accessKey;
 
-	@Value("${spring.aws.secret-key:#{null}")
+	@Value("${spring.aws.secret-key}")
 	private String secretKey;
 
-	@Value("${spring.aws.session-token:#{null}}")
+	@Value("${spring.aws.session-token}")
 	private String sessionToken;
 
 	@Value("${spring.aws.region}")
