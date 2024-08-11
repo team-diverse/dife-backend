@@ -48,6 +48,10 @@ public class CustomUserDetails implements UserDetails {
 		return member.getId();
 	}
 
+	public Boolean getIsDeleted() {
+		return member.getIsDeleted();
+	}
+
 	@Override
 	public boolean isAccountNonExpired() {
 
