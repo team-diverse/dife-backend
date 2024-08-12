@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BlockMemberRequestDto {
-	private Long blockMemberId;
+	private Long memberId;
 }
