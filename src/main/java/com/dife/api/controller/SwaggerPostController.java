@@ -33,7 +33,7 @@ public interface SwaggerPostController {
 			@RequestParam(name = "content") String content,
 			@RequestParam(name = "isPublic") Boolean isPublic,
 			@RequestParam(name = "boardType") BoardCategory boardType,
-			@RequestParam(name = "postFile") MultipartFile postFile,
+			@RequestParam(name = "postFiles", required = false) List<MultipartFile> postFiles,
 			Authentication auth);
 
 	@Operation(
@@ -66,7 +66,7 @@ public interface SwaggerPostController {
 			@RequestParam(name = "content") String content,
 			@RequestParam(name = "isPublic") Boolean isPublic,
 			@RequestParam(name = "boardType") BoardCategory boardType,
-			@RequestParam(name = "postFile", required = false) MultipartFile postFile,
+			@RequestParam(name = "postFiles", required = false) List<MultipartFile> postFiles,
 			Authentication auth);
 
 	@Operation(summary = "게시글 삭제 API", description = "게시글 ID를 이용해 게시글을 삭제합니다.")
