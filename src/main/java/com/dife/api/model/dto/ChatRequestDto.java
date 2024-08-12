@@ -2,7 +2,9 @@ package com.dife.api.model.dto;
 
 import com.dife.api.model.ChatType;
 import com.dife.api.model.ChatroomType;
+import com.dife.api.model.File;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.*;
 
 @Getter
@@ -19,4 +21,5 @@ public class ChatRequestDto {
 	private Long memberId;
 	private String username;
 	private LocalDateTime created;
+	private List<File> files;
 }
