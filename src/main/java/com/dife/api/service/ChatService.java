@@ -1,6 +1,8 @@
 package com.dife.api.service;
 
+import com.dife.api.exception.ChatroomException;
 import com.dife.api.exception.ChatroomNotFoundException;
+import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.handler.DisconnectHandler;
 import com.dife.api.handler.NotificationHandler;
 import com.dife.api.model.*;
@@ -8,17 +10,21 @@ import com.dife.api.model.dto.*;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
+import com.dife.api.repository.FileRepository;
+import com.dife.api.repository.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +34,9 @@ public class ChatService {
 
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
+	private final FileRepository fileRepository;
+
+	private final MemberRepository memberRepository;
 
 	private final RedisPublisher redisPublisher;
 	private final RedisLockChatServiceFacade chatServiceFacade;
@@ -35,6 +44,7 @@ public class ChatService {
 	private final DisconnectHandler disconnectHandler;
 	private final NotificationHandler notificationHandler;
 	private final MemberService memberService;
+	private final FileService fileService;
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
 
@@ -174,5 +184,69 @@ public class ChatService {
 		chat.setCreated(LocalDateTime.now());
 		chatRepository.save(chat);
 		return chat;
+	}
+
+	public ChatResponseDto addChatFiles(
+			List<MultipartFile> chatFiles, Long chatroomId, String memberEmail)
+			throws JsonProcessingException {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		Chatroom chatroom =
+				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
+
+		if (!chatroom.getMembers().contains(member))
+			throw new ChatroomException("채팅방 회원만이 채팅 파일을 보낼 수 있습니다!");
+
+		Chat chat = new Chat();
+		chat.setMember(member);
+		chat.setChatroom(chatroom);
+		chatroom.getChats().add(chat);
+
+		chatRepository.save(chat);
+
+		if (chatFiles != null && !chatFiles.isEmpty()) {
+			List<File> files =
+					chatFiles.stream()
+							.map(
+									file -> {
+										FileDto fileDto = fileService.upload(file);
+										File mappedFile = modelMapper.map(fileDto, File.class);
+										mappedFile.setChat(chat);
+										return mappedFile;
+									})
+							.collect(Collectors.toList());
+
+			chat.setFiles(files);
+			fileRepository.saveAll(files);
+		}
+
+		chatroomRepository.save(chatroom);
+
+		Set<Member> chatroomMembers = chatroom.getMembers();
+
+		for (Member chatroomMember : chatroomMembers) {
+			if (!Objects.equals(chatroomMember.getId(), member.getId())) {
+				List<NotificationToken> notificationTokens = chatroomMember.getNotificationTokens();
+
+				for (NotificationToken notificationToken : notificationTokens) {
+					Notification notification = new Notification();
+					notification.setNotificationToken(notificationToken);
+					notification.setType(NotificationType.CHAT);
+					notification.setChatMemberEmail(member.getEmail());
+
+					String message = member.getUsername() + "이 파일 메시지를 보냈습니다!";
+					notification.setMessage(message);
+					notificationToken.getNotifications().add(notification);
+
+					notificationService.sendPushNotification(notificationToken.getPushToken(), message);
+				}
+			}
+		}
+
+		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
+		redisPublisher.publish(chatRedisDto);
+
+		return modelMapper.map(chat, ChatResponseDto.class);
 	}
 }
