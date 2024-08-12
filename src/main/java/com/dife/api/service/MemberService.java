@@ -197,6 +197,9 @@ public class MemberService {
 
 		CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 		Long memberId = customUserDetails.getId();
+		Boolean isCanceled = customUserDetails.getIsDeleted();
+
+		if (isCanceled) throw new MemberException("탈퇴한 회원입니다!");
 
 		String accessToken =
 				jwtUtil.createJwt(memberId, "accessToken", "dife", ACCESS_TOKEN_VALIDITY_DURATION);
@@ -244,6 +247,14 @@ public class MemberService {
 
 	public Member getMemberEntityByEmail(String email) {
 		return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+	}
+
+	public void deleteMember(String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		member.setIsDeleted(true);
+
+		memberRepository.save(member);
 	}
 
 	public void changePassword(String email) {
@@ -405,5 +416,15 @@ public class MemberService {
 		return comments.stream()
 				.map(c -> modelMapper.map(c, CommentResponseDto.class))
 				.collect(toList());
+	}
+
+	public List<MemberResponseDto> getLikeMembers(String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		return member.getLikeList().stream()
+				.map(ll -> modelMapper.map(ll, MemberResponseDto.class))
+				.collect(Collectors.toList());
 	}
 }

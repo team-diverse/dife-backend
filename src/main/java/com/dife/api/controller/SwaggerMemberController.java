@@ -139,4 +139,8 @@ public interface SwaggerMemberController {
 	@Operation(summary = "회원이 작성한 댓글 조회 API", description = "회원의 인가를 이용해 작성한 댓글을 조회하는 API입니다.")
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<List<CommentResponseDto>> getMemberComments(Authentication auth);
+
+	@Operation(summary = "회원이 좋아요 누른 회원 목록 조회 API")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<List<MemberResponseDto>> getLikeMembers(Authentication auth);
 }

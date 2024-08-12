@@ -111,6 +111,12 @@ public class MemberController implements SwaggerMemberController {
 		return new ResponseEntity<>(OK);
 	}
 
+	@DeleteMapping
+	public ResponseEntity<Void> deleteMember(Authentication auth) {
+		memberService.deleteMember(auth.getName());
+		return new ResponseEntity<>(OK);
+	}
+
 	@GetMapping("/random")
 	public ResponseEntity<List<MemberResponseDto>> getRandomMembers(
 			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
@@ -146,5 +152,11 @@ public class MemberController implements SwaggerMemberController {
 	public ResponseEntity<List<CommentResponseDto>> getMemberComments(Authentication auth) {
 		List<CommentResponseDto> responseDto = memberService.getComments(auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
+	}
+
+	@GetMapping("/likes")
+	public ResponseEntity<List<MemberResponseDto>> getLikeMembers(Authentication auth) {
+		List<MemberResponseDto> responseDto = memberService.getLikeMembers(auth.getName());
+		return ResponseEntity.ok(responseDto);
 	}
 }

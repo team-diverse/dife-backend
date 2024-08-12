@@ -30,7 +30,7 @@ public class Report extends BaseTimeEntity {
 	@JoinColumn(name = "comment_id")
 	private Comment comment;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne
 	@JoinColumn(name = "receiver_id")
 	private Member receiver;
 }
