@@ -42,4 +42,9 @@ public class File {
 	@JoinColumn(name = "post_id")
 	@JsonIgnore
 	private Post post;
+
+	@ManyToOne
+	@JoinColumn(name = "chat_id")
+	@JsonIgnore
+	private Chat chat;
 }
