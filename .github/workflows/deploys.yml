@@ -3,7 +3,7 @@ name: Deploy 'prod' to Amazon EC2
 on:
   push:
     branches:
-      - prod
+      - tmp/tmp
 
 jobs:
   deploy:
