@@ -38,7 +38,7 @@ public class PostService {
 			String content,
 			Boolean isPublic,
 			BoardCategory boardType,
-			MultipartFile postFile,
+			List<MultipartFile> postFiles,
 			String memberEmail) {
 
 		Member member =
@@ -53,12 +53,21 @@ public class PostService {
 
 		postRepository.save(post);
 
-		if (isFileValid(postFile)) {
-			FileDto fileDto = fileService.upload(postFile);
-			File file = modelMapper.map(fileDto, File.class);
-			file.setPost(post);
-			fileRepository.save(file);
-			post.getFiles().add(file);
+		if (postFiles != null && !postFiles.isEmpty()) {
+			List<File> files =
+					postFiles.stream()
+							.filter(this::isFileValid)
+							.map(
+									file -> {
+										FileDto fileDto = fileService.upload(file);
+										File mappedFile = modelMapper.map(fileDto, File.class);
+										mappedFile.setPost(post);
+										return mappedFile;
+									})
+							.collect(Collectors.toList());
+
+			fileRepository.saveAll(files);
+			post.getFiles().addAll(files);
 		}
 
 		postRepository.save(post);
@@ -83,10 +92,8 @@ public class PostService {
 				.collect(toList());
 	}
 
-	@Transactional(readOnly = true)
 	public PostResponseDto getPost(Long id, String memberEmail) {
 		Post post = postRepository.findById(id).orElseThrow(PostNotFoundException::new);
-
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
@@ -95,22 +102,7 @@ public class PostService {
 		responseDto.setLikesCount(post.getPostLikes().size());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
 
-		if (likePostRepository.existsByPostAndMember(post, member)) responseDto.setIsLiked(true);
-		else responseDto.setIsLiked(false);
-
-		List<File> files = post.getFiles().stream().collect(Collectors.toList());
-
-		List<FileDto> fileDtos =
-				files.stream()
-						.map(
-								file -> {
-									FileDto fileDto = modelMapper.map(file, FileDto.class);
-									fileDto.setUrl(fileService.getPresignUrl(file.getOriginalName()));
-									return fileDto;
-								})
-						.collect(Collectors.toList());
-
-		responseDto.setFiles(fileDtos);
+		responseDto.setIsLiked(likePostRepository.existsByPostAndMember(post, member));
 
 		return responseDto;
 	}
@@ -121,7 +113,7 @@ public class PostService {
 			String content,
 			Boolean isPublic,
 			BoardCategory boardType,
-			MultipartFile postFile,
+			List<MultipartFile> postFiles,
 			String memberEmail) {
 
 		Member member =
@@ -137,14 +129,22 @@ public class PostService {
 
 		postRepository.save(post);
 
-		if (!(post.getFiles().isEmpty() && (postFile == null || postFile.isEmpty()))) {
-			if (postFile != null && !postFile.isEmpty()) {
-				FileDto fileDto = fileService.upload(postFile);
-				File file = modelMapper.map(fileDto, File.class);
-				file.setPost(post);
-				fileRepository.save(file);
+		if (postFiles != null && !postFiles.isEmpty()) {
+			List<File> newFiles =
+					postFiles.stream()
+							.filter(this::isFileValid)
+							.map(
+									file -> {
+										FileDto fileDto = fileService.upload(file);
+										File mappedFile = modelMapper.map(fileDto, File.class);
+										mappedFile.setPost(post);
+										return mappedFile;
+									})
+							.collect(Collectors.toList());
 
-				post.getFiles().add(file);
+			if (!newFiles.isEmpty()) {
+				fileRepository.saveAll(newFiles);
+				post.getFiles().addAll(newFiles);
 			}
 		}
 
