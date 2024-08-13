@@ -258,7 +258,8 @@ public class ChatroomService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
-		ChatroomResponseDto responseDto = chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
+		ChatroomResponseDto responseDto = chatroomModelMapper.map(setting, ChatroomResponseDto.class);
+		responseDto.setName(chatroom.getName());
 
 		if (chatroom.getChatroomSetting().getProfileImg() != null) {
 			responseDto.setProfilePresignUrl(

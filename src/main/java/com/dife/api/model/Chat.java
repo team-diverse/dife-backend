@@ -2,9 +2,9 @@ package com.dife.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +22,6 @@ public class Chat {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull
 	@Size(max = 300)
 	private String message;
 
@@ -34,6 +33,9 @@ public class Chat {
 	@ManyToOne
 	@JoinColumn(name = "member_id")
 	private Member member;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<File> files;
 
 	private LocalDateTime created;
 }

@@ -1,10 +1,12 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.Chatroom;
+import com.dife.api.model.File;
 import com.dife.api.model.Member;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +22,8 @@ public class ChatRedisDto {
 	@NotNull
 	@Size(max = 300)
 	private String message;
+
+	private List<File> files;
 
 	private Member member;
 	private Chatroom chatroom;
