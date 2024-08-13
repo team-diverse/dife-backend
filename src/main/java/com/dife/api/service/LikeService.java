@@ -1,6 +1,5 @@
 package com.dife.api.service;
 
-import static com.dife.api.model.LikeType.POST;
 import static java.util.stream.Collectors.toList;
 
 import com.dife.api.exception.*;
@@ -89,10 +88,10 @@ public class LikeService {
 		if (likeCommentRepository.existsByCommentAndMember(comment, member)) {
 			throw new DuplicateLikeException();
 		}
-		LikeComment likeComment = new LikeComment();
-		likeComment.setComment(comment);
-		likeComment.setMember(member);
-		likeCommentRepository.save(likeComment);
+		CommentLike commentLike = new CommentLike();
+		commentLike.setComment(comment);
+		commentLike.setMember(member);
+		likeCommentRepository.save(commentLike);
 
 		Member writer = comment.getWriter();
 		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 댓글을 좋아해요!";
@@ -164,13 +163,13 @@ public class LikeService {
 				Comment comment =
 						commentRepository.findById(dto.getId()).orElseThrow(CommentNotFoundException::new);
 
-				LikeComment likeComment =
+				CommentLike commentLike =
 						likeCommentRepository
 								.findByCommentAndMember(comment, member)
 								.orElseThrow(LikeNotFoundException::new);
 
-				likeComment.getComment().getCommentLikes().remove(likeComment);
-				likeCommentRepository.delete(likeComment);
+				commentLike.getComment().getCommentLikes().remove(commentLike);
+				likeCommentRepository.delete(commentLike);
 				break;
 
 			case CHATROOM:

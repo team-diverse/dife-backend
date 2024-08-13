@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/blocks")
-public class BlockController {
+public class BlockController implements SwaggerBlockController {
 
 	private final BlockService blockService;
 
@@ -31,5 +31,12 @@ public class BlockController {
 	public ResponseEntity<List<MemberResponseDto>> createBlock(Authentication auth) {
 		List<MemberResponseDto> responseDto = blockService.getBlackList(auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
+	}
+
+	@DeleteMapping
+	public ResponseEntity<Void> deleteBlock(
+			@RequestParam(name = "memberId") Long memberId, Authentication auth) {
+		blockService.deleteBlock(memberId, auth.getName());
+		return new ResponseEntity<>(OK);
 	}
 }

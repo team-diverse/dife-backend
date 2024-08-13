@@ -2,18 +2,24 @@ USE dife_local;
 
 SELECT * FROM member;
 SELECT * FROM notification_token;
+SELECT * FROM notification;
 SELECT * FROM post;
 SELECT * FROM comment;
 SELECT * FROM post_likes;
+SELECT * FROM chatroom_likes;
 SELECT * FROM comment_likes;
 SELECT * FROM language;
 SELECT * FROM hobby;
 SELECT * FROM bookmark;
+SELECT * FROM connect;
 SELECT * FROM chatroom;
 SELECT * FROM chatroom_setting;
 SELECT * FROM chatroom_member;
 SELECT * FROM group_purpose;
 SELECT * FROM member_likelist;
+SELECT * FROM translation;
+SELECT * FROM bookmark_translation;
+
 
 INSERT INTO member (ID, EMAIL, PASSWORD, USERNAME, NAME, STUDENT_ID, MAJOR, COUNTRY, IS_PUBLIC, IS_DELETED, MBTI, ROLE, BIO, IS_VERIFIED)
 VALUES ('1', 'poream3387@kookmin.ac.kr', '$2a$10$Y/3KpS26JfwZl/.MCmpXd.n56NnFwfjkwaHQ5726.j69UQQ/gzgWi', 'poream', '이승호', '20181663', '소프트웨어학과', 'KO', 1, 0, 'INTJ', 'ADMIN', 'hiiii', 1);
@@ -135,6 +141,18 @@ INSERT INTO bookmark (ID, POST_ID, MEMBER_ID, CREATED)
 VALUES ('2', '1', '2', NOW());
 
 
+INSERT INTO translation (ID, DETECTED_SOURCE_LANGUAGE, TEXT)
+VALUES ('1', 'EN', 'HIIIIII EVERYONE THIS IS A TEST1');
+INSERT INTO translation (ID, DETECTED_SOURCE_LANGUAGE, TEXT)
+VALUES ('2', 'EN', 'HIIIIII EVERYONE THIS IS A TEST2');
+
+
+INSERT INTO bookmark_translation(BOOKMARK_ID, TRANSLATION_ID)
+VALUES ('1', '1');
+INSERT INTO bookmark_translation(BOOKMARK_ID, TRANSLATION_ID)
+VALUES ('1', '2');
+
+
 INSERT INTO chatroom(ID, NAME, CHATROOM_TYPE, MANAGER_ID, CREATED)
 VALUES ('1', 'name', 0, '5', NOW());
 INSERT INTO chatroom_setting(ID, IS_PUBLIC, DESCRIPTION)
@@ -149,6 +167,11 @@ UPDATE chatroom
 SET CHATROOM_SETTING_ID = 1
 WHERE ID = 1;
 
+INSERT INTO chatroom_likes(CHATROOM_ID, MEMBER_ID, CREATED)
+VALUES ('1', '5', NOW());
+INSERT INTO chatroom_likes(CHATROOM_ID, MEMBER_ID, CREATED)
+VALUES ('1', '2', NOW());
+
 INSERT INTO language(ID,CHATROOM_SETTING_ID, NAME)
 VALUES ('6', '1', 'SPANISH');
 INSERT INTO group_purpose(ID,CHATROOM_SETTING_ID, NAME)
@@ -160,4 +183,24 @@ INSERT INTO member_likelist(LIKELISTED_MEMBER_ID, MEMBER_ID)
 VALUES ('2', '5');
 INSERT INTO member_likelist(LIKELISTED_MEMBER_ID, MEMBER_ID)
 VALUES ('3', '5');
+
+INSERT INTO connect(ID, FROM_MEMBER_ID, TO_MEMBER_ID, STATUS, CREATED)
+VALUES ('1', '5', '2', 'ACCEPTED', NOW());
+INSERT INTO connect(ID, FROM_MEMBER_ID, TO_MEMBER_ID, STATUS, CREATED)
+VALUES ('2', '5', '3', 'PENDING', NOW());
+INSERT INTO connect(ID, FROM_MEMBER_ID, TO_MEMBER_ID, STATUS, CREATED)
+VALUES ('3', '2', '5','ACCEPTED', NOW());
+INSERT INTO connect(ID, FROM_MEMBER_ID, TO_MEMBER_ID, STATUS, CREATED)
+VALUES ('4', '3', '5', 'PENDING', NOW());
+
+INSERT INTO notification(ID,NOTIFICATION_TOKEN_ID, MESSAGE, CREATED)
+VALUES ('1', '5', '알림테스트1', NOW());
+INSERT INTO notification(ID, NOTIFICATION_TOKEN_ID, MESSAGE, CREATED)
+VALUES ('2', '5', '알림테스트2', NOW());
+
+INSERT INTO notification(ID,NOTIFICATION_TOKEN_ID, MESSAGE, CREATED)
+VALUES ('3', '3', '알림테스트3', NOW());
+INSERT INTO notification(ID, NOTIFICATION_TOKEN_ID, MESSAGE, CREATED)
+VALUES ('4', '4', '알림테스트4', NOW());
+
 

@@ -23,4 +23,8 @@ public interface ConnectRepository extends JpaRepository<Connect, Long> {
 			@Param("member1") Member member1, @Param("member2") Member member2);
 
 	Optional<Connect> findByFromMemberAndToMember(Member fromMember, Member toMember);
+
+	List<Connect> findAllByFromMember(Member fromMember);
+
+	List<Connect> findAllByToMember(Member toMember);
 }

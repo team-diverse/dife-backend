@@ -84,6 +84,10 @@ public interface SwaggerMemberController {
 			})
 	ResponseEntity<MemberResponseDto> profile(Authentication auth);
 
+	@Operation(summary = "회원탈퇴 API", description = "로그인한 회원이 탈퇴를 진행할 수 있는 엔드포인트입니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<Void> deleteMember(Authentication auth);
+
 	@Operation(
 			summary = "로그인 API",
 			description = "로그인 성공시 주어지는 회원 ID, AccessToken, RefreshToken 정보를 확인할 수 있습니다.")

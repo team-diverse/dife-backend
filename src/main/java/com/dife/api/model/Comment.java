@@ -42,7 +42,7 @@ public class Comment extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "comment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
-	private List<LikeComment> CommentLikes;
+	private List<CommentLike> CommentLikes;
 
 	@OneToMany(mappedBy = "comment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore

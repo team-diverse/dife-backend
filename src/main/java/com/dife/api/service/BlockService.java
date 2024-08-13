@@ -29,10 +29,10 @@ public class BlockService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Member blackMember =
 				memberRepository
-						.findById(requestDto.getBlockMemberId())
+						.findById(requestDto.getMemberId())
 						.orElseThrow(MemberNotFoundException::new);
 
-		if (member.getId().equals(requestDto.getBlockMemberId())) {
+		if (member.getId().equals(requestDto.getMemberId())) {
 			throw new MemberSendingSelfException();
 		}
 
@@ -68,5 +68,21 @@ public class BlockService {
 	public boolean isBlackListMember(Member currentMember, Member checkMember) {
 		return currentMember.getBlackList().stream()
 				.anyMatch(blacklistedMember -> blacklistedMember.equals(checkMember));
+	}
+
+	public void deleteBlock(Long memberId, String memberEmail) {
+		Member currentMember =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		Member blockMember =
+				memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+		if (!currentMember.getBlackList().contains(blockMember)) throw new MemberNotFoundException();
+
+		currentMember.getBlackList().remove(blockMember);
+		blockMember.getBlackList().remove(currentMember);
+
+		memberRepository.save(currentMember);
+		memberRepository.save(blockMember);
 	}
 }

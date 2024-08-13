@@ -24,7 +24,7 @@ public class Bookmark extends BaseTimeEntity {
 	@Size(max = 300)
 	private String message;
 
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(
 			name = "bookmark_translation",
 			joinColumns = @JoinColumn(name = "bookmark_id"),
