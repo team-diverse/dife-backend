@@ -208,13 +208,7 @@ public class ChatService {
 		if (chatFiles != null && !chatFiles.isEmpty()) {
 			List<File> files =
 					chatFiles.stream()
-							.map(
-									file -> {
-										FileDto fileDto = fileService.upload(file);
-										File mappedFile = modelMapper.map(fileDto, File.class);
-										mappedFile.setChat(chat);
-										return mappedFile;
-									})
+							.map(file -> convertFileToMappedFile(file, chat))
 							.collect(Collectors.toList());
 
 			chat.setFiles(files);
@@ -248,5 +242,12 @@ public class ChatService {
 		redisPublisher.publish(chatRedisDto);
 
 		return modelMapper.map(chat, ChatResponseDto.class);
+	}
+
+	private File convertFileToMappedFile(MultipartFile file, Chat chat) {
+		FileDto fileDto = fileService.upload(file);
+		File mappedFile = modelMapper.map(fileDto, File.class);
+		mappedFile.setChat(chat);
+		return mappedFile;
 	}
 }
