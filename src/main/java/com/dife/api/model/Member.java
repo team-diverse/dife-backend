@@ -46,10 +46,10 @@ public class Member extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
 
-	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Set<Language> languages = new HashSet<>();
 
-	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Set<Hobby> hobbies = new HashSet<>();
 
 	@OneToOne private File profileImg;
@@ -62,11 +62,11 @@ public class Member extends BaseTimeEntity {
 	private Boolean isDeleted = false;
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "fromMember")
+	@OneToMany(mappedBy = "fromMember", cascade = CascadeType.ALL)
 	private Set<Connect> sent;
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "toMember")
+	@OneToMany(mappedBy = "toMember", cascade = CascadeType.ALL)
 	private Set<Connect> received;
 
 	@ManyToMany(mappedBy = "members")
@@ -80,7 +80,7 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private List<Chat> chats;
 
-	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JsonIgnore
 	private Set<Bookmark> bookmarks;
 
@@ -88,19 +88,19 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private Set<Post> posts;
 
-	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
-	private List<PostLike> PostLikes;
+	private List<PostLike> postLikes;
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<NotificationToken> notificationTokens;
 
-	@OneToMany(mappedBy = "receiver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "receiver", fetch = FetchType.EAGER)
 	@JsonIgnore
 	private List<Report> reports;
 
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(
 			name = "member_blacklist",
 			joinColumns = @JoinColumn(name = "member_id"),
@@ -108,7 +108,7 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private List<Member> blackList = new ArrayList<>();
 
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinTable(
 			name = "member_likelist",
 			joinColumns = @JoinColumn(name = "member_id"),

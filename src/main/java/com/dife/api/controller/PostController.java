@@ -32,11 +32,11 @@ public class PostController implements SwaggerPostController {
 			@RequestParam(name = "content") String content,
 			@RequestParam(name = "isPublic") Boolean isPublic,
 			@RequestParam(name = "boardType") BoardCategory boardType,
-			@RequestParam(name = "postFile", required = false) MultipartFile postFile,
+			@RequestParam(name = "postFiles", required = false) List<MultipartFile> postFiles,
 			Authentication auth) {
 
 		PostResponseDto responseDto =
-				postService.createPost(title, content, isPublic, boardType, postFile, auth.getName());
+				postService.createPost(title, content, isPublic, boardType, postFiles, auth.getName());
 
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
@@ -55,10 +55,10 @@ public class PostController implements SwaggerPostController {
 			@RequestParam(name = "content", required = false) String content,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@RequestParam(name = "boardType", required = false) BoardCategory boardType,
-			@RequestParam(name = "postFile", required = false) MultipartFile postFile,
+			@RequestParam(name = "postFiles", required = false) List<MultipartFile> postFiles,
 			Authentication auth) {
 		PostResponseDto responseDto =
-				postService.updatePost(id, title, content, isPublic, boardType, postFile, auth.getName());
+				postService.updatePost(id, title, content, isPublic, boardType, postFiles, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 

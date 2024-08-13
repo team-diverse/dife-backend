@@ -13,7 +13,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
 	List<Comment> findCommentsByPost(Post post);
 
-	boolean existsByWriterAndPostAndParentCommentIsNull(Member writer, Post post);
-
 	List<Comment> findCommentsByWriter(Member writer, Sort sort);
+
+	List<Comment> findAllByWriter(Member writer);
 }

@@ -40,6 +40,14 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final PostRepository postRepository;
+	private final BookmarkRepository bookmarkRepository;
+	private final LikePostRepository likePostRepository;
+	private final LikeCommentRepository likeCommentRepository;
+	private final ConnectRepository connectRepository;
+	private final NotificationTokenRepository notificationTokenRepository;
+	private final NotificationRepository notificationRepository;
+	private final LikeChatroomRepository likeChatroomRepository;
+	private final TranslationRepository translationRepository;
 	private final CommentRepository commentRepository;
 	private final LanguageRepository languageRepository;
 	private final HobbyRepository hobbyRepository;
@@ -252,9 +260,192 @@ public class MemberService {
 	public void deleteMember(String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		deleteMemberBookmarks(member);
+		deleteMemberPostLikes(member);
+		deleteMemberChatroomLikes(member);
+		deleteMemberChatroom(member);
+		deleteMemberLanguage(member);
+		deleteMemberHobbies(member);
+		deleteMemberCommentLikes(member);
+		deleteMemberComments(member);
+		deleteMemberPosts(member);
+		deleteMemberConnects(member);
+		deleteMemberLikeList(member);
+		deleteMemberBlackList(member);
+		deleteMemberNotificationTokens(member);
 		member.setIsDeleted(true);
 
 		memberRepository.save(member);
+	}
+
+	public void deleteMemberBookmarks(Member member) {
+		List<Bookmark> bookmarks = bookmarkRepository.findAllByMember(member);
+
+		for (Bookmark bookmark : bookmarks) {
+			List<Translation> translations = translationRepository.findAllByBookmarks(bookmarks);
+
+			for (Translation translation : translations) {
+				translation.getBookmarks().remove(bookmark);
+
+				if (translation.getBookmarks().isEmpty()) {
+					translationRepository.delete(translation);
+				} else {
+					translationRepository.save(translation);
+				}
+			}
+
+			member.getBookmarks().remove(bookmark);
+
+			if (bookmark.getPost() != null) {
+				bookmark.getPost().getBookmarks().remove(bookmark);
+			}
+
+			bookmarkRepository.delete(bookmark);
+		}
+	}
+
+	public void deleteMemberPostLikes(Member member) {
+		List<PostLike> postLikes = likePostRepository.findPostLikesByMember(member);
+		for (PostLike postLike : postLikes) {
+			if (postLike.getPost() != null) {
+				postLike.getPost().getPostLikes().remove(postLike);
+			}
+			member.getPostLikes().remove(postLike);
+
+			likePostRepository.delete(postLike);
+		}
+	}
+
+	public void deleteMemberCommentLikes(Member member) {
+		List<CommentLike> commentLikes = likeCommentRepository.findAllByMember(member);
+
+		for (CommentLike commentLike : commentLikes) {
+			if (commentLike.getComment() != null) {
+				commentLike.getComment().getCommentLikes().remove(commentLike);
+			}
+			likeCommentRepository.delete(commentLike);
+		}
+	}
+
+	public void deleteMemberChatroomLikes(Member member) {
+		List<ChatroomLike> chatroomLikes = likeChatroomRepository.findChatroomLikeByMember(member);
+		for (ChatroomLike chatroomLike : chatroomLikes) {
+			if (chatroomLike.getChatroom() != null) {
+				likeChatroomRepository.delete(chatroomLike);
+			}
+		}
+	}
+
+	public void deleteMemberChatroom(Member member) {
+		Set<Chatroom> chatrooms = member.getChatrooms();
+		for (Chatroom chatroom : chatrooms) {
+			if (chatroom != null) {
+				chatroom.setManager(null);
+				chatroom.getMembers().remove(member);
+			}
+		}
+	}
+
+	public void deleteMemberLanguage(Member member) {
+		Set<Language> languages = languageRepository.findLanguagesByMember(member);
+
+		for (Language language : languages) {
+			if (language != null) {
+				member.getLanguages().remove(language);
+				languageRepository.delete(language);
+			}
+		}
+	}
+
+	public void deleteMemberHobbies(Member member) {
+		Set<Hobby> hobbies = hobbyRepository.findHobbiesByMember(member);
+
+		for (Hobby hobby : hobbies) {
+			if (hobby != null) {
+				member.getHobbies().remove(hobby);
+				hobbyRepository.delete(hobby);
+			}
+		}
+	}
+
+	public void deleteMemberComments(Member member) {
+		List<Comment> comments = commentRepository.findAllByWriter(member);
+
+		for (Comment comment : comments) {
+			if (comment != null) {
+				comment.setWriter(null);
+				commentRepository.save(comment);
+			}
+		}
+	}
+
+	public void deleteMemberPosts(Member member) {
+		List<Post> posts = postRepository.findAllByWriter(member);
+
+		for (Post post : posts) {
+			if (post != null) {
+				post.setWriter(null);
+				postRepository.save(post);
+			}
+		}
+	}
+
+	public void deleteMemberConnects(Member member) {
+		List<Connect> sendConnects = connectRepository.findAllByFromMember(member);
+
+		for (Connect connect : sendConnects) {
+			if (connect != null) {
+				member.getSent().remove(connect);
+				connectRepository.delete(connect);
+			}
+		}
+
+		List<Connect> toConnects = connectRepository.findAllByToMember(member);
+
+		for (Connect connect : toConnects) {
+			if (connect != null) {
+				member.getReceived().remove(connect);
+				connectRepository.delete(connect);
+			}
+		}
+	}
+
+	public void deleteMemberLikeList(Member member) {
+		List<Member> likeList = member.getLikeList();
+
+		Iterator<Member> iterator = likeList.iterator();
+		while (iterator.hasNext()) {
+			Member likedMember = iterator.next();
+			likedMember.getLikeList().remove(member);
+			iterator.remove();
+		}
+	}
+
+	public void deleteMemberBlackList(Member member) {
+		List<Member> blackList = member.getBlackList();
+
+		Iterator<Member> iterator = blackList.iterator();
+		while (iterator.hasNext()) {
+			Member blockedMember = iterator.next();
+			blockedMember.getBlackList().remove(member);
+			iterator.remove();
+		}
+	}
+
+	public void deleteMemberNotificationTokens(Member member) {
+		List<NotificationToken> notificationTokens = new ArrayList<>(member.getNotificationTokens());
+
+		for (NotificationToken notificationToken : notificationTokens) {
+			List<Notification> notifications = new ArrayList<>(notificationToken.getNotifications());
+			for (Notification notification : notifications) {
+				notificationToken.getNotifications().remove(notification);
+				notificationRepository.delete(notification);
+			}
+
+			member.getNotificationTokens().remove(notificationToken);
+			notificationTokenRepository.delete(notificationToken);
+		}
 	}
 
 	public void changePassword(String email) {
