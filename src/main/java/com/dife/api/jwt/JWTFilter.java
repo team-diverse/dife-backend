@@ -1,6 +1,6 @@
 package com.dife.api.jwt;
 
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
 import com.dife.api.exception.MemberException;
 import com.dife.api.model.Member;
@@ -88,7 +88,7 @@ public class JWTFilter extends OncePerRequestFilter {
 	}
 
 	private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
-		response.setStatus(UNAUTHORIZED.value());
+		response.setStatus(FORBIDDEN.value());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("text/plain; charset=UTF-8");
 		response.getWriter().write(message);

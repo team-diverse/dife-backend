@@ -29,7 +29,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(BadCredentialsException.class)
 	public ResponseEntity<ExceptionResonse> handleBadCredentialsException(
 			BadCredentialsException exception) {
-		return ResponseEntity.status(FORBIDDEN.value())
+		return ResponseEntity.status(UNAUTHORIZED.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 
