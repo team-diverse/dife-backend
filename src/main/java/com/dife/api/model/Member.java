@@ -74,6 +74,7 @@ public class Member extends BaseTimeEntity {
 	private Set<Chatroom> chatrooms = new HashSet<>();
 
 	@OneToMany(mappedBy = "manager")
+	@JsonIgnore
 	private Set<Chatroom> managingChatrooms = new HashSet<>();
 
 	@OneToMany(mappedBy = "member")

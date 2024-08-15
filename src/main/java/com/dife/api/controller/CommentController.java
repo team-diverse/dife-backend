@@ -5,7 +5,6 @@ import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.dto.*;
 import com.dife.api.service.CommentService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -26,11 +25,9 @@ public class CommentController implements SwaggerCommentController {
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 
-	@GetMapping("/{postId}")
-	public ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(
-			@PathVariable(name = "postId") Long postId, Authentication auth) {
-		List<CommentResponseDto> responseDto =
-				commentService.getCommentsByPostId(postId, auth.getName());
-		return ResponseEntity.status(OK).body(responseDto);
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deletePost(@PathVariable(name = "id") Long id, Authentication auth) {
+		commentService.deleteComment(id, auth.getName());
+		return new ResponseEntity<>(OK);
 	}
 }

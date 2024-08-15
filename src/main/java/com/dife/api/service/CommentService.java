@@ -1,5 +1,7 @@
 package com.dife.api.service;
 
+import com.dife.api.exception.CommentNotFoundException;
+import com.dife.api.exception.MemberException;
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
@@ -97,6 +99,17 @@ public class CommentService {
 		dto.setIsLiked(isLiked);
 
 		return dto;
+	}
+
+	public void deleteComment(Long id, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		Comment comment = commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
+
+		if (!comment.getWriter().equals(member)) throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
+
+		commentRepository.delete(comment);
 	}
 
 	private void addNotifications(

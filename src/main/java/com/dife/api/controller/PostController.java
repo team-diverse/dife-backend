@@ -5,6 +5,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.BoardCategory;
 import com.dife.api.model.dto.*;
+import com.dife.api.service.CommentService;
 import com.dife.api.service.PostService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class PostController implements SwaggerPostController {
 
 	private final PostService postService;
+	private final CommentService commentService;
 
 	@GetMapping
 	public ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardCategory boardCategory) {
@@ -59,6 +61,14 @@ public class PostController implements SwaggerPostController {
 			Authentication auth) {
 		PostResponseDto responseDto =
 				postService.updatePost(id, title, content, isPublic, boardType, postFiles, auth.getName());
+		return ResponseEntity.status(OK).body(responseDto);
+	}
+
+	@GetMapping("/{postId}/comments")
+	public ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(
+			@PathVariable(name = "postId") Long postId, Authentication auth) {
+		List<CommentResponseDto> responseDto =
+				commentService.getCommentsByPostId(postId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 

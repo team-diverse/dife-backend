@@ -69,6 +69,18 @@ public interface SwaggerPostController {
 			@RequestParam(name = "postFiles", required = false) List<MultipartFile> postFiles,
 			Authentication auth);
 
+	@Operation(summary = "게시글 댓글 리스트 조회 API", description = "게시글 ID를 이용해 댓글 리스트를 가져옵니다.")
+	@ApiResponse(
+			responseCode = "200",
+			description = "게시글 조회 성공 예시",
+			content = {
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = PostResponseDto.class))
+			})
+	ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(
+			@PathVariable(name = "postId") Long postId, Authentication auth);
+
 	@Operation(summary = "게시글 삭제 API", description = "게시글 ID를 이용해 게시글을 삭제합니다.")
 	@ApiResponse(
 			responseCode = "200",
