@@ -426,12 +426,13 @@ public class MemberService {
 	}
 
 	public void deleteMemberBlackList(Member member) {
-		List<Member> blackList = member.getBlackList();
+		Set<MemberBlock> blackList = member.getBlackList();
 
-		Iterator<Member> iterator = blackList.iterator();
+		Iterator<MemberBlock> iterator = blackList.iterator();
 		while (iterator.hasNext()) {
-			Member blockedMember = iterator.next();
-			blockedMember.getBlackList().remove(member);
+			MemberBlock memberBlock = iterator.next();
+			Member blockedMember = memberBlock.getBlacklistedMember();
+			blockedMember.getBlackList().removeIf(block -> block.getBlacklistedMember().equals(member));
 			iterator.remove();
 		}
 	}
@@ -525,9 +526,12 @@ public class MemberService {
 		Set<String> safeHobbies = hobbies != null ? hobbies : Collections.emptySet();
 		Set<String> safeLanguages = languages != null ? languages : Collections.emptySet();
 
+		Set<Member> blockedMembers = blockService.getBlackSet(currentMember);
+
 		List<Member> validMembers =
 				memberRepository.findAll().stream()
 						.filter(this::isValidMember)
+						.filter(member -> !blockedMembers.contains(member))
 						.filter(
 								member ->
 										safeLanguages.isEmpty()
@@ -567,12 +571,15 @@ public class MemberService {
 		String trimmedKeyword = keyword.trim();
 		List<Member> members = memberRepository.findAllByKeywordSearch(trimmedKeyword);
 
+		Set<Member> blockedMembers = blockService.getBlackSet(currentMember);
+
 		if (members.isEmpty()) {
 			throw new MemberNotFoundException();
 		}
 
 		return members.stream()
 				.filter(this::isValidMember)
+				.filter(member -> !blockedMembers.contains(member))
 				.map(
 						member -> {
 							MemberResponseDto responseDto =
