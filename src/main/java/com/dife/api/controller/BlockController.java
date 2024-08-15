@@ -4,7 +4,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.dto.BlockMemberRequestDto;
-import com.dife.api.model.dto.MemberResponseDto;
+import com.dife.api.model.dto.BlockMemberResponseDto;
 import com.dife.api.service.BlockService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,16 +20,17 @@ public class BlockController implements SwaggerBlockController {
 	private final BlockService blockService;
 
 	@PostMapping
-	public ResponseEntity<List<MemberResponseDto>> createBlock(
+	public ResponseEntity<List<BlockMemberResponseDto>> createBlock(
 			@RequestBody BlockMemberRequestDto requestDto, Authentication auth) {
 
-		List<MemberResponseDto> responseDto = blockService.createBlackList(requestDto, auth.getName());
+		List<BlockMemberResponseDto> responseDto =
+				blockService.createBlackList(requestDto, auth.getName());
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 
 	@GetMapping
-	public ResponseEntity<List<MemberResponseDto>> createBlock(Authentication auth) {
-		List<MemberResponseDto> responseDto = blockService.getBlackList(auth.getName());
+	public ResponseEntity<List<BlockMemberResponseDto>> createBlock(Authentication auth) {
+		List<BlockMemberResponseDto> responseDto = blockService.getBlackList(auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
