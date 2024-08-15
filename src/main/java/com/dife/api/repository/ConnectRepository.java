@@ -19,7 +19,7 @@ public interface ConnectRepository extends JpaRepository<Connect, Long> {
 
 	@Query(
 			"SELECT c FROM Connect c WHERE (c.toMember = :member1 AND c.fromMember = :member2) OR (c.fromMember = :member1 AND c.toMember = :member2) ")
-	Optional<Connect> findByMemberPair(
+	List<Connect> findByMemberPair(
 			@Param("member1") Member member1, @Param("member2") Member member2);
 
 	Optional<Connect> findByFromMemberAndToMember(Member fromMember, Member toMember);

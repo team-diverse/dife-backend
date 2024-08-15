@@ -30,8 +30,7 @@ public class ConnectService {
 	public List<ConnectResponseDto> getConnects(String currentMemberEmail) {
 		Member currentMember =
 				memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
-		List<Connect> connects =
-				connectRepository.findAllByMemberAndStatus(currentMember, ConnectStatus.ACCEPTED);
+		List<Connect> connects = connectRepository.findAllByToMember(currentMember);
 
 		return connects.stream()
 				.map(c -> modelMapper.map(c, ConnectResponseDto.class))
@@ -45,10 +44,9 @@ public class ConnectService {
 		Member otherMember =
 				memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
-		Connect connect =
-				connectRepository
-						.findByMemberPair(otherMember, currentMember)
-						.orElseThrow(ConnectNotFoundException::new);
+		List<Connect> connections = connectRepository.findByMemberPair(currentMember, otherMember);
+
+		Connect connect = connections.stream().findFirst().orElseThrow(ConnectNotFoundException::new);
 
 		return modelMapper.map(connect, ConnectResponseDto.class);
 	}
@@ -62,7 +60,9 @@ public class ConnectService {
 		if (currentMember.getId().equals(toMember.getId())) {
 			throw new IdenticalConnectException();
 		}
-		if (!connectRepository.findByMemberPair(currentMember, toMember).isEmpty()) {
+		List<Connect> existingConnections = connectRepository.findByMemberPair(currentMember, toMember);
+
+		if (!existingConnections.isEmpty()) {
 			throw new ConnectDuplicateException();
 		}
 
@@ -114,10 +114,10 @@ public class ConnectService {
 	}
 
 	public boolean isConnected(Member member1, Member member2) {
-		return connectRepository
-				.findByMemberPair(member1, member2)
-				.map(connect -> connect.getStatus().equals(ConnectStatus.ACCEPTED))
-				.orElse(false);
+		List<Connect> connections = connectRepository.findByMemberPair(member1, member2);
+
+		return connections.stream()
+				.anyMatch(connect -> connect.getStatus().equals(ConnectStatus.ACCEPTED));
 	}
 
 	public boolean hasPendingConnect(Member fromMember, Member toMember) {
