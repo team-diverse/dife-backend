@@ -23,7 +23,8 @@ public class PostController implements SwaggerPostController {
 	private final CommentService commentService;
 
 	@GetMapping("/posts")
-	public ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardCategory boardCategory, Authentication auth) {
+	public ResponseEntity<List<PostResponseDto>> getPostsByBoardType(
+			BoardCategory boardCategory, Authentication auth) {
 		List<PostResponseDto> responseDto =
 				postService.getPostsByBoardType(boardCategory, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
@@ -78,7 +79,6 @@ public class PostController implements SwaggerPostController {
 		postService.createBlock(postId, auth.getName());
 		return new ResponseEntity<>(CREATED);
 	}
-
 
 	@GetMapping("/posts/search")
 	public ResponseEntity<List<PostResponseDto>> getSearchedPosts(
