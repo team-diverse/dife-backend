@@ -43,7 +43,6 @@ public class Member extends BaseTimeEntity {
 
 	private Boolean isPublic = true;
 
-	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
