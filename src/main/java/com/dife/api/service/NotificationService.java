@@ -70,10 +70,13 @@ public class NotificationService {
 	public List<NotificationResponseDto> getNotifications(String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
-		List<NotificationToken> notifications = notificationTokenRepository.findAllByMember(member);
 
-		return notifications.stream()
-				.map(n -> modelMapper.map(n, NotificationResponseDto.class))
+		List<NotificationToken> notificationTokens =
+				notificationTokenRepository.findAllByMember(member);
+
+		return notificationTokens.stream()
+				.flatMap(notificationToken -> notificationToken.getNotifications().stream())
+				.map(notification -> modelMapper.map(notification, NotificationResponseDto.class))
 				.collect(toList());
 	}
 
@@ -98,15 +101,20 @@ public class NotificationService {
 	}
 
 	public void addNotifications(
-			Member toMember, Member currentMember, String messageTemplate, NotificationType type) {
+			Member toMember,
+			Member currentMember,
+			String messageTemplate,
+			NotificationType type,
+			Long typeId) {
 		if (!Objects.equals(toMember.getId(), currentMember.getId())
 				&& type != NotificationType.CONNECT) {
-			List<NotificationToken> notificationTokens = currentMember.getNotificationTokens();
+			List<NotificationToken> notificationTokens = toMember.getNotificationTokens();
 
 			for (NotificationToken notificationToken : notificationTokens) {
 				Notification notification = new Notification();
 				notification.setNotificationToken(notificationToken);
 				notification.setType(type);
+				notification.setTypeId(typeId);
 
 				String message = String.format(messageTemplate, currentMember.getUsername());
 				notification.setMessage(message);

@@ -1,6 +1,6 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.NotificationToken;
+import com.dife.api.model.NotificationType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,5 +8,13 @@ import lombok.Setter;
 @Setter
 public class NotificationResponseDto {
 
-	private NotificationToken notificationToken;
+	private Long id;
+
+	private NotificationType type;
+
+	private Long typeId;
+
+	private String chatMemberEmail;
+
+	private String message;
 }

@@ -74,7 +74,7 @@ public class ConnectService {
 
 		String message = "Hi!🤝 " + currentMember.getUsername() + "님이 회원님과의 커넥트를 맺고 싶어해요!";
 		notificationService.addNotifications(
-				toMember, currentMember, message, NotificationType.CONNECT);
+				toMember, currentMember, message, NotificationType.CONNECT, connect.getId());
 
 		return modelMapper.map(connect, ConnectResponseDto.class);
 	}
@@ -93,9 +93,9 @@ public class ConnectService {
 						.orElseThrow(ConnectNotFoundException::new);
 		connect.setStatus(ConnectStatus.ACCEPTED);
 
-		createNotifications(currentMember, otherMember.getEmail());
+		createNotifications(currentMember, otherMember.getEmail(), connect.getId());
 
-		createNotifications(otherMember, currentMember.getEmail());
+		createNotifications(otherMember, currentMember.getEmail(), connect.getId());
 	}
 
 	public void deleteConnect(Long id, String email) {
@@ -127,13 +127,14 @@ public class ConnectService {
 				.orElse(false);
 	}
 
-	private void createNotifications(Member member, String otherMemberEmail) {
+	private void createNotifications(Member member, String otherMemberEmail, Long typeId) {
 		List<NotificationToken> notificationTokens = member.getNotificationTokens();
 
 		Member otherMember =
 				memberRepository.findByEmail(otherMemberEmail).orElseThrow(MemberNotFoundException::new);
 		String message = "YEAH!🙌 " + otherMember.getUsername() + "님과의 커넥트가 성사되었어요!";
 
-		notificationService.addNotifications(member, otherMember, message, NotificationType.CONNECT);
+		notificationService.addNotifications(
+				member, otherMember, message, NotificationType.CONNECT, typeId);
 	}
 }
