@@ -94,7 +94,8 @@ public class ChatService {
 
 			String message =
 					"WELCOME! 😊 " + chatroom.getName() + "방에 " + member.getUsername() + "님이 입장하셨습니다!";
-			notificationService.addNotifications(chatroomMember, member, message, NotificationType.CHAT);
+			notificationService.addNotifications(
+					chatroomMember, member, message, NotificationType.CHATROOM, chatroomId);
 		}
 
 		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
@@ -123,7 +124,8 @@ public class ChatService {
 					for (NotificationToken notificationToken : notificationTokens) {
 						Notification notification = new Notification();
 						notification.setNotificationToken(notificationToken);
-						notification.setType(NotificationType.CHAT);
+						notification.setType(NotificationType.CHATROOM);
+						notification.setTypeId(chatroom.getId());
 						notification.setChatMemberEmail(member.getEmail());
 
 						String message = chat.getMessage();
@@ -226,7 +228,7 @@ public class ChatService {
 				for (NotificationToken notificationToken : notificationTokens) {
 					Notification notification = new Notification();
 					notification.setNotificationToken(notificationToken);
-					notification.setType(NotificationType.CHAT);
+					notification.setType(NotificationType.CHATROOM);
 					notification.setChatMemberEmail(member.getEmail());
 
 					String message = member.getUsername() + "이 파일 메시지를 보냈습니다!";
