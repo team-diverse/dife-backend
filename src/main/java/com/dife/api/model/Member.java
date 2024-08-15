@@ -100,13 +100,13 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private List<Report> reports;
 
-	@ManyToMany(cascade = CascadeType.ALL)
-	@JoinTable(
-			name = "member_blacklist",
-			joinColumns = @JoinColumn(name = "member_id"),
-			inverseJoinColumns = @JoinColumn(name = "blacklisted_member_id"))
+	@OneToMany(mappedBy = "member")
 	@JsonIgnore
-	private List<Member> blackList = new ArrayList<>();
+	private Set<PostBlock> postBlocks = new HashSet<>();
+
+	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private Set<MemberBlock> blackList = new HashSet<>();
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinTable(

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,11 +37,11 @@ public class Post extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
-	private List<PostLike> PostLikes;
+	private List<PostLike> postLikes;
 
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
-	private List<Bookmark> Bookmarks;
+	private List<Bookmark> bookmarks;
 
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JsonIgnore
@@ -49,4 +50,8 @@ public class Post extends BaseTimeEntity {
 	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
 	@JsonIgnore
 	private List<Report> reports;
+
+	@OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private Set<PostBlock> postBlocks;
 }
