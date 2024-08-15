@@ -125,17 +125,20 @@ public class MemberService {
 			member.setProfileImg(file);
 		}
 
-		if (username != null && !username.isEmpty()) member.setUsername(username);
-		if (country != null && country != member.getCountry()) member.setCountry(country);
-		if (bio != null && !bio.isEmpty()) member.setBio(bio);
-		if (mbti != null && !mbti.equals(member.getMbti())) member.setMbti(mbti);
+		member.setUsername(username);
+		member.setCountry(country);
+		member.setBio(bio);
+		member.setMbti(mbti);
 
-		if (hobbies != null && !hobbies.isEmpty()) {
+		if (hobbies != null) {
 			Set<String> safeHobbies = hobbies;
 
 			Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByMember(member);
 			Map<String, Hobby> nameToHobbyMap =
-					existingHobbies.stream().collect(Collectors.toMap(Hobby::getName, Function.identity()));
+					existingHobbies.stream()
+							.collect(
+									Collectors.toMap(
+											Hobby::getName, Function.identity(), (existing, replacement) -> existing));
 
 			Set<Hobby> updatedHobbies = new HashSet<>();
 
@@ -156,15 +159,16 @@ public class MemberService {
 
 			member.setHobbies(updatedHobbies);
 		}
-		member.setHobbies(member.getHobbies());
 
-		if (languages != null && !languages.isEmpty()) {
+		if (languages != null) {
 			Set<String> safeLanguages = languages;
 
 			Set<Language> existingLanguages = languageRepository.findLanguagesByMember(member);
 			Map<String, Language> nameToLanguageMap =
 					existingLanguages.stream()
-							.collect(Collectors.toMap(Language::getName, Function.identity()));
+							.collect(
+									Collectors.toMap(
+											Language::getName, Function.identity(), (existing, replacement) -> existing));
 
 			Set<Language> updatedLanguages = new HashSet<>();
 
@@ -185,9 +189,8 @@ public class MemberService {
 
 			member.setLanguages(updatedLanguages);
 		}
-		member.setLanguages(member.getLanguages());
 
-		if (isPublic != null && isPublic != member.getIsPublic()) member.setIsPublic(isPublic);
+		if (isPublic != null) member.setIsPublic(isPublic);
 		memberRepository.save(member);
 
 		return memberModelMapper.map(member, MemberResponseDto.class);
