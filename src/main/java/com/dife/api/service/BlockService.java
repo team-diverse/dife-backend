@@ -2,10 +2,13 @@ package com.dife.api.service;
 
 import com.dife.api.exception.*;
 import com.dife.api.model.Member;
+import com.dife.api.model.MemberBlock;
 import com.dife.api.model.dto.BlockMemberRequestDto;
-import com.dife.api.model.dto.MemberResponseDto;
+import com.dife.api.model.dto.BlockMemberResponseDto;
+import com.dife.api.repository.BlockMemberRepository;
 import com.dife.api.repository.MemberRepository;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class BlockService {
 
 	private final MemberRepository memberRepository;
+	private final BlockMemberRepository blockMemberRepository;
 
 	private final ModelMapper modelMapper;
 
-	public List<MemberResponseDto> createBlackList(
+	public List<BlockMemberResponseDto> createBlackList(
 			BlockMemberRequestDto requestDto, String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -38,7 +42,8 @@ public class BlockService {
 
 		boolean isAlreadyBlacklisted = false;
 
-		List<Member> blackList = member.getBlackList();
+		Set<MemberBlock> blackList = member.getBlackList();
+
 		if (blackList != null) {
 			isAlreadyBlacklisted = blackList.stream().anyMatch(bl -> bl.equals(blackMember));
 		}
@@ -47,22 +52,34 @@ public class BlockService {
 			throw new DuplicateMemberException("이미 블랙리스트에 존재하는 회원입니다!");
 		}
 
-		member.getBlackList().add(blackMember);
+		MemberBlock memberBlock = new MemberBlock();
+		memberBlock.setMember(member);
+		memberBlock.setBlacklistedMember(blackMember);
 
+		blockMemberRepository.save(memberBlock);
+
+		member.getBlackList().add(memberBlock);
 		memberRepository.save(member);
 
 		return member.getBlackList().stream()
-				.map(bl -> modelMapper.map(bl, MemberResponseDto.class))
+				.map(bl -> modelMapper.map(bl, BlockMemberResponseDto.class))
 				.collect(Collectors.toList());
 	}
 
-	public List<MemberResponseDto> getBlackList(String memberEmail) {
+	public List<BlockMemberResponseDto> getBlackList(String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		return member.getBlackList().stream()
-				.map(bl -> modelMapper.map(bl, MemberResponseDto.class))
+				.map(bl -> modelMapper.map(bl, BlockMemberResponseDto.class))
 				.collect(Collectors.toList());
+	}
+
+	public Set<Member> getBlackSet(Member member) {
+		Set<MemberBlock> blockedMemberBlocks = member.getBlackList();
+		return blockedMemberBlocks.stream()
+				.map(MemberBlock::getBlacklistedMember)
+				.collect(Collectors.toSet());
 	}
 
 	public boolean isBlackListMember(Member currentMember, Member checkMember) {
@@ -77,10 +94,15 @@ public class BlockService {
 		Member blockMember =
 				memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
-		if (!currentMember.getBlackList().contains(blockMember)) throw new MemberNotFoundException();
+		MemberBlock blockToRemove =
+				blockMemberRepository
+						.findByMemberAndBlacklistedMember(currentMember, blockMember)
+						.orElseThrow(MemberNotFoundException::new);
 
-		currentMember.getBlackList().remove(blockMember);
-		blockMember.getBlackList().remove(currentMember);
+		currentMember.getBlackList().remove(blockToRemove);
+		blockMember.getBlackList().removeIf(block -> block.getMember().equals(currentMember));
+
+		blockMemberRepository.delete(blockToRemove);
 
 		memberRepository.save(currentMember);
 		memberRepository.save(blockMember);
