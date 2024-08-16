@@ -43,7 +43,6 @@ public class Member extends BaseTimeEntity {
 
 	private Boolean isPublic = true;
 
-	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -74,6 +73,7 @@ public class Member extends BaseTimeEntity {
 	private Set<Chatroom> chatrooms = new HashSet<>();
 
 	@OneToMany(mappedBy = "manager")
+	@JsonIgnore
 	private Set<Chatroom> managingChatrooms = new HashSet<>();
 
 	@OneToMany(mappedBy = "member")

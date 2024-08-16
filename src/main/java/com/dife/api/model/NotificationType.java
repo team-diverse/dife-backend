@@ -1,7 +1,7 @@
 package com.dife.api.model;
 
 public enum NotificationType {
-	COMMUNITY,
+	POST,
 	CONNECT,
-	CHAT
+	CHATROOM
 }
