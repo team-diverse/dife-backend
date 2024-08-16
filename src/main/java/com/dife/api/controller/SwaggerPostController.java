@@ -18,7 +18,8 @@ public interface SwaggerPostController {
 
 	@Operation(summary = "게시판 조회 API", description = "게시판 종류를 입력해 최신순으로 게시판을 조회합니다.")
 	@ApiResponse(responseCode = "200")
-	ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardCategory boardCategory);
+	ResponseEntity<List<PostResponseDto>> getPostsByBoardType(
+			BoardCategory boardCategory, Authentication auth);
 
 	@Operation(
 			summary = "게시글 생성 API",
@@ -79,4 +80,17 @@ public interface SwaggerPostController {
 						schema = @Schema(implementation = PostResponseDto.class))
 			})
 	ResponseEntity<Void> deletePost(@PathVariable(name = "id") Long id, Authentication auth);
+
+	@Operation(summary = "게시글 차단 API", description = "게시글 ID를 이용해 특정 게시글을 차단합니다.")
+	@ApiResponse(responseCode = "201")
+	ResponseEntity<Void> createBlock(@PathVariable(name = "postId") Long postId, Authentication auth);
+
+	@Operation(
+			summary = "게시판 검색 조회 API",
+			description = "게시글의 title, content를 바탕으로 게시판을 조회합니다. 게시판 type 또한 입력으로 받아 구체적인 검색을 허용합니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<List<PostResponseDto>> getSearchedPosts(
+			@RequestParam(name = "keyword", required = false) String keyword,
+			@RequestParam(name = "type", required = false) BoardCategory boardCategory,
+			Authentication auth);
 }

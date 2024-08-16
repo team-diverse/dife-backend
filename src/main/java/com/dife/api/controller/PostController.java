@@ -23,8 +23,10 @@ public class PostController implements SwaggerPostController {
 	private final CommentService commentService;
 
 	@GetMapping("/posts")
-	public ResponseEntity<List<PostResponseDto>> getPostsByBoardType(BoardCategory boardCategory) {
-		List<PostResponseDto> responseDto = postService.getPostsByBoardType(boardCategory);
+	public ResponseEntity<List<PostResponseDto>> getPostsByBoardType(
+			BoardCategory boardCategory, Authentication auth) {
+		List<PostResponseDto> responseDto =
+				postService.getPostsByBoardType(boardCategory, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
@@ -68,5 +70,23 @@ public class PostController implements SwaggerPostController {
 	public ResponseEntity<Void> deletePost(@PathVariable(name = "id") Long id, Authentication auth) {
 		postService.deletePost(id, auth.getName());
 		return new ResponseEntity<>(OK);
+	}
+
+	@PostMapping("/posts/{postId}/blocks")
+	public ResponseEntity<Void> createBlock(
+			@PathVariable(name = "postId") Long postId, Authentication auth) {
+
+		postService.createBlock(postId, auth.getName());
+		return new ResponseEntity<>(CREATED);
+	}
+
+	@GetMapping("/posts/search")
+	public ResponseEntity<List<PostResponseDto>> getSearchedPosts(
+			@RequestParam(name = "keyword", required = false) String keyword,
+			@RequestParam(name = "type", required = false) BoardCategory boardCategory,
+			Authentication auth) {
+		List<PostResponseDto> responseDto =
+				postService.getSearchPosts(keyword, boardCategory, auth.getName());
+		return ResponseEntity.status(OK).body(responseDto);
 	}
 }

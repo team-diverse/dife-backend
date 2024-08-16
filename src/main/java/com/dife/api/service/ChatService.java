@@ -45,6 +45,7 @@ public class ChatService {
 	private final NotificationHandler notificationHandler;
 	private final MemberService memberService;
 	private final FileService fileService;
+	private final BlockService blockService;
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
 
@@ -112,12 +113,16 @@ public class ChatService {
 
 		Member member = memberService.getMemberEntityById(dto.getMemberId());
 
+		Set<Member> blockedMembers = blockService.getBlackSet(member);
+
 		if (dto.getMessage().length() <= 300) {
 			Chat chat = saveChat(member, chatroom, dto.getMessage());
 
 			Set<Member> chatroomMembers = chatroom.getMembers();
 
 			for (Member chatroomMember : chatroomMembers) {
+				if (blockedMembers.contains(chatroomMember)) return;
+
 				if (!Objects.equals(chatroomMember.getId(), member.getId())) {
 					List<NotificationToken> notificationTokens = chatroomMember.getNotificationTokens();
 
