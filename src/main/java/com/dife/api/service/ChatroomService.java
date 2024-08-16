@@ -59,7 +59,11 @@ public class ChatroomService {
 				.map(
 						c -> {
 							ChatroomResponseDto responseDto =
-									modelMapper.map(c.getChatroomSetting(), ChatroomResponseDto.class);
+									chatroomModelMapper.map(c, ChatroomResponseDto.class);
+
+							responseDto.setName(c.getName());
+							responseDto.setChatroomType(c.getChatroomType());
+							responseDto.setManager(c.getManager());
 							if (c.getChatroomSetting().getProfileImg() != null) {
 								responseDto.setProfilePresignUrl(
 										fileService.getPresignUrl(
