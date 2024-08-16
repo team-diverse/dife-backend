@@ -1,7 +1,6 @@
 package com.dife.api.controller;
 
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.ok;
 
 import com.dife.api.model.ChatroomType;
@@ -24,6 +23,16 @@ import org.springframework.web.multipart.MultipartFile;
 public class ChatroomController implements SwaggerChatroomController {
 
 	private final ChatroomService chatroomService;
+
+	@RequestMapping(value = "/check", method = RequestMethod.HEAD)
+	public ResponseEntity<Void> checkUsername(@RequestParam(name = "name") String name) {
+		Boolean isDuplicate = chatroomService.isDuplicate(name);
+
+		if (isDuplicate) {
+			return ResponseEntity.status(CONFLICT).build();
+		}
+		return ResponseEntity.ok().build();
+	}
 
 	@GetMapping
 	public ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(

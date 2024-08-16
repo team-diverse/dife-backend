@@ -42,6 +42,10 @@ public class ChatroomService {
 
 	private final FileService fileService;
 
+	public Boolean isDuplicate(String name) {
+		return chatroomRepository.existsByName(name);
+	}
+
 	public List<ChatroomResponseDto> getChatrooms(ChatroomType chatroomType, String memberEmail) {
 
 		List<Chatroom> chatrooms;
