@@ -132,6 +132,7 @@ public class ChatService {
 						notification.setType(NotificationType.CHATROOM);
 						notification.setTypeId(chatroom.getId());
 						notification.setChatMemberEmail(member.getEmail());
+						notification.setCreated(LocalDateTime.now());
 
 						String message = chat.getMessage();
 						if (message.length() > 30) {
@@ -140,7 +141,8 @@ public class ChatService {
 						notification.setMessage(message);
 						notificationToken.getNotifications().add(notification);
 
-						notificationService.sendPushNotification(notificationToken.getPushToken(), message);
+						notificationService.sendPushNotification(
+								notificationToken.getPushToken(), notification.getCreated(), message);
 					}
 				}
 			}
@@ -235,12 +237,14 @@ public class ChatService {
 					notification.setNotificationToken(notificationToken);
 					notification.setType(NotificationType.CHATROOM);
 					notification.setChatMemberEmail(member.getEmail());
+					notification.setCreated(LocalDateTime.now());
 
 					String message = member.getUsername() + "이 파일 메시지를 보냈습니다!";
 					notification.setMessage(message);
 					notificationToken.getNotifications().add(notification);
 
-					notificationService.sendPushNotification(notificationToken.getPushToken(), message);
+					notificationService.sendPushNotification(
+							notificationToken.getPushToken(), notification.getCreated(), message);
 				}
 			}
 		}

@@ -11,6 +11,7 @@ import com.dife.api.repository.CommentRepository;
 import com.dife.api.repository.LikeCommentRepository;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -120,9 +121,11 @@ public class CommentService {
 			notification.setType(type);
 			notification.setMessage(message);
 			notification.setTypeId(typeId);
+			notification.setCreated(LocalDateTime.now());
 			token.getNotifications().add(notification);
 
-			notificationService.sendPushNotification(token.getPushToken(), message);
+			notificationService.sendPushNotification(
+					token.getPushToken(), notification.getCreated(), message);
 		}
 	}
 }
