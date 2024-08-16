@@ -136,7 +136,10 @@ public class ChatroomService {
 
 		Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByChatroomSetting(setting);
 		Map<String, Hobby> nameToHobbyMap =
-				existingHobbies.stream().collect(Collectors.toMap(Hobby::getName, Function.identity()));
+				existingHobbies.stream()
+						.collect(
+								Collectors.toMap(
+										Hobby::getName, Function.identity(), (existing, replacement) -> existing));
 
 		Set<Hobby> updatedHobbies = new HashSet<>();
 
@@ -164,7 +167,9 @@ public class ChatroomService {
 		Set<Language> existingLanguages = languageRepository.findLanguagesByChatroomSetting(setting);
 		Map<String, Language> nameToLanguageMap =
 				existingLanguages.stream()
-						.collect(Collectors.toMap(Language::getName, Function.identity()));
+						.collect(
+								Collectors.toMap(
+										Language::getName, Function.identity(), (existing, replacement) -> existing));
 
 		Set<Language> updatedLanguages = new HashSet<>();
 
@@ -189,7 +194,11 @@ public class ChatroomService {
 				groupPurposesRepository.findGroupPurposesByChatroomSetting(setting);
 		Map<String, GroupPurpose> nameToGroupPurposeMap =
 				existingGroupPurposes.stream()
-						.collect(Collectors.toMap(GroupPurpose::getName, Function.identity()));
+						.collect(
+								Collectors.toMap(
+										GroupPurpose::getName,
+										Function.identity(),
+										(existing, replacement) -> existing));
 
 		Set<GroupPurpose> updatedGroupPurposes = new HashSet<>();
 

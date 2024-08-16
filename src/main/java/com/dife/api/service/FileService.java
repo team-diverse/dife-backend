@@ -42,8 +42,8 @@ public class FileService {
 		String fileName = originalFilename.substring(0, originalFilename.lastIndexOf('.'));
 		Long fileSize = file.getSize();
 
-		if (fileSize > 5_000_000) {
-			throw new RuntimeException("File size exceeds limit of 5MB");
+		if (fileSize > 10_000_000) {
+			throw new RuntimeException("File size exceeds limit of 10MB");
 		}
 
 		try {

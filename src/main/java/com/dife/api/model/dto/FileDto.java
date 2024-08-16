@@ -1,7 +1,6 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.Format;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,15 +14,15 @@ import lombok.Setter;
 public class FileDto {
 	private Long id;
 
-	@NotNull private String originalName;
+	private String originalName;
 
-	@NotNull private String name;
+	private String name;
 
-	@NotNull private String size;
+	private String size;
 
 	private String url;
 
-	@NotNull private Format format;
+	private Format format;
 
 	private LocalDateTime createdAt;
 }
