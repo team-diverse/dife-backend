@@ -1,5 +1,7 @@
 package com.dife.api.service;
 
+import com.dife.api.exception.CommentNotFoundException;
+import com.dife.api.exception.MemberException;
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
@@ -73,12 +75,12 @@ public class CommentService {
 					comment.getParentComment().getWriter().getNotificationTokens();
 			String parentMessage =
 					"WOW!😆 " + comment.getWriter().getUsername() + "님이 회원님이 댓글을 남긴 게시글에 다른 댓글이 추가되었어요!";
-			addNotifications(parentCommentTokens, parentMessage, NotificationType.COMMUNITY);
+			addNotifications(parentCommentTokens, parentMessage, NotificationType.POST, post.getId());
 		}
 
 		List<NotificationToken> postTokens = post.getWriter().getNotificationTokens();
 		String postMessage = "WOW!😆 " + comment.getWriter().getUsername() + "님이 회원님의 게시글에 댓글이 추가되었어요!";
-		addNotifications(postTokens, postMessage, NotificationType.COMMUNITY);
+		addNotifications(postTokens, postMessage, NotificationType.POST, post.getId());
 
 		return responseDto;
 	}
@@ -99,13 +101,25 @@ public class CommentService {
 		return dto;
 	}
 
+	public void deleteComment(Long id, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+		Comment comment = commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
+
+		if (!comment.getWriter().equals(member)) throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
+
+		commentRepository.delete(comment);
+	}
+
 	private void addNotifications(
-			List<NotificationToken> tokens, String message, NotificationType type) {
+			List<NotificationToken> tokens, String message, NotificationType type, Long typeId) {
 		for (NotificationToken token : tokens) {
 			Notification notification = new Notification();
 			notification.setNotificationToken(token);
 			notification.setType(type);
 			notification.setMessage(message);
+			notification.setTypeId(typeId);
 			token.getNotifications().add(notification);
 
 			notificationService.sendPushNotification(token.getPushToken(), message);

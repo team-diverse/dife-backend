@@ -2,6 +2,7 @@ package com.dife.api.service;
 
 import static java.util.stream.Collectors.toList;
 
+import com.dife.api.exception.MemberException;
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
@@ -160,6 +161,7 @@ public class PostService {
 		Post post =
 				postRepository.findByWriterAndId(member, id).orElseThrow(PostNotFoundException::new);
 
+		if (!post.getWriter().equals(member)) throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
 		for (File file : post.getFiles()) {
 			fileService.deleteFile(file.getId());
 		}

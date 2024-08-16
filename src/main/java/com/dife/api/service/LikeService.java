@@ -76,7 +76,7 @@ public class LikeService {
 
 		Member writer = post.getWriter();
 		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 게시글을 좋아해요!";
-		notificationService.addNotifications(writer, member, message, NotificationType.COMMUNITY);
+		notificationService.addNotifications(writer, member, message, NotificationType.POST, postId);
 	}
 
 	public void createLikeComment(Long commentId, String memberEmail) {
@@ -95,7 +95,7 @@ public class LikeService {
 
 		Member writer = comment.getWriter();
 		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 댓글을 좋아해요!";
-		notificationService.addNotifications(writer, member, message, NotificationType.COMMUNITY);
+		notificationService.addNotifications(writer, member, message, NotificationType.POST, commentId);
 	}
 
 	public void createLikeChatroom(Long chatroomId, String memberEmail) {

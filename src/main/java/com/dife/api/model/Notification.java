@@ -17,6 +17,8 @@ public class Notification extends BaseTimeEntity {
 
 	private NotificationType type;
 
+	private Long typeId;
+
 	private String chatMemberEmail;
 
 	private String message;
