@@ -102,14 +102,24 @@ public class CommentService {
 		return dto;
 	}
 
+	@Transactional
 	public void deleteComment(Long id, String memberEmail) {
-
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Comment comment = commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
 
-		if (!comment.getWriter().equals(member)) throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
+		if (!comment.getWriter().equals(member)) {
+			throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
+		}
 
+		if (!comment.getChildrenComments().isEmpty()) {
+			for (Comment childComment : comment.getChildrenComments()) {
+				childComment.getPost().getComments().remove(childComment);
+				commentRepository.delete(childComment);
+			}
+		}
+
+		comment.getPost().getComments().remove(comment);
 		commentRepository.delete(comment);
 	}
 
