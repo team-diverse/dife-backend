@@ -108,8 +108,7 @@ public class NotificationService {
 			String messageTemplate,
 			NotificationType type,
 			Long typeId) {
-		if (!Objects.equals(toMember.getId(), currentMember.getId())
-				&& type != NotificationType.CONNECT) {
+		if (!Objects.equals(toMember.getId(), currentMember.getId())) {
 			List<NotificationToken> notificationTokens = toMember.getNotificationTokens();
 
 			for (NotificationToken notificationToken : notificationTokens) {
