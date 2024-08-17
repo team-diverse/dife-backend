@@ -1,5 +1,6 @@
 package com.dife.api.controller;
 
+import com.dife.api.model.ConnectStatus;
 import com.dife.api.model.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "Connect API", description = "커넥트 서비스 API")
 public interface SwaggerConnectController {
 
-	@Operation(summary = "커넥트 목록 조회 API", description = "회원 AUTH를 이용해 회원이 맺은 커넥트 목록을 조회합니다.")
+	@Operation(
+			summary = "커넥트 목록 조회 API",
+			description = "회원 AUTH를 이용해 회원이 맺은 커넥트 목록을 커넥트의 status에 따라 조회합니다.")
 	@ApiResponse(
 			responseCode = "200",
 			description = "단일 커넥트 조회 성공 예시",
@@ -26,7 +29,8 @@ public interface SwaggerConnectController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = ConnectResponseDto.class))
 			})
-	ResponseEntity<List<ConnectResponseDto>> getConnects(Authentication auth);
+	ResponseEntity<List<ConnectResponseDto>> getConnects(
+			@RequestParam(name = "status", required = false) ConnectStatus status, Authentication auth);
 
 	@Operation(summary = "특정 회원과의 커넥트 조회 API", description = "특정 회원의 ID를 이용해 맺은 커넥트를 조회합니다.")
 	@ApiResponse(

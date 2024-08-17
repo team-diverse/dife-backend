@@ -3,6 +3,7 @@ package com.dife.api.controller;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
+import com.dife.api.model.ConnectStatus;
 import com.dife.api.model.dto.ConnectPatchRequestDto;
 import com.dife.api.model.dto.ConnectRequestDto;
 import com.dife.api.model.dto.ConnectResponseDto;
@@ -22,8 +23,9 @@ public class ConnectController implements SwaggerConnectController {
 	private final ConnectService connectService;
 
 	@GetMapping
-	public ResponseEntity<List<ConnectResponseDto>> getConnects(Authentication auth) {
-		List<ConnectResponseDto> responseDto = connectService.getConnects(auth.getName());
+	public ResponseEntity<List<ConnectResponseDto>> getConnects(
+			@RequestParam(name = "status", required = false) ConnectStatus status, Authentication auth) {
+		List<ConnectResponseDto> responseDto = connectService.getConnects(status, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 

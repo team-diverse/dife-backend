@@ -28,17 +28,28 @@ public class ConnectService {
 	private final NotificationService notificationService;
 
 	@Transactional(readOnly = true)
-	public List<ConnectResponseDto> getConnects(String currentMemberEmail) {
+	public List<ConnectResponseDto> getConnects(ConnectStatus status, String currentMemberEmail) {
+
+		List<Connect> allConnects = new ArrayList<>();
 		Member currentMember =
 				memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
 
-		List<Connect> pendingConnects = connectRepository.findAllByToMember(currentMember);
-		List<Connect> acceptedConnects =
-				connectRepository.findAllByMemberAndStatus(currentMember, ConnectStatus.ACCEPTED);
-
-		List<Connect> allConnects = new ArrayList<>();
-		allConnects.addAll(pendingConnects);
-		allConnects.addAll(acceptedConnects);
+		switch (status) {
+			case ACCEPTED:
+				allConnects =
+						connectRepository.findAllByMemberAndStatus(currentMember, ConnectStatus.ACCEPTED);
+				break;
+			case PENDING:
+				allConnects =
+						connectRepository.findAll().stream()
+								.filter(connect -> connect.getStatus().equals(ConnectStatus.PENDING))
+								.filter(
+										connect ->
+												connect.getToMember().getId().equals(currentMember.getId())
+														|| connect.getFromMember().getId().equals(currentMember.getId()))
+								.collect(toList());
+				break;
+		}
 
 		return allConnects.stream()
 				.map(c -> modelMapper.map(c, ConnectResponseDto.class))
