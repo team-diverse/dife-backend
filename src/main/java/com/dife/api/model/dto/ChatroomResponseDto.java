@@ -16,18 +16,13 @@ public class ChatroomResponseDto {
 
 	private Long id;
 
-	private String name;
-
-	private ChatroomType chatroomType;
-
 	private Member manager;
+
+	private String name;
 
 	private String description;
 
 	private File profileImg;
-
-	@Schema(description = "Presigned S3경로")
-	private String profilePresignUrl;
 
 	private Set<String> hobbies;
 
@@ -46,6 +41,8 @@ public class ChatroomResponseDto {
 	private String password;
 
 	private LocalDateTime created;
+
+	private LocalDateTime modified;
 
 	private Set<Member> members;
 

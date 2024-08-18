@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "chatroom_setting")
-public class ChatroomSetting {
+public class ChatroomSetting extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,8 @@ public class ChatroomSetting {
 	private Set<Hobby> hobbies = new HashSet<>();
 
 	private Integer count = 0;
-	private Integer maxCount = 30;
+
+	private Integer maxCount = 2;
 
 	@OneToMany(mappedBy = "chatroomSetting", cascade = CascadeType.ALL)
 	private Set<GroupPurpose> purposes = new HashSet<>();
@@ -35,7 +36,7 @@ public class ChatroomSetting {
 	@OneToMany(mappedBy = "chatroomSetting", cascade = CascadeType.ALL)
 	private Set<Language> languages = new HashSet<>();
 
-	private Boolean isPublic = true;
+	private Boolean isPublic;
 
 	@Size(min = 5, max = 5, message = "비밀번호는 정확히 5자 이어야 합니다.")
 	@Pattern(regexp = "^[0-9]{5}$", message = "비밀번호는 숫자 5자로 구성되어야 합니다.")

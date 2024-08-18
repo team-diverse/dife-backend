@@ -155,8 +155,8 @@ VALUES ('1', '2');
 
 INSERT INTO chatroom(ID, NAME, CHATROOM_TYPE, MANAGER_ID, CREATED)
 VALUES ('1', 'name', 0, '5', NOW());
-INSERT INTO chatroom_setting(ID, IS_PUBLIC, DESCRIPTION)
-VALUES ('1', 1, 'description');
+INSERT INTO chatroom_setting(ID, IS_PUBLIC, MAX_COUNT, DESCRIPTION)
+VALUES ('1', 1, 7, 'description');
 
 INSERT INTO chatroom_member(CHATROOM_ID, MEMBER_ID)
 VALUES ('1', '5');
