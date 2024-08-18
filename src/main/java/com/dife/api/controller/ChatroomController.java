@@ -6,6 +6,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import com.dife.api.model.ChatroomType;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.ChatroomService;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,7 +46,7 @@ public class ChatroomController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(
-			@PathVariable(name = "id") Long chatroomId, Authentication auth) {
+			@PathVariable(name = "id") Long chatroomId, Authentication auth) throws IOException {
 		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
@@ -63,7 +64,8 @@ public class ChatroomController {
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@RequestParam(name = "password", required = false) String password,
-			Authentication authentication) {
+			Authentication authentication)
+			throws IOException {
 
 		ChatroomResponseDto responseDto =
 				chatroomService.createChatroom(
@@ -93,7 +95,8 @@ public class ChatroomController {
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@RequestParam(name = "password", required = false) String password,
-			Authentication auth) {
+			Authentication auth)
+			throws IOException {
 
 		ChatroomResponseDto responseDto =
 				chatroomService.update(

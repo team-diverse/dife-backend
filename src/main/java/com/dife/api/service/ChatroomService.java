@@ -6,6 +6,7 @@ import com.dife.api.exception.*;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -73,7 +74,8 @@ public class ChatroomService {
 			Set<String> languages,
 			Boolean isPublic,
 			String password,
-			String memberEmail) {
+			String memberEmail)
+			throws IOException {
 		switch (chatroomType) {
 			case GROUP:
 				return createGroupChatroom(
@@ -103,7 +105,8 @@ public class ChatroomService {
 			Set<String> hobbies,
 			Set<String> languages,
 			Boolean isPublic,
-			String password) {
+			String password)
+			throws IOException {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -144,7 +147,8 @@ public class ChatroomService {
 			Set<String> hobbies,
 			Set<String> languages,
 			Boolean isPublic,
-			String password) {
+			String password)
+			throws IOException {
 		if (hobbies != null) {
 
 			Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByChatroomSetting(givenSetting);
@@ -288,7 +292,8 @@ public class ChatroomService {
 			Set<String> languages,
 			Boolean isPublic,
 			String password,
-			String memberEmail) {
+			String memberEmail)
+			throws IOException {
 		Chatroom chatroom = chatroomRepository.getReferenceById(id);
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 
@@ -329,7 +334,7 @@ public class ChatroomService {
 		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
 	}
 
-	public ChatroomResponseDto getChatroom(Long id, String memberEmail) {
+	public ChatroomResponseDto getChatroom(Long id, String memberEmail) throws IOException {
 
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
 
@@ -487,7 +492,14 @@ public class ChatroomService {
 	public List<ChatroomResponseDto> getChatroomResponseDtos(
 			List<Chatroom> chatrooms, Member member) {
 		return chatrooms.stream()
-				.map(chatroom -> getChatroom(chatroom.getId(), member.getEmail()))
+				.map(
+						chatroom -> {
+							try {
+								return getChatroom(chatroom.getId(), member.getEmail());
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						})
 				.collect(Collectors.toList());
 	}
 
