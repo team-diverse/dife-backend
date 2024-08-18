@@ -33,7 +33,7 @@ public class FileService {
 	@Value("${spring.aws.bucket-name}")
 	private String bucketName;
 
-	public FileDto upload(MultipartFile file) {
+	public FileDto upload(MultipartFile file) throws IOException {
 		if (file.isEmpty()) {
 			throw new RuntimeException("Empty file cannot be uploaded");
 		}
@@ -60,12 +60,13 @@ public class FileService {
 		fileInfo.setName(fileName);
 		fileInfo.setSize(fileSize);
 		fileInfo.setFormat(Format.JPG);
+		fileInfo.setUrl(getPresignUrl(originalFilename));
 		fileRepository.save(fileInfo);
 
 		return modelMapper.map(fileInfo, FileDto.class);
 	}
 
-	public String getPresignUrl(String fileName) {
+	public String getPresignUrl(String fileName) throws IOException {
 		if (fileName == null || fileName.equals("empty")) {
 			return null;
 		}
