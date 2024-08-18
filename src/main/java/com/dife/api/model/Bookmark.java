@@ -2,7 +2,6 @@ package com.dife.api.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +37,4 @@ public class Bookmark extends BaseTimeEntity {
 	@ManyToOne
 	@JoinColumn(name = "post_id")
 	private Post post;
-
-	private LocalDateTime created;
 }
