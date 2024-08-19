@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,7 +24,7 @@ public interface SwaggerChatroomController {
 
 	@Operation(
 			summary = "채팅방 생성1 API",
-			description = "사용자가 multipart/form-data 형태의 POST요청으로 그룹 채팅방1 생성하는 API입니다.")
+			description = "사용자가 multipart/form-data 형태의 POST요청으로 그룹 채팅방을 생성하는 API입니다.")
 	@ApiResponse(
 			responseCode = "201",
 			description = "그룹 채팅방1 생성 성공 예시",
@@ -38,11 +39,17 @@ public interface SwaggerChatroomController {
 			@RequestParam(name = "name", required = false) String name,
 			@RequestParam(name = "description", required = false) String description,
 			@RequestParam(name = "toMemberId", required = false) Long toMemberId,
+			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
+			@RequestParam(name = "maxCount", required = false) Optional<Integer> maxCount,
+			@RequestParam(name = "purposes", required = false) Set<String> purposes,
+			@RequestParam(name = "languages", required = false) Set<String> languages,
+			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
+			@RequestParam(name = "password", required = false) String password,
 			Authentication authentication);
 
 	@Operation(
 			summary = "채팅방 세부사항 업데이트 API",
-			description = "사용자가 DTO를 작성해 PUT요청으로 그룹 채팅방 정보 업데이트를 진행하는 API입니다.")
+			description = "사용자가 DTO를 작성해 PUT요청으로 그룹 채팅방 정보 업데이트를 진행하는 API입니다. 방장만이 접근할 수 있는 API입니다.")
 	@ApiResponse(
 			responseCode = "200",
 			description = "그룹 채팅방 업데이트 성공 예시",
@@ -52,8 +59,14 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<ChatroomResponseDto> update(
-			GroupChatroomPutRequestDto requestDto,
-			@PathVariable(name = "id") Long chatroomId,
+			@PathVariable(name = "id", required = false) Long id,
+			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
+			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
+			@RequestParam(name = "maxCount", required = false) Optional<Integer> maxCount,
+			@RequestParam(name = "purpose", required = false) Set<String> purposes,
+			@RequestParam(name = "languages", required = false) Set<String> languages,
+			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
+			@RequestParam(name = "password", required = false) String password,
 			Authentication auth);
 
 	@Operation(summary = "채팅방 회원 강퇴 API", description = "채팅방 방장만이 회원 강퇴 권한을 갖는 API입니다.")

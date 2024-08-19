@@ -38,17 +38,6 @@ public class MapperConfig {
 				.addMappings(
 						mapper -> {
 							mapper.map(
-									src -> src.getChatroomSetting().getProfileImg(),
-									ChatroomResponseDto::setProfileImg);
-							mapper.map(
-									src -> src.getChatroomSetting().getDescription(),
-									ChatroomResponseDto::setDescription);
-							mapper.map(src -> src.getChatroomSetting().getCount(), ChatroomResponseDto::setCount);
-							mapper.map(
-									src -> src.getChatroomSetting().getMaxCount(), ChatroomResponseDto::setMaxCount);
-							mapper.map(
-									src -> src.getChatroomSetting().getIsPublic(), ChatroomResponseDto::setIsPublic);
-							mapper.map(
 									src ->
 											Optional.ofNullable(src.getChatroomSetting().getHobbies())
 													.orElse(Collections.emptySet())
