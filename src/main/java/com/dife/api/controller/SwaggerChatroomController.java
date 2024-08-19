@@ -17,6 +17,10 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Chatroom API", description = "채팅방 관리 서비스 API")
 public interface SwaggerChatroomController {
 
+	@Operation(summary = "채팅방 중복 이름 확인 API", description = "사용자가 채팅방 이름을 검색해 중복성을 검사하는 API입니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<Void> checkUsername(@RequestParam(name = "name") String name);
+
 	@Operation(
 			summary = "채팅방 생성1 API",
 			description = "사용자가 multipart/form-data 형태의 POST요청으로 그룹 채팅방1 생성하는 API입니다.")

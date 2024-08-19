@@ -20,6 +20,8 @@ public class ChatroomResponseDto {
 
 	private ChatroomType chatroomType;
 
+	private Member manager;
+
 	private String description;
 
 	private File profileImg;
