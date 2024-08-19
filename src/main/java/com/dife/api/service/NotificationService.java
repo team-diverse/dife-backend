@@ -15,6 +15,7 @@ import com.dife.api.model.dto.NotificationTokenResponseDto;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.NotificationRepository;
 import com.dife.api.repository.NotificationTokenRepository;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class NotificationService {
 				.collect(toList());
 	}
 
-	public void sendPushNotification(String expoToken, String message) {
+	public void sendPushNotification(String expoToken, LocalDateTime created, String message) {
 		String expoPushUrl = "https://exp.host/--/api/v2/push/send";
 
 		HttpHeaders headers = new HttpHeaders();
@@ -89,6 +90,7 @@ public class NotificationService {
 		Map<String, Object> body = new HashMap<>();
 		body.put("to", expoToken);
 		body.put("sound", "default");
+		body.put("created", created);
 		body.put("body", message);
 
 		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
@@ -106,8 +108,7 @@ public class NotificationService {
 			String messageTemplate,
 			NotificationType type,
 			Long typeId) {
-		if (!Objects.equals(toMember.getId(), currentMember.getId())
-				&& type != NotificationType.CONNECT) {
+		if (!Objects.equals(toMember.getId(), currentMember.getId())) {
 			List<NotificationToken> notificationTokens = toMember.getNotificationTokens();
 
 			for (NotificationToken notificationToken : notificationTokens) {
@@ -115,12 +116,13 @@ public class NotificationService {
 				notification.setNotificationToken(notificationToken);
 				notification.setType(type);
 				notification.setTypeId(typeId);
+				notification.setCreated(LocalDateTime.now());
 
 				String message = String.format(messageTemplate, currentMember.getUsername());
 				notification.setMessage(message);
 				notificationToken.getNotifications().add(notification);
 
-				sendPushNotification(notificationToken.getPushToken(), message);
+				sendPushNotification(notificationToken.getPushToken(), notification.getCreated(), message);
 			}
 		}
 	}

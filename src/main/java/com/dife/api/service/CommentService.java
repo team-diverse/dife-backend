@@ -11,6 +11,7 @@ import com.dife.api.repository.CommentRepository;
 import com.dife.api.repository.LikeCommentRepository;
 import com.dife.api.repository.MemberRepository;
 import com.dife.api.repository.PostRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -101,14 +102,24 @@ public class CommentService {
 		return dto;
 	}
 
+	@Transactional
 	public void deleteComment(Long id, String memberEmail) {
-
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Comment comment = commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
 
-		if (!comment.getWriter().equals(member)) throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
+		if (!comment.getWriter().equals(member)) {
+			throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
+		}
 
+		if (!comment.getChildrenComments().isEmpty()) {
+			for (Comment childComment : comment.getChildrenComments()) {
+				childComment.getPost().getComments().remove(childComment);
+				commentRepository.delete(childComment);
+			}
+		}
+
+		comment.getPost().getComments().remove(comment);
 		commentRepository.delete(comment);
 	}
 
@@ -120,9 +131,11 @@ public class CommentService {
 			notification.setType(type);
 			notification.setMessage(message);
 			notification.setTypeId(typeId);
+			notification.setCreated(LocalDateTime.now());
 			token.getNotifications().add(notification);
 
-			notificationService.sendPushNotification(token.getPushToken(), message);
+			notificationService.sendPushNotification(
+					token.getPushToken(), notification.getCreated(), message);
 		}
 	}
 }

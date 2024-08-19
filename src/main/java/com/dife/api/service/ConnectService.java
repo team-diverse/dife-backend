@@ -9,6 +9,7 @@ import com.dife.api.model.dto.ConnectRequestDto;
 import com.dife.api.model.dto.ConnectResponseDto;
 import com.dife.api.repository.ConnectRepository;
 import com.dife.api.repository.MemberRepository;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -27,12 +28,30 @@ public class ConnectService {
 	private final NotificationService notificationService;
 
 	@Transactional(readOnly = true)
-	public List<ConnectResponseDto> getConnects(String currentMemberEmail) {
+	public List<ConnectResponseDto> getConnects(ConnectStatus status, String currentMemberEmail) {
+
+		List<Connect> allConnects = new ArrayList<>();
 		Member currentMember =
 				memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
-		List<Connect> connects = connectRepository.findAllByToMember(currentMember);
 
-		return connects.stream()
+		switch (status) {
+			case ACCEPTED:
+				allConnects =
+						connectRepository.findAllByMemberAndStatus(currentMember, ConnectStatus.ACCEPTED);
+				break;
+			case PENDING:
+				allConnects =
+						connectRepository.findAll().stream()
+								.filter(connect -> connect.getStatus().equals(ConnectStatus.PENDING))
+								.filter(
+										connect ->
+												connect.getToMember().getId().equals(currentMember.getId())
+														|| connect.getFromMember().getId().equals(currentMember.getId()))
+								.collect(toList());
+				break;
+		}
+
+		return allConnects.stream()
 				.map(c -> modelMapper.map(c, ConnectResponseDto.class))
 				.collect(toList());
 	}
