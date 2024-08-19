@@ -27,8 +27,9 @@ public class Chatroom extends BaseTimeEntity {
 
 	private ChatroomType chatroomType = ChatroomType.GROUP;
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "chatroom_setting_id")
+	@JsonIgnore
 	private ChatroomSetting chatroomSetting;
 
 	@ManyToOne
@@ -36,7 +37,7 @@ public class Chatroom extends BaseTimeEntity {
 	@JsonIgnore
 	private Member manager;
 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(
 			name = "chatroom_member",
 			joinColumns = @JoinColumn(name = "chatroom_id"),
