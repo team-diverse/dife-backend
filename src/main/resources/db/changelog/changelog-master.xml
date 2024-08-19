@@ -1,0 +1,703 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="suyeon">
+        <createTable tableName="member">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="is_deleted" type="bit"/>
+            <column name="is_public" type="bit"/>
+            <column name="is_verified" type="bit"/>
+            <column name="mbti" type="tinyint">
+                <constraints checkConstraint="mbti BETWEEN 0 AND 15"/>
+            </column>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="profile_img_id" type="bigint"/>
+            <column name="verification_file_id" type="bigint"/>
+            <column name="bio" type="varchar(60)"/>
+            <column name="country" type="varchar(255)"/>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="major" type="varchar(255)"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(255)"/>
+            <column name="student_id" type="varchar(255)"/>
+            <column name="username" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="suyeon">
+        <addUniqueConstraint columnNames="profile_img_id"
+                             tableName="member"
+                             constraintName="UK_aq5a3oh6p1chase3mmb15l30t"/>
+
+        <addUniqueConstraint columnNames="verification_file_id"
+                             tableName="member"
+                             constraintName="UK_ju95f4bdlnpmsq0h6intiwv0t"/>
+    </changeSet>
+
+    <changeSet id="3" author="suyeon">
+        <createTable tableName="file">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="format" type="tinyint">
+                <constraints checkConstraint="format BETWEEN 0 AND 6"/>
+            </column>
+            <column name="chat_id" type="bigint"/>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="post_id" type="bigint"/>
+            <column name="size" type="bigint"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="original_name" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="suyeon">
+        <createTable tableName="hobby">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="chatroom_setting_id" type="bigint"/>
+            <column name="member_id" type="bigint"/>
+            <column name="name" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="5" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="hobby"
+                                 constraintName="FKarxitmu8hs5yjf588wxjk230m"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="6" author="suyeon">
+        <createTable tableName="language">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="chatroom_setting_id" type="bigint"/>
+            <column name="member_id" type="bigint"/>
+            <column name="name" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="7" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="language"
+                                 constraintName="FK3qd8ocasqnmc3v4is5o2b4l4w"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="8" author="suyeon">
+        <createTable tableName="member_blocks">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="blacklisted_member_id" type="bigint"/>
+            <column name="created" type="datetime(6)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="modified" type="datetime(6)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="9" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="member_blocks"
+                                 constraintName="FKaebj0wk4x9olhmpg3uw7ccyxc"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="blacklisted_member_id"
+                                 baseTableName="member_blocks"
+                                 constraintName="FKm08dhs1gq1slckx5wt2sragwi"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="10" author="suyeon">
+        <createTable tableName="notification_token">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created" type="datetime(6)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="device_id" type="varchar(255)"/>
+            <column name="push_token" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="11" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="notification_token"
+                                 constraintName="FKqld7c8jfn885g6opo7e8f864k"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="12" author="suyeon">
+        <createTable tableName="notification">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="tinyint">
+                <constraints checkConstraint="type BETWEEN 0 AND 2"/>
+            </column>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="notification_token_id" type="bigint"/>
+            <column name="type_id" type="bigint"/>
+            <column name="chat_member_email" type="varchar(255)"/>
+            <column name="message" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="13" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="notification_token_id"
+                                 baseTableName="notification"
+                                 constraintName="FKfrkrdnl9a665ut3wfvqlusvhc"
+                                 referencedTableName="notification_token"
+                                 referencedColumnNames="id"/>
+        <sql>
+            ALTER TABLE notification
+                ADD CONSTRAINT CK_notification_type
+                    CHECK (type BETWEEN 0 AND 2);
+        </sql>
+    </changeSet>
+
+    <changeSet id="14" author="suyeon">
+        <createTable tableName="connect">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="from_member_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="to_member_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="15" author="suyeon">
+        <addUniqueConstraint columnNames="from_member_id, to_member_id"
+                             tableName="connect"
+                             constraintName="UKabqqibieu680igqu2bjt60b2w"/>
+    </changeSet>
+
+
+    <changeSet id="16" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="from_member_id"
+                                 baseTableName="connect"
+                                 constraintName="FKba0dy37xultekhhxci9ttmd4k"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="to_member_id"
+                                 baseTableName="connect"
+                                 constraintName="FKdfohivw8eu27xdrnfs5dc8hwv"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="17" author="suyeon">
+        <sql>
+            ALTER TABLE connect
+                ADD CONSTRAINT CHK_status
+                    CHECK (status IN ('PENDING', 'ACCEPTED'));
+        </sql>
+    </changeSet>
+
+    <changeSet id="18" author="suyeon">
+        <createTable tableName="post">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="is_public" type="bit"/>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="content" type="varchar(255)"/>
+            <column name="title" type="varchar(255)"/>
+            <column name="board_type" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="19" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="post"
+                                 constraintName="FK83s99f4kx8oiqm3ro0sasmpww"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="20" author="suyeon">
+        <createTable tableName="comment">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="is_public" type="bit"/>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="parent_id" type="bigint"/>
+            <column name="post_id" type="bigint"/>
+            <column name="writer_id" type="bigint"/>
+            <column name="content" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="21" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="parent_id"
+                                 baseTableName="comment"
+                                 constraintName="FKde3rfu96lep00br5ov0mdieyt"
+                                 referencedTableName="comment"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="writer_id"
+                                 baseTableName="comment"
+                                 constraintName="FKjfdaen6h2c8o1axvh7j6go3rq"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="comment"
+                                 constraintName="FKs1slvnkuemjsq2kj4h3vhx7i1"
+                                 referencedTableName="post"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+
+    <changeSet id="22" author="suyeon">
+        <createTable tableName="post_likes">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="post_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="23" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="post_likes"
+                                 constraintName="FK31v89uqgytp1u8jm6vcn1rpsv"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="post_likes"
+                                 constraintName="FKmxmoc9p5ndijnsqtvsjcuoxm3"
+                                 referencedTableName="post"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="24" author="suyeon">
+        <createTable tableName="comment_likes">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="comment_id" type="bigint"/>
+            <column name="member_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="25" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="comment_likes"
+                                 constraintName="FK7mxs5jtimpj71miv2r0fp6r8p"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="comment_id"
+                                 baseTableName="comment_likes"
+                                 constraintName="FKd0epu3dcjc57pwe7lt5jgfqsi"
+                                 referencedTableName="comment"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="26" author="suyeon">
+        <createTable tableName="post_blocks">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="post_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="27" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="post_blocks"
+                                 constraintName="FKaag1y88bxfdpmcyb3s6598nnb"
+                                 referencedTableName="post"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="post_blocks"
+                                 constraintName="FKl20cxtgrnl9sc4j39n42whfxj"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="28" author="suyeon">
+        <createTable tableName="chatroom">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="chatroom_type" type="tinyint"/>
+            <column name="chatroom_setting_id" type="bigint"/>
+            <column name="created" type="datetime(6)"/>
+            <column name="manager_id" type="bigint"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="name" type="varchar(255)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="manager_id"
+                                 baseTableName="chatroom"
+                                 constraintName="FKmvj0i6jeryxxndh47t7ewpfvb"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+        <sql>
+            ALTER TABLE chatroom
+                ADD CONSTRAINT CK_chatroom_chatroom_type
+                    CHECK (chatroom_type BETWEEN 0 AND 1);
+        </sql>
+    </changeSet>
+
+    <changeSet id="29" author="suyeon">
+        <createTable tableName="chatroom_setting">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="count" type="int"/>
+            <column name="is_public" type="bit"/>
+            <column name="max_count" type="int"/>
+            <column name="password" type="varchar(5)"/>
+            <column name="created" type="datetime(6)"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="profile_img_id" type="bigint"/>
+            <column name="description" type="varchar(60)"/>
+        </createTable>
+        <addUniqueConstraint columnNames="profile_img_id"
+                             constraintName="UK_98hmbcjwpvs198to5fpmreqbh"
+                             tableName="chatroom_setting"/>
+        <addForeignKeyConstraint baseColumnNames="profile_img_id"
+                                 baseTableName="chatroom_setting"
+                                 constraintName="FKdvry3uv77saagsf3sqt8rk532"
+                                 referencedTableName="file"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="30" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chatroom_setting_id"
+                                 baseTableName="chatroom"
+                                 constraintName="FKsqa6p4lg8h6427v7u3l8whsl1"
+                                 referencedTableName="chatroom_setting"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="31" author="suyeon">
+        <createTable tableName="group_purpose">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="chatroom_setting_id" type="bigint"/>
+            <column name="name" type="varchar(255)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="chatroom_setting_id"
+                                 baseTableName="group_purpose"
+                                 constraintName="FKogcn1o7n7kkt57js4943jhjk7"
+                                 referencedTableName="chatroom_setting"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="32" author="suyeon">
+        <createTable tableName="chatroom_member">
+            <column name="chatroom_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="member_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="chatroom_id,member_id"
+                       constraintName="PK_chatroom_member"
+                       tableName="chatroom_member"/>
+        <addForeignKeyConstraint baseColumnNames="chatroom_id"
+                                 baseTableName="chatroom_member"
+                                 constraintName="FK7hnl9ue9df56m03bu8qbcl4ha"
+                                 referencedTableName="chatroom"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="chatroom_member"
+                                 constraintName="FK34d73aw9dfbopj0jnx3koin33"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="33" author="suyeon">
+        <createTable tableName="chat">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="chatroom_id" type="bigint"/>
+            <column name="created" type="datetime(6)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="message" type="varchar(300)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="chatroom_id"
+                                 baseTableName="chat"
+                                 constraintName="FKt1s17j5bqqa0kmqosbw83fhn7"
+                                 referencedTableName="chatroom"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="chat"
+                                 constraintName="FKgvc5hrt0h18xk63qosss3ti30"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="34" author="suyeon">
+        <createTable tableName="chat_files">
+            <column name="chat_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="files_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="files_id"
+                             constraintName="UK_51oxcy8r9qre209960tc7e797"
+                             tableName="chat_files"/>
+        <addForeignKeyConstraint baseColumnNames="files_id"
+                                 baseTableName="chat_files"
+                                 constraintName="FKa9xgj5rlkkmb8q8eus21p3t07"
+                                 referencedTableName="file"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="chat_id"
+                                 baseTableName="chat_files"
+                                 constraintName="FKs9n3ot93qx9bsgbv5q438v23q"
+                                 referencedTableName="chat"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="35" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chat_id"
+                                 baseTableName="file"
+                                 constraintName="FK8c4c0psnyrekjd6vpnw1hhcjw"
+                                 referencedTableName="chat"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="36" author="suyeon">
+
+        <addForeignKeyConstraint baseColumnNames="chatroom_setting_id"
+                                 baseTableName="hobby"
+                                 constraintName="FK3bg5m6nd0otgap6uej8pgssve"
+                                 referencedTableName="chatroom_setting"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="37" author="suyeon">
+
+        <addForeignKeyConstraint baseColumnNames="chatroom_setting_id"
+                                 baseTableName="language"
+                                 constraintName="FKshtysvouql26m57uww8ivbx89"
+                                 referencedTableName="chatroom_setting"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="38" author="suyeon">
+        <createTable tableName="chatroom_likes">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="chatroom_id" type="bigint"/>
+            <column name="created" type="datetime(6)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="modified" type="datetime(6)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="chatroom_id"
+                                 baseTableName="chatroom_likes"
+                                 constraintName="FK1yivcq2x0wkpm175rn4rt0qp8"
+                                 referencedTableName="chatroom"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="chatroom_likes"
+                                 constraintName="FKs3bdmutcb3k5cxwp7ylufd0yn"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+
+    <changeSet id="39" author="suyeon">
+        <createTable tableName="bookmark">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created" type="datetime(6)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="post_id" type="bigint"/>
+            <column name="message" type="varchar(300)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="bookmark"
+                                 constraintName="FK5bm7rup91j277mc7gg63akie2"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="bookmark"
+                                 constraintName="FKkm47dr0i09mor5ks9aaebx15u"
+                                 referencedTableName="post"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="40" author="suyeon">
+        <createTable tableName="translation">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="detected_source_language" type="varchar(255)"/>
+            <column name="text" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="41" author="suyeon">
+        <createTable tableName="bookmark_translation">
+            <column name="bookmark_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="translation_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="bookmark_id"
+                                 baseTableName="bookmark_translation"
+                                 constraintName="FKjgx1nyvlil155e3td7xpb6ake"
+                                 referencedTableName="bookmark"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="translation_id"
+                                 baseTableName="bookmark_translation"
+                                 constraintName="FKmp8u2ihp4f3bne3xqbn536366"
+                                 referencedTableName="translation"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="42" author="suyeon">
+        <createTable tableName="translation_bookmarks">
+            <column name="bookmarks_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="translation_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="bookmarks_id"
+                                 baseTableName="translation_bookmarks"
+                                 constraintName="FKfo6seok42sjlrdq8odg7js465"
+                                 referencedTableName="bookmark"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="translation_id"
+                                 baseTableName="translation_bookmarks"
+                                 constraintName="FKm1x6e32onn1vh75chhbk8p3uk"
+                                 referencedTableName="translation"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="43" author="suyeon">
+        <createTable tableName="report">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="tinyint"/>
+            <column name="comment_id" type="bigint"/>
+            <column name="created" type="datetime(6)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="modified" type="datetime(6)"/>
+            <column name="post_id" type="bigint"/>
+            <column name="receiver_id" type="bigint"/>
+            <column name="description" type="varchar(255)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="comment_id"
+                                 baseTableName="report"
+                                 constraintName="FK1dw2gwqqspkllnye2ylaiabqx"
+                                 referencedTableName="comment"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="report"
+                                 constraintName="FKel7y5wyx42a6njav1dbe2torl"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="report"
+                                 constraintName="FKnuqod1y014fp5bmqjeoffcgqy"
+                                 referencedTableName="post"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseColumnNames="receiver_id"
+                                 baseTableName="report"
+                                 constraintName="FKpfkktpdd9lbluujqudllpesgh"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+        <sql>
+            ALTER TABLE report
+                ADD CONSTRAINT CK_report_type
+                    CHECK (type BETWEEN 0 AND 3);
+        </sql>
+    </changeSet>
+
+    <changeSet id="44" author="suyeon">
+        <createTable tableName="member_likelist">
+            <column name="member_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="likelisted_member_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <sql>
+            ALTER TABLE member_likelist
+                ADD CONSTRAINT PK_member_likelist PRIMARY KEY (member_id, likelisted_member_id);
+        </sql>
+
+        <addForeignKeyConstraint baseColumnNames="member_id"
+                                 baseTableName="member_likelist"
+                                 constraintName="FK_member_likelist_member"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseColumnNames="likelisted_member_id"
+                                 baseTableName="member_likelist"
+                                 constraintName="FK_member_likelist_likelisted_member"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+
+</databaseChangeLog>
