@@ -14,12 +14,12 @@ public interface SwaggerBlockController {
 
 	@Operation(summary = "차단 생성 API", description = "사용자가 차단하고자 하는 회원의 ID를 body에 작성해 차단 생성하는 API입니다.")
 	@ApiResponse(responseCode = "201")
-	ResponseEntity<List<MemberResponseDto>> createBlock(
+	ResponseEntity<List<BlockMemberResponseDto>> createBlock(
 			BlockMemberRequestDto requestDto, Authentication auth);
 
 	@Operation(summary = "차단 목록 조회 API", description = "사용자가 차단되어 있는 회원들의 목록을 조회할 수 있는 API입니다.")
 	@ApiResponse(responseCode = "200")
-	ResponseEntity<List<MemberResponseDto>> createBlock(Authentication auth);
+	ResponseEntity<List<BlockMemberResponseDto>> createBlock(Authentication auth);
 
 	@Operation(
 			summary = "차단 취소 API",

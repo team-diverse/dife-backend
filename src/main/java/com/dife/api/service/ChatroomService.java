@@ -32,6 +32,8 @@ public class ChatroomService {
 	private final MemberRepository memberRepository;
 	private final ChatRepository chatRepository;
 
+	private final BlockService blockService;
+
 	private final ModelMapper modelMapper;
 
 	@Autowired
@@ -237,6 +239,11 @@ public class ChatroomService {
 				memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
 		Member otherMember =
 				memberRepository.findById(toMemberId).orElseThrow(MemberNotFoundException::new);
+
+		Set<Member> blockedMembers = blockService.getBlackSet(currentMember);
+
+		if (blockedMembers.contains(otherMember))
+			throw new MemberException("차단된 사용자에게는 일대일 채팅을 보낼 수 없습니다!");
 
 		if (chatroomRepository.existsSingleChatroomByMembers(
 				currentMember, otherMember, ChatroomType.SINGLE))

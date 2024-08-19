@@ -2,16 +2,15 @@ package com.dife.api.service;
 
 import static java.util.stream.Collectors.toList;
 
+import com.dife.api.exception.BlockDuplicateException;
 import com.dife.api.exception.MemberException;
 import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
-import com.dife.api.repository.FileRepository;
-import com.dife.api.repository.LikePostRepository;
-import com.dife.api.repository.MemberRepository;
-import com.dife.api.repository.PostRepository;
+import com.dife.api.repository.*;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,9 @@ public class PostService {
 
 	private final PostRepository postRepository;
 	private final LikePostRepository likePostRepository;
+	private final BlockPostRepository blockPostRepository;
 	private final FileService fileService;
+	private final BlockService blockService;
 	private final FileRepository fileRepository;
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
@@ -77,11 +78,18 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<PostResponseDto> getPostsByBoardType(BoardCategory boardCategory) {
+	public List<PostResponseDto> getPostsByBoardType(
+			BoardCategory boardCategory, String memberEmail) {
 		Sort sort = Sort.by(Sort.Direction.DESC, "created");
 		List<Post> posts = postRepository.findPostsByBoardType(boardCategory, sort);
 
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		Set<Member> blockedMembers = blockService.getBlackSet(member);
+
 		return posts.stream()
+				.filter(post -> !blockedMembers.contains(post.getWriter()))
 				.map(
 						post -> {
 							PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
@@ -98,6 +106,8 @@ public class PostService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
+		if (blockPostRepository.existsByPostAndMember(post, member))
+			throw new MemberException("차단된 사용자는 게시글을 볼 수 없습니다!");
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
 		responseDto.setCommentCount(post.getComments().size());
 		responseDto.setLikesCount(post.getPostLikes().size());
@@ -154,6 +164,22 @@ public class PostService {
 		return modelMapper.map(post, PostResponseDto.class);
 	}
 
+	public void createBlock(Long postId, String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+		if (blockPostRepository.existsByPostAndMember(post, member))
+			throw new BlockDuplicateException();
+
+		PostBlock postBlock = new PostBlock();
+		postBlock.setPost(post);
+		postBlock.setMember(member);
+
+		blockPostRepository.save(postBlock);
+	}
+
 	public void deletePost(Long id, String memberEmail) {
 
 		Member member =
@@ -171,5 +197,48 @@ public class PostService {
 
 	private boolean isFileValid(MultipartFile file) {
 		return file != null && !file.isEmpty();
+	}
+
+	public List<PostResponseDto> getSearchPosts(
+			String keyword, BoardCategory type, String memberEmail) {
+
+		Member currentMember =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		String trimmedKeyword = (keyword != null) ? keyword.trim() : "";
+		Sort sort = Sort.by(Sort.Direction.DESC, "created");
+
+		List<Post> posts;
+
+		if (type == BoardCategory.FREE || type == BoardCategory.TIP) {
+			posts =
+					postRepository.findPostsByBoardType(type, sort).stream()
+							.filter(
+									post ->
+											post.getTitle().contains(trimmedKeyword)
+													|| post.getContent().contains(trimmedKeyword)
+													|| post.getWriter().getName().contains(trimmedKeyword))
+							.collect(Collectors.toList());
+		} else {
+			posts = postRepository.findAllByKeywordSearch(trimmedKeyword);
+		}
+
+		Set<Member> blockedMembers = blockService.getBlackSet(currentMember);
+
+		if (posts.isEmpty()) {
+			throw new PostNotFoundException();
+		}
+
+		return posts.stream()
+				.filter(post -> !blockedMembers.contains(post.getWriter()))
+				.map(
+						post -> {
+							PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
+							responseDto.setCommentCount(post.getComments().size());
+							responseDto.setLikesCount(post.getPostLikes().size());
+							responseDto.setBookmarkCount(post.getBookmarks().size());
+							return responseDto;
+						})
+				.collect(toList());
 	}
 }
