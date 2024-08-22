@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Notification API", description = "알림 서비스 API")
 public interface SwaggerNotificationController {
@@ -22,7 +23,8 @@ public interface SwaggerNotificationController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = NotificationResponseDto.class))
 			})
-	ResponseEntity<List<NotificationResponseDto>> getNotifications(Authentication auth);
+	ResponseEntity<List<NotificationResponseDto>> getNotifications(
+			@PathVariable("deviceId") String deviceId, Authentication auth);
 
 	@Operation(summary = "알림 토큰 생성 API", description = "사용자의 접속 기기에 따른 알림 토큰을 생성하는 API입니다.")
 	@ApiResponse(

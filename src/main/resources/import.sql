@@ -58,15 +58,15 @@ INSERT INTO hobby(ID, MEMBER_ID, NAME)
 VALUES ('4', '5', 'SOCCER');
 
 INSERT INTO notification_token(ID, MEMBER_ID, DEVICE_ID, PUSH_TOKEN)
-VALUES ('1', '1', 'XXXX-XXXX-XXXX', 'pushToken1');
+VALUES ('1', '1', 'deviceId1', 'pushToken1');
 INSERT INTO notification_token(ID, MEMBER_ID, DEVICE_ID, PUSH_TOKEN)
-VALUES ('2', '2', 'XXXX-XXXX-XXXX', 'pushToken2');
+VALUES ('2', '2', 'deviceId2', 'pushToken2');
 INSERT INTO notification_token(ID, MEMBER_ID, DEVICE_ID, PUSH_TOKEN)
-VALUES ('3', '3', 'XXXX-XXXX-XXXX', 'pushToken3');
+VALUES ('3', '3', 'deviceId3', 'pushToken3');
 INSERT INTO notification_token(ID, MEMBER_ID, DEVICE_ID, PUSH_TOKEN)
-VALUES ('4', '4', 'XXXX-XXXX-XXXX', 'pushToken4');
+VALUES ('4', '4', 'deviceId4', 'pushToken4');
 INSERT INTO notification_token(ID, MEMBER_ID, DEVICE_ID, PUSH_TOKEN)
-VALUES ('5', '5', 'XXXX-XXXX-XXXX', 'pushToken5');
+VALUES ('5', '5', 'deviceId5', 'pushToken5');
 
 ALTER TABLE post MODIFY COLUMN content LONGTEXT;
 
