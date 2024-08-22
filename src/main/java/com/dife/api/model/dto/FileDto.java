@@ -1,6 +1,8 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.Format;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +24,7 @@ public class FileDto {
 
 	private String url;
 
+	@Enumerated(EnumType.STRING)
 	private Format format;
 
 	private LocalDateTime createdAt;

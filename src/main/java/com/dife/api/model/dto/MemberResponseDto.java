@@ -3,6 +3,8 @@ package com.dife.api.model.dto;
 import com.dife.api.model.File;
 import com.dife.api.model.MbtiCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.*;
@@ -45,6 +47,7 @@ public class MemberResponseDto {
 	private Boolean isLiked = false;
 
 	@Schema(description = "MBTI", example = "ENTJ")
+	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
 
 	@Schema(description = "언어", example = "Korean, English")

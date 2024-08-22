@@ -31,8 +31,7 @@ public class MapperConfig {
 				.setConverter(context -> context.getSource().getName());
 		modelMapper
 				.typeMap(GroupPurpose.class, String.class)
-				.setConverter(context -> context.getSource().getName());
-
+				.setConverter(context -> context.getSource().getType().name());
 		modelMapper
 				.typeMap(Chatroom.class, ChatroomResponseDto.class)
 				.addMappings(
@@ -54,13 +53,12 @@ public class MapperConfig {
 													.map(Language::getName)
 													.collect(Collectors.toSet()),
 									ChatroomResponseDto::setLanguages);
-
 							mapper.map(
 									src ->
 											Optional.ofNullable(src.getChatroomSetting().getPurposes())
 													.orElse(Collections.emptySet())
 													.stream()
-													.map(GroupPurpose::getName)
+													.map(GroupPurpose::getType)
 													.collect(Collectors.toSet()),
 									ChatroomResponseDto::setPurposes);
 							mapper.map(

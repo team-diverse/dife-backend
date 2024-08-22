@@ -25,6 +25,7 @@ public class Chatroom extends BaseTimeEntity {
 
 	private String name = "";
 
+	@Enumerated(EnumType.STRING)
 	private ChatroomType chatroomType = ChatroomType.GROUP;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
