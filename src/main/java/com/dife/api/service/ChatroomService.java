@@ -28,7 +28,6 @@ public class ChatroomService {
 	private final ChatroomRepository chatroomRepository;
 	private final HobbyRepository hobbyRepository;
 	private final LanguageRepository languageRepository;
-	private final GroupPurposesRepository groupPurposesRepository;
 	private final LikeChatroomRepository likeChatroomRepository;
 	private final MemberRepository memberRepository;
 	private final ChatRepository chatRepository;
@@ -69,7 +68,7 @@ public class ChatroomService {
 			String description,
 			Long toMemberId,
 			Optional<Integer> maxCount,
-			Set<String> purposes,
+			Set<GroupPurposeType> purposes,
 			Set<String> hobbies,
 			Set<String> languages,
 			Boolean isPublic,
@@ -101,7 +100,7 @@ public class ChatroomService {
 			String description,
 			String memberEmail,
 			Optional<Integer> maxCount,
-			Set<String> purposes,
+			Set<GroupPurposeType> purposes,
 			Set<String> hobbies,
 			Set<String> languages,
 			Boolean isPublic,
@@ -143,7 +142,7 @@ public class ChatroomService {
 			MultipartFile profileImg,
 			ChatroomSetting givenSetting,
 			Optional<Integer> maxCount,
-			Set<String> purposes,
+			Set<GroupPurposeType> purposes,
 			Set<String> hobbies,
 			Set<String> languages,
 			Boolean isPublic,
@@ -151,35 +150,17 @@ public class ChatroomService {
 			throws IOException {
 
 		if (purposes != null) {
-
-			Set<GroupPurpose> existingPurposes =
-					groupPurposesRepository.findGroupPurposesByChatroomSetting(givenSetting);
-			Map<String, GroupPurpose> nameToPurposeMap =
-					existingPurposes.stream()
-							.collect(
-									Collectors.toMap(
-											GroupPurpose::getName,
-											Function.identity(),
-											(existing, replacement) -> existing));
-
-			Set<GroupPurpose> updatedPurposes = new HashSet<>();
-
-			for (String purposeName : purposes) {
-				if (nameToPurposeMap.containsKey(purposeName)) {
-					updatedPurposes.add(nameToPurposeMap.get(purposeName));
-				} else {
-					GroupPurpose nPurpose = new GroupPurpose();
-					nPurpose.setName(purposeName);
-					nPurpose.setChatroomSetting(givenSetting);
-					groupPurposesRepository.save(nPurpose);
-					updatedPurposes.add(nPurpose);
-				}
-			}
-			existingPurposes.stream()
-					.filter(purpose -> !purposes.contains(purpose.getName()))
-					.forEach(groupPurposesRepository::delete);
-
-			givenSetting.setPurposes(updatedPurposes);
+			Set<GroupPurpose> groupPurposes =
+					purposes.stream()
+							.map(
+									purposeType -> {
+										GroupPurpose groupPurpose = new GroupPurpose();
+										groupPurpose.setType(purposeType);
+										groupPurpose.setChatroomSetting(givenSetting);
+										return groupPurpose;
+									})
+							.collect(Collectors.toSet());
+			givenSetting.setPurposes(groupPurposes);
 		}
 
 		if (hobbies != null) {
@@ -288,7 +269,7 @@ public class ChatroomService {
 			Long id,
 			MultipartFile profileImg,
 			Optional<Integer> maxCount,
-			Set<String> purposes,
+			Set<GroupPurposeType> purposes,
 			Set<String> hobbies,
 			Set<String> languages,
 			Boolean isPublic,
@@ -415,8 +396,8 @@ public class ChatroomService {
 
 	public List<ChatroomResponseDto> getFilterChatrooms(
 			Set<String> hobbies,
+			Set<GroupPurposeType> purposes,
 			Set<String> languages,
-			Set<String> purposes,
 			Integer maxCount,
 			String memberEmail) {
 
@@ -424,7 +405,7 @@ public class ChatroomService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Set<String> safeHobbies = hobbies != null ? hobbies : Collections.emptySet();
-		Set<String> safePurposes = purposes != null ? purposes : Collections.emptySet();
+		Set<GroupPurposeType> safePurposes = purposes != null ? purposes : Collections.emptySet();
 		Set<String> safeLanguages = languages != null ? languages : Collections.emptySet();
 
 		List<Chatroom> validChatrooms =
@@ -441,7 +422,7 @@ public class ChatroomService {
 									ChatroomSetting setting = chatroom.getChatroomSetting();
 									return safePurposes.isEmpty()
 											|| setting.getPurposes().stream()
-													.anyMatch(purpose -> safePurposes.contains(purpose.getName()));
+													.anyMatch(purpose -> safePurposes.contains(purpose.getType()));
 								})
 						.filter(
 								chatroom -> {

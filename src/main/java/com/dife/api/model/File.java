@@ -28,6 +28,7 @@ public class File extends BaseTimeEntity {
 
 	private Long size;
 
+	@Enumerated(EnumType.STRING)
 	private Format format;
 
 	@ManyToOne
