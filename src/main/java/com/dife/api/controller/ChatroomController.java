@@ -127,12 +127,10 @@ public class ChatroomController {
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "purposes", required = false) Set<String> purposes,
-			@RequestParam(name = "minCount", required = false, defaultValue = "3") Integer minCount,
 			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount,
 			Authentication auth) {
 		List<ChatroomResponseDto> responseDto =
-				chatroomService.getFilterChatrooms(
-						hobbies, languages, purposes, minCount, maxCount, auth.getName());
+				chatroomService.getFilterChatrooms(hobbies, languages, purposes, maxCount, auth.getName());
 		return ok(responseDto);
 	}
 

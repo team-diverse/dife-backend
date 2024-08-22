@@ -417,7 +417,6 @@ public class ChatroomService {
 			Set<String> hobbies,
 			Set<String> languages,
 			Set<String> purposes,
-			Integer minCount,
 			Integer maxCount,
 			String memberEmail) {
 
@@ -454,7 +453,7 @@ public class ChatroomService {
 						.filter(
 								chatroom -> {
 									ChatroomSetting setting = chatroom.getChatroomSetting();
-									return setting.getMaxCount() >= minCount && setting.getMaxCount() <= maxCount;
+									return setting.getMaxCount() <= maxCount;
 								})
 						.collect(Collectors.toList());
 
