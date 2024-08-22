@@ -7,6 +7,7 @@ import com.dife.api.model.MbtiCategory;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.MemberService;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +60,8 @@ public class MemberController implements SwaggerMemberController {
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
-			Authentication auth) {
+			Authentication auth)
+			throws IOException {
 
 		MemberResponseDto responseDto =
 				memberService.update(
@@ -78,13 +80,13 @@ public class MemberController implements SwaggerMemberController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<MemberResponseDto> getById(
-			@PathVariable(name = "id") Long id, Authentication auth) {
+			@PathVariable(name = "id") Long id, Authentication auth) throws IOException {
 		MemberResponseDto responseDto = memberService.getMemberById(id, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 
 	@GetMapping("/profile")
-	public ResponseEntity<MemberResponseDto> profile(Authentication auth) {
+	public ResponseEntity<MemberResponseDto> profile(Authentication auth) throws IOException {
 		MemberResponseDto responseDto = memberService.getMember(auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
@@ -119,7 +121,8 @@ public class MemberController implements SwaggerMemberController {
 
 	@GetMapping("/random")
 	public ResponseEntity<List<MemberResponseDto>> getRandomMembers(
-			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
+			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth)
+			throws IOException {
 		List<MemberResponseDto> responseDto = memberService.getRandomMembers(count, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
@@ -129,7 +132,8 @@ public class MemberController implements SwaggerMemberController {
 			@RequestParam(name = "mbtis", required = false) Set<MbtiCategory> mbtiCategories,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
-			Authentication auth) {
+			Authentication auth)
+			throws IOException {
 		List<MemberResponseDto> responseDto =
 				memberService.getFilterMembers(mbtiCategories, hobbies, languages, auth.getName());
 		return ResponseEntity.ok(responseDto);
