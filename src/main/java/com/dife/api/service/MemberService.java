@@ -9,6 +9,7 @@ import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -102,7 +103,8 @@ public class MemberService {
 			Boolean isPublic,
 			MultipartFile profileImg,
 			MultipartFile verificationFile,
-			String memberEmail) {
+			String memberEmail)
+			throws IOException {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
@@ -223,7 +225,7 @@ public class MemberService {
 		return responseEntity;
 	}
 
-	public MemberResponseDto getMember(String email) {
+	public MemberResponseDto getMember(String email) throws IOException {
 
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
@@ -234,7 +236,7 @@ public class MemberService {
 		return responseDto;
 	}
 
-	public MemberResponseDto getMemberById(Long id, String memberEmail) {
+	public MemberResponseDto getMemberById(Long id, String memberEmail) throws IOException {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
@@ -481,7 +483,7 @@ public class MemberService {
 		javaMailSender.send(simpleMailMessage);
 	}
 
-	public List<MemberResponseDto> getRandomMembers(int count, String email) {
+	public List<MemberResponseDto> getRandomMembers(int count, String email) throws IOException {
 		Member currentMember = getMemberEntityByEmail(email);
 
 		List<Member> validRandomMembers =
@@ -516,7 +518,8 @@ public class MemberService {
 			Set<MbtiCategory> mbtiCategories,
 			Set<String> hobbies,
 			Set<String> languages,
-			String memberEmail) {
+			String memberEmail)
+			throws IOException {
 
 		Member currentMember =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -585,9 +588,14 @@ public class MemberService {
 							MemberResponseDto responseDto =
 									memberModelMapper.map(member, MemberResponseDto.class);
 							responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
-							if (responseDto.getProfileImg() != null)
-								responseDto.setProfilePresignUrl(
-										fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+							if (responseDto.getProfileImg() != null) {
+								try {
+									responseDto.setProfilePresignUrl(
+											fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							}
 							return responseDto;
 						})
 				.collect(Collectors.toList());

@@ -6,20 +6,23 @@ import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.handler.DisconnectHandler;
 import com.dife.api.handler.NotificationHandler;
 import com.dife.api.model.*;
+import com.dife.api.model.CustomMultipartFile;
 import com.dife.api.model.dto.*;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
-import com.dife.api.repository.FileRepository;
 import com.dife.api.repository.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.modelmapper.ModelMapper;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
@@ -34,7 +37,6 @@ public class ChatService {
 
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
-	private final FileRepository fileRepository;
 
 	private final MemberRepository memberRepository;
 
@@ -57,6 +59,9 @@ public class ChatService {
 				break;
 			case CHAT:
 				chat(dto);
+				break;
+			case FILE:
+				file(dto);
 				break;
 			case EXIT:
 				exit(dto, headerAccessor);
@@ -195,14 +200,16 @@ public class ChatService {
 		return chat;
 	}
 
-	public ChatResponseDto addChatFiles(
-			List<MultipartFile> chatFiles, Long chatroomId, String memberEmail)
-			throws JsonProcessingException {
+	public ChatResponseDto file(ChatRequestDto requestDto) throws JsonProcessingException {
 		Member member =
-				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+				memberRepository
+						.findById(requestDto.getMemberId())
+						.orElseThrow(MemberNotFoundException::new);
 
 		Chatroom chatroom =
-				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
+				chatroomRepository
+						.findById(requestDto.getChatroomId())
+						.orElseThrow(ChatroomNotFoundException::new);
 
 		if (!chatroom.getMembers().contains(member))
 			throw new ChatroomException("채팅방 회원만이 채팅 파일을 보낼 수 있습니다!");
@@ -210,20 +217,58 @@ public class ChatService {
 		Chat chat = new Chat();
 		chat.setMember(member);
 		chat.setChatroom(chatroom);
-		chatroom.getChats().add(chat);
+		List<String> awsS3ImageUrls = new ArrayList<>();
 
-		chatRepository.save(chat);
+		for (String imgCode : requestDto.getImgCode()) {
+			try {
+				String[] strings = imgCode.split(",");
+				String base64Image = strings[1];
+				String dataPrefix = strings[0];
+				String extension;
 
-		if (chatFiles != null && !chatFiles.isEmpty()) {
-			List<File> files =
-					chatFiles.stream()
-							.map(file -> convertFileToMappedFile(file, chat))
-							.collect(Collectors.toList());
+				if (dataPrefix.contains("jpeg")) {
+					extension = "jpeg";
+				} else if (dataPrefix.contains("png")) {
+					extension = "png";
+				} else {
+					extension = "jpg";
+				}
 
-			chat.setFiles(files);
-			fileRepository.saveAll(files);
+				byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+
+				File tempFile = File.createTempFile("image", "." + extension);
+				try (OutputStream outputStream = new FileOutputStream(tempFile)) {
+					outputStream.write(imageBytes);
+				}
+
+				DiskFileItem fileItem =
+						new DiskFileItem(
+								tempFile.getName(),
+								Files.probeContentType(tempFile.toPath()),
+								false,
+								tempFile.getName(),
+								(int) tempFile.length(),
+								tempFile.getParentFile());
+
+				MultipartFile multipartFile = new CustomMultipartFile(fileItem);
+				FileDto fileDto = fileService.upload(multipartFile);
+				awsS3ImageUrls.add(fileDto.getUrl());
+
+				if (!tempFile.delete()) {
+					log.warn("Failed to delete temporary file: " + tempFile.getAbsolutePath());
+				}
+
+			} catch (IOException ex) {
+				log.error("IOException Error Message : {}", ex.getMessage());
+				ex.printStackTrace();
+			}
 		}
 
+		for (String awsS3ImageUrl : awsS3ImageUrls) {
+			chat.getImgCode().add(awsS3ImageUrl);
+		}
+
+		chatRepository.save(chat);
 		chatroomRepository.save(chatroom);
 
 		Set<Member> chatroomMembers = chatroom.getMembers();
@@ -253,12 +298,5 @@ public class ChatService {
 		redisPublisher.publish(chatRedisDto);
 
 		return modelMapper.map(chat, ChatResponseDto.class);
-	}
-
-	private File convertFileToMappedFile(MultipartFile file, Chat chat) {
-		FileDto fileDto = fileService.upload(file);
-		File mappedFile = modelMapper.map(fileDto, File.class);
-		mappedFile.setChat(chat);
-		return mappedFile;
 	}
 }

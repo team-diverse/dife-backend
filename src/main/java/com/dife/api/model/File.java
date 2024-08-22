@@ -23,6 +23,9 @@ public class File extends BaseTimeEntity {
 
 	private String name;
 
+	@Column(columnDefinition = "TEXT")
+	private String url;
+
 	private Long size;
 
 	private Format format;
