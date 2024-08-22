@@ -120,8 +120,8 @@ public interface SwaggerChatroomController {
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "purposes", required = false) Set<String> purposes,
-			@RequestParam(name = "minCount", required = false, defaultValue = "3") Integer minCount,
-			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount);
+			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount,
+			Authentication auth);
 
 	@Operation(
 			summary = "채팅방 필터 검색 조회 API",
