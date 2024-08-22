@@ -135,7 +135,7 @@ public class ChatroomService {
 		chatroomRepository.save(chatroom);
 
 		return createDetail(
-				chatroom, profileImg, setting, maxCount, hobbies, languages, purposes, isPublic, password);
+				chatroom, profileImg, setting, maxCount, purposes, hobbies, languages, isPublic, password);
 	}
 
 	public ChatroomResponseDto createDetail(
@@ -149,6 +149,39 @@ public class ChatroomService {
 			Boolean isPublic,
 			String password)
 			throws IOException {
+
+		if (purposes != null) {
+
+			Set<GroupPurpose> existingPurposes =
+					groupPurposesRepository.findGroupPurposesByChatroomSetting(givenSetting);
+			Map<String, GroupPurpose> nameToPurposeMap =
+					existingPurposes.stream()
+							.collect(
+									Collectors.toMap(
+											GroupPurpose::getName,
+											Function.identity(),
+											(existing, replacement) -> existing));
+
+			Set<GroupPurpose> updatedPurposes = new HashSet<>();
+
+			for (String purposeName : purposes) {
+				if (nameToPurposeMap.containsKey(purposeName)) {
+					updatedPurposes.add(nameToPurposeMap.get(purposeName));
+				} else {
+					GroupPurpose nPurpose = new GroupPurpose();
+					nPurpose.setName(purposeName);
+					nPurpose.setChatroomSetting(givenSetting);
+					groupPurposesRepository.save(nPurpose);
+					updatedPurposes.add(nPurpose);
+				}
+			}
+			existingPurposes.stream()
+					.filter(purpose -> !purposes.contains(purpose.getName()))
+					.forEach(groupPurposesRepository::delete);
+
+			givenSetting.setPurposes(updatedPurposes);
+		}
+
 		if (hobbies != null) {
 
 			Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByChatroomSetting(givenSetting);
@@ -206,38 +239,6 @@ public class ChatroomService {
 					.forEach(languageRepository::delete);
 
 			givenSetting.setLanguages(updatedLanguages);
-		}
-
-		if (purposes != null) {
-
-			Set<GroupPurpose> existingPurposes =
-					groupPurposesRepository.findGroupPurposesByChatroomSetting(givenSetting);
-			Map<String, GroupPurpose> nameToPurposeMap =
-					existingPurposes.stream()
-							.collect(
-									Collectors.toMap(
-											GroupPurpose::getName,
-											Function.identity(),
-											(existing, replacement) -> existing));
-
-			Set<GroupPurpose> updatedPurposes = new HashSet<>();
-
-			for (String purposeName : purposes) {
-				if (nameToPurposeMap.containsKey(purposeName)) {
-					updatedPurposes.add(nameToPurposeMap.get(purposeName));
-				} else {
-					GroupPurpose nPurpose = new GroupPurpose();
-					nPurpose.setName(purposeName);
-					nPurpose.setChatroomSetting(givenSetting);
-					groupPurposesRepository.save(nPurpose);
-					updatedPurposes.add(nPurpose);
-				}
-			}
-			existingPurposes.stream()
-					.filter(purpose -> !purposes.contains(purpose.getName()))
-					.forEach(groupPurposesRepository::delete);
-
-			givenSetting.setPurposes(updatedPurposes);
 		}
 
 		if (maxCount.isEmpty() && givenSetting.getMaxCount() == 2) {
@@ -416,7 +417,6 @@ public class ChatroomService {
 			Set<String> hobbies,
 			Set<String> languages,
 			Set<String> purposes,
-			Integer minCount,
 			Integer maxCount,
 			String memberEmail) {
 
@@ -453,7 +453,7 @@ public class ChatroomService {
 						.filter(
 								chatroom -> {
 									ChatroomSetting setting = chatroom.getChatroomSetting();
-									return setting.getMaxCount() > minCount && setting.getMaxCount() < maxCount;
+									return setting.getMaxCount() <= maxCount;
 								})
 						.collect(Collectors.toList());
 

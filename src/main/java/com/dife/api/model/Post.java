@@ -20,7 +20,8 @@ public class Post extends BaseTimeEntity {
 
 	private String title = "";
 
-	private String content = "";
+	@Column(columnDefinition = "LONGTEXT")
+	private String content;
 
 	private Boolean isPublic = true;
 
