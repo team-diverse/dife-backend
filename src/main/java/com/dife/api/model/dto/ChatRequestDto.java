@@ -11,7 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatRequestDto {
-
 	private ChatroomType chatroomType;
 	private ChatType chatType;
 	private String password;

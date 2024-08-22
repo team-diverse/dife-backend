@@ -2,59 +2,62 @@ package com.dife.api.model;
 
 import java.io.*;
 import java.io.File;
-import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.apache.commons.io.IOUtils;
+import lombok.ToString;
 import org.springframework.web.multipart.MultipartFile;
 
-public class CustomMultipartFile implements MultipartFile {
+@ToString
+public class Base64MultipartFile implements MultipartFile {
 
-	private final DiskFileItem fileItem;
 	private final byte[] fileContent;
+	private final String fileName;
+	private final String contentType;
 
-	public CustomMultipartFile(DiskFileItem fileItem) throws IOException {
-		this.fileItem = fileItem;
-		this.fileContent = IOUtils.toByteArray(fileItem.getInputStream());
+	public Base64MultipartFile(byte[] fileContent, String fileName, String contentType)
+			throws IOException {
+		this.fileName = fileName;
+		this.fileContent = fileContent;
+		this.contentType = contentType;
 	}
 
 	@Override
 	public String getName() {
-		return fileItem.getFieldName();
+		return this.fileName;
 	}
 
 	@Override
 	public String getOriginalFilename() {
-		return fileItem.getName();
+		return this.fileName;
 	}
 
 	@Override
 	public String getContentType() {
-		return fileItem.getContentType();
+		return this.contentType;
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return fileItem.getSize() == 0;
+		return this.fileContent.length == 0;
 	}
 
 	@Override
 	public long getSize() {
-		return fileItem.getSize();
+		return this.fileContent.length;
 	}
 
 	@Override
 	public byte[] getBytes() throws IOException {
-		return fileContent;
+		return this.fileContent;
 	}
 
 	@Override
 	public InputStream getInputStream() throws IOException {
-		return new ByteArrayInputStream(fileContent);
+		return new ByteArrayInputStream(this.fileContent);
 	}
 
 	@Override
 	public void transferTo(File dest) throws IOException, IllegalStateException {
 		try (OutputStream out = new FileOutputStream(dest)) {
-			out.write(fileContent);
+			out.write(this.fileContent);
 		}
 	}
 }
