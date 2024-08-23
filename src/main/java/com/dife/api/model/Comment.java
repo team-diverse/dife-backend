@@ -31,12 +31,12 @@ public class Comment extends BaseTimeEntity {
 	@JsonIgnore
 	private Post post;
 
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	@JoinColumn(name = "parent_id")
 	@JsonIgnore
 	private Comment parentComment;
 
-	@OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "parentComment")
 	@JsonBackReference
 	private List<Comment> childrenComments = new ArrayList<>();
 
