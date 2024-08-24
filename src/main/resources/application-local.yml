@@ -5,10 +5,6 @@ spring:
 
   jpa:
     open-in-view: true
-    hibernate:
-      ddl-auto: create
-    defer-datasource-initialization: true
-
 
   sql:
     init:
