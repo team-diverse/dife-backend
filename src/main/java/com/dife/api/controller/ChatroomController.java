@@ -148,4 +148,12 @@ public class ChatroomController {
 		List<ChatroomResponseDto> responseDto = chatroomService.getLikedChatrooms(auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
+
+	@GetMapping("/random")
+	public ResponseEntity<List<ChatroomResponseDto>> getRandomChatrooms(
+			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
+		List<ChatroomResponseDto> responseDto =
+				chatroomService.getRandomChatrooms(count, auth.getName());
+		return ResponseEntity.ok(responseDto);
+	}
 }

@@ -484,6 +484,27 @@ public class ChatroomService {
 				.collect(Collectors.toList());
 	}
 
+	public List<ChatroomResponseDto> getRandomChatrooms(int count, String email) {
+		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+
+		List<Chatroom> randomChatrooms =
+				chatroomRepository.findAll().stream()
+						.filter(c -> c.getChatroomType() == ChatroomType.GROUP)
+						.filter(c -> !c.getManager().getId().equals(member.getId()))
+						.filter(c -> c.getChatroomSetting().getMaxCount() > c.getMembers().size())
+						.collect(toList());
+
+		log.info(String.valueOf(randomChatrooms.size()));
+		if (randomChatrooms.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		Collections.shuffle(randomChatrooms);
+		List<Chatroom> chatrooms = randomChatrooms.stream().limit(count).toList();
+
+		return getChatroomResponseDtos(chatrooms, member);
+	}
+
 	public void kickout(Long roomId, Long memberId, String memberEmail) {
 		Chatroom chatroom =
 				chatroomRepository.findById(roomId).orElseThrow(ChatroomNotFoundException::new);

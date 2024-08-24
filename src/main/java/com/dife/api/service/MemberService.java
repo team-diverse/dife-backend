@@ -380,8 +380,12 @@ public class MemberService {
 		List<Comment> comments = commentRepository.findAllByWriter(member);
 
 		for (Comment comment : comments) {
-			if (comment != null) {
+			if (comment.getChildrenComments() == null || comment.getChildrenComments().isEmpty()) {
+				comment.getPost().getComments().remove(comment);
+				commentRepository.delete(comment);
+			} else if (comment.getChildrenComments() != null || comment.getParentComment() != null) {
 				comment.setWriter(null);
+				comment.setContent(null);
 				commentRepository.save(comment);
 			}
 		}

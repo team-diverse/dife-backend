@@ -147,4 +147,11 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<List<ChatroomResponseDto>> getLikeChatrooms(Authentication auth);
+
+	@Operation(
+			summary = "홈화면 랜덤 10개 채팅방 조회 API",
+			description = "홈화면에 보일 커넥트 준비상태 10개 회원 정보를 확인할 수 있습니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<List<ChatroomResponseDto>> getRandomChatrooms(
+			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth);
 }
