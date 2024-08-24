@@ -2,9 +2,9 @@ spring:
     jpa:
         database-platform: org.hibernate.dialect.MySQLDialect
         show-sql: true
-        hibernate:
-            ddl-auto: none
-        defer-datasource-initialization: false
+    liquibase:
+        enabled: true
+        change-log: classpath:db/changelog/changelog-master.xml
 
     datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver

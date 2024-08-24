@@ -9,8 +9,6 @@ spring:
     username: root
     password: password
   jpa:
-    hibernate:
-      ddl-auto: create
     show-sql: true
     defer-datasource-initialization: true
 
