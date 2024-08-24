@@ -564,4 +564,8 @@
             <column name="type" type="varchar(50)"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="remove-url-column-from-file-20240824-2307" author="seungho">
+        <dropColumn tableName="file" columnName="url"/>
+    </changeSet>
 </databaseChangeLog>

@@ -22,8 +22,6 @@ public class FileDto {
 
 	private String size;
 
-	private String url;
-
 	@Enumerated(EnumType.STRING)
 	private Format format;
 
