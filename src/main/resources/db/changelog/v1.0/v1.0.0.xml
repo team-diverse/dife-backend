@@ -559,4 +559,9 @@
                                  constraintName="FK_TRANSLATION_BOOKMARKS_ON_TRANSLATION" referencedColumnNames="id"
                                  referencedTableName="translation"/>
     </changeSet>
+    <changeSet id="add-type-column-to-group_purpose-20240824-1815" author="seungho">
+        <addColumn tableName="group_purpose">
+            <column name="type" type="varchar(50)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
