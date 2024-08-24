@@ -490,6 +490,7 @@ public class ChatroomService {
 		List<Chatroom> randomChatrooms =
 				chatroomRepository.findAll().stream()
 						.filter(c -> c.getChatroomType() == ChatroomType.GROUP)
+						.filter(c -> !c.getManager().getId().equals(member.getId()))
 						.filter(c -> c.getChatroomSetting().getMaxCount() > c.getMembers().size())
 						.collect(toList());
 
