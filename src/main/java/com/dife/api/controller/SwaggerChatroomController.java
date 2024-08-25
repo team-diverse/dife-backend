@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -102,7 +101,7 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<ChatroomResponseDto> getGroupChatroom(
-			@PathVariable(name = "id") Long id, Authentication auth) throws IOException;
+			@PathVariable(name = "id") Long id, Authentication auth);
 
 	@Operation(
 			summary = "그룹 채팅방 필터 검색 조회 API",

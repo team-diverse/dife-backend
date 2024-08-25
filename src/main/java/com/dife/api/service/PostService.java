@@ -9,7 +9,6 @@ import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.*;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,12 +61,7 @@ public class PostService {
 							.filter(this::isFileValid)
 							.map(
 									file -> {
-										FileDto fileDto = null;
-										try {
-											fileDto = fileService.upload(file);
-										} catch (IOException e) {
-											throw new RuntimeException(e);
-										}
+										FileDto fileDto = fileService.upload(file);
 										File mappedFile = modelMapper.map(fileDto, File.class);
 										mappedFile.setPost(post);
 										return mappedFile;
@@ -152,12 +146,7 @@ public class PostService {
 							.filter(this::isFileValid)
 							.map(
 									file -> {
-										FileDto fileDto = null;
-										try {
-											fileDto = fileService.upload(file);
-										} catch (IOException e) {
-											throw new RuntimeException(e);
-										}
+										FileDto fileDto = fileService.upload(file);
 										File mappedFile = modelMapper.map(fileDto, File.class);
 										mappedFile.setPost(post);
 										return mappedFile;

@@ -1,5 +1,6 @@
 package com.dife.api.model.dto;
 
+import com.dife.api.model.File;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -23,5 +24,5 @@ public class ChatResponseDto {
 
 	private String username;
 
-	private List<String> imgCode;
+	private List<File> files;
 }
