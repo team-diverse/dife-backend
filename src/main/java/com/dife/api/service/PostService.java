@@ -79,10 +79,16 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<PostResponseDto> getPostsByBoardType(
-			BoardCategory boardCategory, String memberEmail) {
+	public List<PostResponseDto> getPostsByBoardType(BoardCategory type, String memberEmail) {
 		Sort sort = Sort.by(Sort.Direction.DESC, "created");
-		List<Post> posts = postRepository.findPostsByBoardType(boardCategory, sort);
+
+		List<Post> posts;
+
+		if (type == null) {
+			posts = postRepository.findAll(sort);
+		} else {
+			posts = postRepository.findPostsByBoardType(type, sort);
+		}
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
