@@ -90,7 +90,8 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
-			ChatroomType chatroomType, Authentication authentication);
+			@RequestParam(name = "type", required = false) ChatroomType type,
+			Authentication authentication);
 
 	@Operation(summary = "채팅방 조회 API", description = "그룹, 싱글 모든 채팅방을 Id로 조회해주는 API입니다.")
 	@ApiResponse(

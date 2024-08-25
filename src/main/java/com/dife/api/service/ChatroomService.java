@@ -46,18 +46,19 @@ public class ChatroomService {
 		return chatroomRepository.existsByName(name);
 	}
 
-	public List<ChatroomResponseDto> getChatrooms(ChatroomType chatroomType, String memberEmail) {
+	public List<ChatroomResponseDto> getChatrooms(ChatroomType type, String memberEmail) {
 
 		List<Chatroom> chatrooms;
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if (chatroomType == ChatroomType.GROUP)
-			chatrooms = chatroomRepository.findAllByChatroomType(chatroomType);
-		else {
-			chatrooms = chatroomRepository.findAllByChatroomTypeAndMember(chatroomType, member);
-		}
+		if (type == ChatroomType.SINGLE)
+			chatrooms = chatroomRepository.findAllByChatroomTypeAndMember(ChatroomType.SINGLE, member);
+		else if (type == ChatroomType.GROUP)
+			chatrooms = chatroomRepository.findAllByChatroomType(ChatroomType.GROUP);
+		else chatrooms = chatroomRepository.findAllByChatroomTypeAndManager(ChatroomType.GROUP, member);
+
 		return getChatroomResponseDtos(chatrooms, member);
 	}
 
