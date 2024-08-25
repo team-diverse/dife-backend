@@ -97,14 +97,8 @@ public class PostService {
 
 		return posts.stream()
 				.filter(post -> !blockedMembers.contains(post.getWriter()))
-				.map(
-						post -> {
-							PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
-							responseDto.setCommentCount(post.getComments().size());
-							responseDto.setLikesCount(post.getPostLikes().size());
-							responseDto.setBookmarkCount(post.getBookmarks().size());
-							return responseDto;
-						})
+				.filter(post -> !blockPostRepository.existsByPostAndMember(post, member))
+				.map(post -> getPost(post.getId(), memberEmail))
 				.collect(toList());
 	}
 
@@ -113,8 +107,6 @@ public class PostService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if (blockPostRepository.existsByPostAndMember(post, member))
-			throw new MemberException("차단된 사용자는 게시글을 볼 수 없습니다!");
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
 		responseDto.setCommentCount(post.getComments().size());
 		responseDto.setLikesCount(post.getPostLikes().size());

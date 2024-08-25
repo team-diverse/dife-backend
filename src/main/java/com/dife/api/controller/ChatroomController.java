@@ -39,9 +39,10 @@ public class ChatroomController {
 
 	@GetMapping
 	public ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
-			ChatroomType chatroomType, Authentication authentication) {
+			@RequestParam(name = "type", required = false) ChatroomType type,
+			Authentication authentication) {
 		List<ChatroomResponseDto> responseDto =
-				chatroomService.getChatrooms(chatroomType, authentication.getName());
+				chatroomService.getChatrooms(type, authentication.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
