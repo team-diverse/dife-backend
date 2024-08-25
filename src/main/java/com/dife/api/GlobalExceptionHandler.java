@@ -66,6 +66,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 
+	@ExceptionHandler(BlockNotFoundException.class)
+	public ResponseEntity<ExceptionResonse> handleBlockException(BlockNotFoundException exception) {
+		return ResponseEntity.status(NOT_FOUND.value())
+				.body(new ExceptionResonse(false, exception.getMessage()));
+	}
+
 	@ExceptionHandler(PostNotFoundException.class)
 	public ResponseEntity<ExceptionResonse> handlePostNotFoundException(
 			PostNotFoundException exception) {
