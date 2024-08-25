@@ -247,8 +247,8 @@ public class ChatService {
 
 				MultipartFile multipartFile = new Base64MultipartFile(imageBytes, fileName, contentType);
 				FileDto fileDto = fileService.upload(multipartFile);
-				awsS3ImageUrls.add(fileDto.getUrl());
 
+				awsS3ImageUrls.add(fileService.getPresignUrl(fileDto.getId()));
 			} catch (IOException ex) {
 				log.error("IOException Error Message : {}", ex.getMessage());
 				ex.printStackTrace();

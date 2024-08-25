@@ -595,12 +595,8 @@ public class MemberService {
 									memberModelMapper.map(member, MemberResponseDto.class);
 							responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
 							if (responseDto.getProfileImg() != null) {
-								try {
-									responseDto.setProfilePresignUrl(
-											fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
-								} catch (IOException e) {
-									throw new RuntimeException(e);
-								}
+								responseDto.setProfilePresignUrl(
+										fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
 							}
 							return responseDto;
 						})

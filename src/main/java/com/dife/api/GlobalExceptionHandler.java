@@ -3,6 +3,8 @@ package com.dife.api;
 import static org.springframework.http.HttpStatus.*;
 
 import com.dife.api.exception.*;
+import com.dife.api.exception.file.S3FileNameInvalidException;
+import com.dife.api.exception.file.S3FileNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -124,6 +126,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<ExceptionResonse> handleRuntimeException(RuntimeException exception) {
 		return ResponseEntity.status(FORBIDDEN.value())
+				.body(new ExceptionResonse(false, exception.getMessage()));
+	}
+
+	@ExceptionHandler(S3FileNotFoundException.class)
+	public ResponseEntity<ExceptionResonse> handleS3FileNotFoundException(
+			S3FileNotFoundException exception) {
+		return ResponseEntity.status(NOT_FOUND.value())
+				.body(new ExceptionResonse(false, exception.getMessage()));
+	}
+
+	@ExceptionHandler(S3FileNameInvalidException.class)
+	public ResponseEntity<ExceptionResonse> handleS3FileNameInvalidException(
+			S3FileNameInvalidException exception) {
+		return ResponseEntity.status(BAD_REQUEST.value())
 				.body(new ExceptionResonse(false, exception.getMessage()));
 	}
 }
