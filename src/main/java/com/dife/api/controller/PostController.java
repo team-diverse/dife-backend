@@ -24,9 +24,8 @@ public class PostController implements SwaggerPostController {
 
 	@GetMapping("/posts")
 	public ResponseEntity<List<PostResponseDto>> getPostsByBoardType(
-			BoardCategory boardCategory, Authentication auth) {
-		List<PostResponseDto> responseDto =
-				postService.getPostsByBoardType(boardCategory, auth.getName());
+			@RequestParam(name = "type", required = false) BoardCategory type, Authentication auth) {
+		List<PostResponseDto> responseDto = postService.getPostsByBoardType(type, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 

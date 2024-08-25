@@ -6,23 +6,19 @@ import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.handler.DisconnectHandler;
 import com.dife.api.handler.NotificationHandler;
 import com.dife.api.model.*;
-import com.dife.api.model.CustomMultipartFile;
 import com.dife.api.model.dto.*;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
 import com.dife.api.repository.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.*;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.modelmapper.ModelMapper;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
@@ -61,7 +57,12 @@ public class ChatService {
 				chat(dto);
 				break;
 			case FILE:
-				file(dto);
+				try {
+					file(dto);
+				} catch (Exception e) {
+					log.error("Error Message : {}", e.getMessage());
+				}
+
 				break;
 			case EXIT:
 				exit(dto, headerAccessor);
@@ -79,8 +80,10 @@ public class ChatService {
 		String sessionId = headerAccessor.getSessionId();
 
 		Member member = memberService.getMemberEntityById(dto.getMemberId());
-		if (!disconnectHandler.isEnterDisconnectChecked(chatroom, member, sessionId, dto.getPassword()))
+		if (!disconnectHandler.canEnterChatroom(chatroom, member, sessionId, dto.getPassword())) {
+			disconnectHandler.disconnect(chatroom.getId(), sessionId);
 			return;
+		}
 
 		String username = member.getUsername();
 
@@ -95,9 +98,9 @@ public class ChatService {
 		Chat chat = saveChat(member, chatroom, enterMessage);
 
 		Set<Member> chatroomMembers = chatroom.getMembers();
+		chatroomMembers.add(member);
 
 		for (Member chatroomMember : chatroomMembers) {
-
 			String message =
 					"WELCOME! 😊 " + chatroom.getName() + "방에 " + member.getUsername() + "님이 입장하셨습니다!";
 			notificationService.addNotifications(
@@ -120,41 +123,42 @@ public class ChatService {
 
 		Set<Member> blockedMembers = blockService.getBlackSet(member);
 
-		if (dto.getMessage().length() <= 300) {
-			Chat chat = saveChat(member, chatroom, dto.getMessage());
+		if (dto.getMessage().length() >= 300) {
+			throw new ChatroomException("채팅 메시지는 300자 이하로 입력해주세요!");
+		}
 
-			Set<Member> chatroomMembers = chatroom.getMembers();
+		Chat chat = saveChat(member, chatroom, dto.getMessage());
+		Set<Member> chatroomMembers = chatroom.getMembers();
 
-			for (Member chatroomMember : chatroomMembers) {
-				if (blockedMembers.contains(chatroomMember)) return;
+		for (Member chatroomMember : chatroomMembers) {
+			if (blockedMembers.contains(chatroomMember)) return;
 
-				if (!Objects.equals(chatroomMember.getId(), member.getId())) {
-					List<NotificationToken> notificationTokens = chatroomMember.getNotificationTokens();
+			if (!Objects.equals(chatroomMember.getId(), member.getId())) {
+				List<NotificationToken> notificationTokens = chatroomMember.getNotificationTokens();
 
-					for (NotificationToken notificationToken : notificationTokens) {
-						Notification notification = new Notification();
-						notification.setNotificationToken(notificationToken);
-						notification.setType(NotificationType.CHATROOM);
-						notification.setTypeId(chatroom.getId());
-						notification.setChatMemberEmail(member.getEmail());
-						notification.setCreated(LocalDateTime.now());
+				for (NotificationToken notificationToken : notificationTokens) {
+					Notification notification = new Notification();
+					notification.setNotificationToken(notificationToken);
+					notification.setType(NotificationType.CHATROOM);
+					notification.setTypeId(chatroom.getId());
+					notification.setChatMemberEmail(member.getEmail());
+					notification.setCreated(LocalDateTime.now());
 
-						String message = chat.getMessage();
-						if (message.length() > 30) {
-							message = message.substring(0, 30) + "...";
-						}
-						notification.setMessage(message);
-						notificationToken.getNotifications().add(notification);
-
-						notificationService.sendPushNotification(
-								notificationToken.getPushToken(), notification.getCreated(), message);
+					String message = chat.getMessage();
+					if (message.length() > 30) {
+						message = message.substring(0, 30) + "...";
 					}
+					notification.setMessage(message);
+					notificationToken.getNotifications().add(notification);
+
+					notificationService.sendPushNotification(
+							notificationToken.getPushToken(), notification.getCreated(), message);
 				}
 			}
-
-			ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
-			redisPublisher.publish(chatRedisDto);
 		}
+
+		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
+		redisPublisher.publish(chatRedisDto);
 	}
 
 	public void exit(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
@@ -210,20 +214,22 @@ public class ChatService {
 				chatroomRepository
 						.findById(requestDto.getChatroomId())
 						.orElseThrow(ChatroomNotFoundException::new);
-
-		if (!chatroom.getMembers().contains(member))
+		if (!chatroom.getMembers().contains(member)) {
 			throw new ChatroomException("채팅방 회원만이 채팅 파일을 보낼 수 있습니다!");
+		}
+
+		List<String> imgCodes = requestDto.getImgCode();
 
 		Chat chat = new Chat();
 		chat.setMember(member);
 		chat.setChatroom(chatroom);
 		List<String> awsS3ImageUrls = new ArrayList<>();
 
-		for (String imgCode : requestDto.getImgCode()) {
+		for (String imgCode : imgCodes) {
 			try {
 				String[] strings = imgCode.split(",");
-				String base64Image = strings[1];
 				String dataPrefix = strings[0];
+				String base64Image = strings[1];
 				String extension;
 
 				if (dataPrefix.contains("jpeg")) {
@@ -236,28 +242,13 @@ public class ChatService {
 
 				byte[] imageBytes = Base64.getDecoder().decode(base64Image);
 
-				File tempFile = File.createTempFile("image", "." + extension);
-				try (OutputStream outputStream = new FileOutputStream(tempFile)) {
-					outputStream.write(imageBytes);
-				}
+				String fileName = UUID.randomUUID().toString() + '.' + extension;
+				String contentType = Files.probeContentType(new File(fileName).toPath());
 
-				DiskFileItem fileItem =
-						new DiskFileItem(
-								tempFile.getName(),
-								Files.probeContentType(tempFile.toPath()),
-								false,
-								tempFile.getName(),
-								(int) tempFile.length(),
-								tempFile.getParentFile());
-
-				MultipartFile multipartFile = new CustomMultipartFile(fileItem);
+				MultipartFile multipartFile = new Base64MultipartFile(imageBytes, fileName, contentType);
 				FileDto fileDto = fileService.upload(multipartFile);
-				awsS3ImageUrls.add(fileDto.getUrl());
 
-				if (!tempFile.delete()) {
-					log.warn("Failed to delete temporary file: " + tempFile.getAbsolutePath());
-				}
-
+				awsS3ImageUrls.add(fileService.getPresignUrl(fileDto.getId()));
 			} catch (IOException ex) {
 				log.error("IOException Error Message : {}", ex.getMessage());
 				ex.printStackTrace();

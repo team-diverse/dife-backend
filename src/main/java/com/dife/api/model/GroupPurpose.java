@@ -15,7 +15,8 @@ public class GroupPurpose {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String name;
+	@Enumerated(EnumType.STRING)
+	private GroupPurposeType type;
 
 	@ManyToOne
 	@JoinColumn(name = "chatroom_setting_id")

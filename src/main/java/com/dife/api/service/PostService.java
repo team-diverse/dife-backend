@@ -9,7 +9,6 @@ import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.*;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,11 +62,7 @@ public class PostService {
 							.map(
 									file -> {
 										FileDto fileDto = null;
-										try {
-											fileDto = fileService.upload(file);
-										} catch (IOException e) {
-											throw new RuntimeException(e);
-										}
+										fileDto = fileService.upload(file);
 										File mappedFile = modelMapper.map(fileDto, File.class);
 										mappedFile.setPost(post);
 										return mappedFile;
@@ -84,10 +79,16 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<PostResponseDto> getPostsByBoardType(
-			BoardCategory boardCategory, String memberEmail) {
+	public List<PostResponseDto> getPostsByBoardType(BoardCategory type, String memberEmail) {
 		Sort sort = Sort.by(Sort.Direction.DESC, "created");
-		List<Post> posts = postRepository.findPostsByBoardType(boardCategory, sort);
+
+		List<Post> posts;
+
+		if (type == null) {
+			posts = postRepository.findAll(sort);
+		} else {
+			posts = postRepository.findPostsByBoardType(type, sort);
+		}
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -96,14 +97,8 @@ public class PostService {
 
 		return posts.stream()
 				.filter(post -> !blockedMembers.contains(post.getWriter()))
-				.map(
-						post -> {
-							PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
-							responseDto.setCommentCount(post.getComments().size());
-							responseDto.setLikesCount(post.getPostLikes().size());
-							responseDto.setBookmarkCount(post.getBookmarks().size());
-							return responseDto;
-						})
+				.filter(post -> !blockPostRepository.existsByPostAndMember(post, member))
+				.map(post -> getPost(post.getId(), memberEmail))
 				.collect(toList());
 	}
 
@@ -112,8 +107,6 @@ public class PostService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if (blockPostRepository.existsByPostAndMember(post, member))
-			throw new MemberException("차단된 사용자는 게시글을 볼 수 없습니다!");
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
 		responseDto.setCommentCount(post.getComments().size());
 		responseDto.setLikesCount(post.getPostLikes().size());
@@ -153,11 +146,7 @@ public class PostService {
 							.map(
 									file -> {
 										FileDto fileDto = null;
-										try {
-											fileDto = fileService.upload(file);
-										} catch (IOException e) {
-											throw new RuntimeException(e);
-										}
+										fileDto = fileService.upload(file);
 										File mappedFile = modelMapper.map(fileDto, File.class);
 										mappedFile.setPost(post);
 										return mappedFile;

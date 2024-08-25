@@ -4,6 +4,7 @@ import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.ok;
 
 import com.dife.api.model.ChatroomType;
+import com.dife.api.model.GroupPurposeType;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.ChatroomService;
 import java.io.IOException;
@@ -38,9 +39,10 @@ public class ChatroomController {
 
 	@GetMapping
 	public ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
-			ChatroomType chatroomType, Authentication authentication) {
+			@RequestParam(name = "type", required = false) ChatroomType type,
+			Authentication authentication) {
 		List<ChatroomResponseDto> responseDto =
-				chatroomService.getChatrooms(chatroomType, authentication.getName());
+				chatroomService.getChatrooms(type, authentication.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
@@ -60,7 +62,7 @@ public class ChatroomController {
 			@RequestParam(name = "toMemberId", required = false) Long toMemberId,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "maxCount", required = false) Optional<Integer> maxCount,
-			@RequestParam(name = "purposes", required = false) Set<String> purposes,
+			@RequestParam(name = "purposes", required = false) Set<GroupPurposeType> purposes,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@RequestParam(name = "password", required = false) String password,
@@ -75,8 +77,8 @@ public class ChatroomController {
 						description,
 						toMemberId,
 						maxCount,
-						hobbies,
 						purposes,
+						hobbies,
 						languages,
 						isPublic,
 						password,
@@ -91,7 +93,7 @@ public class ChatroomController {
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "maxCount", required = false) Optional<Integer> maxCount,
-			@RequestParam(name = "purpose", required = false) Set<String> purposes,
+			@RequestParam(name = "purpose", required = false) Set<GroupPurposeType> purposes,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@RequestParam(name = "password", required = false) String password,
@@ -103,8 +105,8 @@ public class ChatroomController {
 						id,
 						profileImg,
 						maxCount,
-						hobbies,
 						purposes,
+						hobbies,
 						languages,
 						isPublic,
 						password,
@@ -126,13 +128,11 @@ public class ChatroomController {
 	public ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
-			@RequestParam(name = "purposes", required = false) Set<String> purposes,
-			@RequestParam(name = "minCount", required = false, defaultValue = "3") Integer minCount,
+			@RequestParam(name = "purposes", required = false) Set<GroupPurposeType> purposes,
 			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount,
 			Authentication auth) {
 		List<ChatroomResponseDto> responseDto =
-				chatroomService.getFilterChatrooms(
-						hobbies, languages, purposes, minCount, maxCount, auth.getName());
+				chatroomService.getFilterChatrooms(hobbies, purposes, languages, maxCount, auth.getName());
 		return ok(responseDto);
 	}
 
@@ -147,6 +147,14 @@ public class ChatroomController {
 	@GetMapping("/likes")
 	public ResponseEntity<List<ChatroomResponseDto>> getLikeChatrooms(Authentication auth) {
 		List<ChatroomResponseDto> responseDto = chatroomService.getLikedChatrooms(auth.getName());
+		return ResponseEntity.ok(responseDto);
+	}
+
+	@GetMapping("/random")
+	public ResponseEntity<List<ChatroomResponseDto>> getRandomChatrooms(
+			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
+		List<ChatroomResponseDto> responseDto =
+				chatroomService.getRandomChatrooms(count, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 }
