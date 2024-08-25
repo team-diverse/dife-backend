@@ -45,7 +45,9 @@ public class BlockService {
 		Set<MemberBlock> blackList = member.getBlackList();
 
 		if (blackList != null) {
-			isAlreadyBlacklisted = blackList.stream().anyMatch(bl -> bl.equals(blackMember));
+			isAlreadyBlacklisted =
+					blackList.stream()
+							.anyMatch(bl -> bl.getBlacklistedMember().getId().equals(blackMember.getId()));
 		}
 
 		if (isAlreadyBlacklisted) {
@@ -97,7 +99,7 @@ public class BlockService {
 		MemberBlock blockToRemove =
 				blockMemberRepository
 						.findByMemberAndBlacklistedMember(currentMember, blockMember)
-						.orElseThrow(MemberNotFoundException::new);
+						.orElseThrow(BlockNotFoundException::new);
 
 		currentMember.getBlackList().remove(blockToRemove);
 		blockMember.getBlackList().removeIf(block -> block.getMember().equals(currentMember));

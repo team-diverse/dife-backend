@@ -28,7 +28,7 @@ public interface SwaggerChatController {
 
 	@Operation(summary = "단일 채팅 가져오기 API", description = "채팅방의 ID와 채팅 ID를 입력하여 단일 채팅을 가져옵니다.")
 	@ApiResponse(
-			responseCode = "201",
+			responseCode = "200",
 			description = "단일 채팅 조회 성공 예시",
 			content = {
 				@Content(

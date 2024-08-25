@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +58,8 @@ public interface SwaggerMemberController {
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
-			Authentication auth);
+			Authentication auth)
+			throws IOException;
 
 	@Operation(
 			summary = "회원 ID별 조회 API",
@@ -70,8 +72,8 @@ public interface SwaggerMemberController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = MemberResponseDto.class))
 			})
-	ResponseEntity<MemberResponseDto> getById(
-			@PathVariable(name = "id") Long id, Authentication auth);
+	ResponseEntity<MemberResponseDto> getById(@PathVariable(name = "id") Long id, Authentication auth)
+			throws IOException;
 
 	@Operation(summary = "마이페이지 API", description = "로그인 한 유저의 개인 정보를 확인할 수 있는 마이페이지 입니다.")
 	@ApiResponse(
@@ -82,7 +84,7 @@ public interface SwaggerMemberController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = MemberResponseDto.class))
 			})
-	ResponseEntity<MemberResponseDto> profile(Authentication auth);
+	ResponseEntity<MemberResponseDto> profile(Authentication auth) throws IOException;
 
 	@Operation(summary = "회원탈퇴 API", description = "로그인한 회원이 탈퇴를 진행할 수 있는 엔드포인트입니다.")
 	@ApiResponse(responseCode = "200")
@@ -116,7 +118,8 @@ public interface SwaggerMemberController {
 			description = "홈화면에 보일 커넥트 준비상태 10개 회원 정보를 확인할 수 있습니다.")
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<List<MemberResponseDto>> getRandomMembers(
-			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth);
+			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth)
+			throws IOException;
 
 	@Operation(
 			summary = "필터 선택지 회원 조회 API",
@@ -127,7 +130,8 @@ public interface SwaggerMemberController {
 			@RequestParam(name = "mbtis", required = false) Set<MbtiCategory> mbtiCategories,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
-			Authentication auth);
+			Authentication auth)
+			throws IOException;
 
 	@Operation(
 			summary = "회원 필터 검색 조회 API",

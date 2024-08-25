@@ -16,6 +16,7 @@ public class Notification extends BaseTimeEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Enumerated(EnumType.STRING)
 	private NotificationType type;
 
 	private Long typeId;

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -89,7 +90,8 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
-			ChatroomType chatroomType, Authentication authentication);
+			@RequestParam(name = "type", required = false) ChatroomType type,
+			Authentication authentication);
 
 	@Operation(summary = "채팅방 조회 API", description = "그룹, 싱글 모든 채팅방을 Id로 조회해주는 API입니다.")
 	@ApiResponse(
@@ -101,7 +103,7 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<ChatroomResponseDto> getGroupChatroom(
-			@PathVariable(name = "id") Long id, Authentication auth);
+			@PathVariable(name = "id") Long id, Authentication auth) throws IOException;
 
 	@Operation(
 			summary = "그룹 채팅방 필터 검색 조회 API",
@@ -119,8 +121,8 @@ public interface SwaggerChatroomController {
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "purposes", required = false) Set<String> purposes,
-			@RequestParam(name = "minCount", required = false, defaultValue = "3") Integer minCount,
-			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount);
+			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount,
+			Authentication auth);
 
 	@Operation(
 			summary = "채팅방 필터 검색 조회 API",
@@ -146,4 +148,11 @@ public interface SwaggerChatroomController {
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
 	ResponseEntity<List<ChatroomResponseDto>> getLikeChatrooms(Authentication auth);
+
+	@Operation(
+			summary = "홈화면 랜덤 10개 채팅방 조회 API",
+			description = "홈화면에 보일 커넥트 준비상태 10개 회원 정보를 확인할 수 있습니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<List<ChatroomResponseDto>> getRandomChatrooms(
+			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth);
 }

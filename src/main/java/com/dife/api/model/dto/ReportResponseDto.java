@@ -4,6 +4,8 @@ import com.dife.api.model.Comment;
 import com.dife.api.model.Member;
 import com.dife.api.model.Post;
 import com.dife.api.model.ReportType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +17,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReportResponseDto {
 
+	@Enumerated(EnumType.STRING)
 	private ReportType type;
+
 	private Post post;
 	private Comment comment;
 	private Member receiver;

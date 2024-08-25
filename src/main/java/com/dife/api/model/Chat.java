@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,8 +35,7 @@ public class Chat {
 	@JoinColumn(name = "member_id")
 	private Member member;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<File> files;
+	@ElementCollection private List<String> imgCode = new ArrayList<>();
 
 	private LocalDateTime created;
 }

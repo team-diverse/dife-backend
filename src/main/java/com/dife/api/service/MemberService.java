@@ -9,6 +9,7 @@ import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -58,6 +59,8 @@ public class MemberService {
 	private final BlockService blockService;
 	private final ModelMapper modelMapper;
 	private final ConnectService connectSerivce;
+	private final PostService postService;
+	private final CommentService commentService;
 	private final LikeService likeService;
 
 	@Autowired
@@ -102,7 +105,8 @@ public class MemberService {
 			Boolean isPublic,
 			MultipartFile profileImg,
 			MultipartFile verificationFile,
-			String memberEmail) {
+			String memberEmail)
+			throws IOException {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
@@ -223,7 +227,7 @@ public class MemberService {
 		return responseEntity;
 	}
 
-	public MemberResponseDto getMember(String email) {
+	public MemberResponseDto getMember(String email) throws IOException {
 
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
@@ -234,7 +238,7 @@ public class MemberService {
 		return responseDto;
 	}
 
-	public MemberResponseDto getMemberById(Long id, String memberEmail) {
+	public MemberResponseDto getMemberById(Long id, String memberEmail) throws IOException {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
@@ -376,8 +380,12 @@ public class MemberService {
 		List<Comment> comments = commentRepository.findAllByWriter(member);
 
 		for (Comment comment : comments) {
-			if (comment != null) {
+			if (comment.getChildrenComments() == null || comment.getChildrenComments().isEmpty()) {
+				comment.getPost().getComments().remove(comment);
+				commentRepository.delete(comment);
+			} else if (comment.getChildrenComments() != null || comment.getParentComment() != null) {
 				comment.setWriter(null);
+				comment.setContent(null);
 				commentRepository.save(comment);
 			}
 		}
@@ -481,7 +489,7 @@ public class MemberService {
 		javaMailSender.send(simpleMailMessage);
 	}
 
-	public List<MemberResponseDto> getRandomMembers(int count, String email) {
+	public List<MemberResponseDto> getRandomMembers(int count, String email) throws IOException {
 		Member currentMember = getMemberEntityByEmail(email);
 
 		List<Member> validRandomMembers =
@@ -516,7 +524,8 @@ public class MemberService {
 			Set<MbtiCategory> mbtiCategories,
 			Set<String> hobbies,
 			Set<String> languages,
-			String memberEmail) {
+			String memberEmail)
+			throws IOException {
 
 		Member currentMember =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -585,9 +594,10 @@ public class MemberService {
 							MemberResponseDto responseDto =
 									memberModelMapper.map(member, MemberResponseDto.class);
 							responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
-							if (responseDto.getProfileImg() != null)
+							if (responseDto.getProfileImg() != null) {
 								responseDto.setProfilePresignUrl(
 										fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+							}
 							return responseDto;
 						})
 				.collect(Collectors.toList());
@@ -604,7 +614,9 @@ public class MemberService {
 		Sort sort = Sort.by(Sort.Direction.DESC, "created");
 		List<Post> posts = postRepository.findPostsByWriter(member, sort);
 
-		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
+		return posts.stream()
+				.map(post -> postService.getPost(post.getId(), memberEmail))
+				.collect(toList());
 	}
 
 	public List<CommentResponseDto> getComments(String memberEmail) {
@@ -615,7 +627,7 @@ public class MemberService {
 		List<Comment> comments = commentRepository.findCommentsByWriter(writer, sort);
 
 		return comments.stream()
-				.map(c -> modelMapper.map(c, CommentResponseDto.class))
+				.map(comment -> commentService.getComment(comment, writer))
 				.collect(toList());
 	}
 

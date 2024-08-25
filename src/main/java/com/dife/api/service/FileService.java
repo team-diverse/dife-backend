@@ -1,5 +1,7 @@
 package com.dife.api.service;
 
+import com.dife.api.exception.file.S3FileNameInvalidException;
+import com.dife.api.exception.file.S3FileNotFoundException;
 import com.dife.api.model.File;
 import com.dife.api.model.Format;
 import com.dife.api.model.dto.FileDto;
@@ -66,16 +68,24 @@ public class FileService {
 	}
 
 	public String getPresignUrl(String fileName) {
-		if (fileName == null || fileName.equals("empty")) {
-			return null;
+		if (fileName == null || fileName.trim().isEmpty()) {
+			throw new S3FileNameInvalidException("파일 이름이 비어있습니다.");
 		}
+		return generatePresignedUrl(fileName);
+	}
 
+	public String getPresignUrl(Long fileId) {
+		File file = fileRepository.findById(fileId).orElseThrow(S3FileNotFoundException::new);
+		return generatePresignedUrl(file.getName());
+	}
+
+	public String generatePresignedUrl(String fileName) {
 		GetObjectRequest getObjectRequest =
 				GetObjectRequest.builder().bucket(bucketName).key(fileName).build();
 
 		GetObjectPresignRequest getObjectPresignRequest =
 				GetObjectPresignRequest.builder()
-						.signatureDuration(Duration.ofMinutes(5))
+						.signatureDuration(Duration.ofMinutes(10))
 						.getObjectRequest(getObjectRequest)
 						.build();
 
@@ -83,17 +93,13 @@ public class FileService {
 				presigner.presignGetObject(getObjectPresignRequest);
 
 		String url = presignedGetObjectRequest.url().toString();
-
 		presigner.close();
-
 		return url;
 	}
 
 	public void deleteFile(Long id) {
-
 		File file = fileRepository.getReferenceById(id);
 		fileRepository.delete(file);
-
 		DeleteObjectRequest deleteObjectRequest =
 				DeleteObjectRequest.builder().bucket(bucketName).key(file.getOriginalName()).build();
 

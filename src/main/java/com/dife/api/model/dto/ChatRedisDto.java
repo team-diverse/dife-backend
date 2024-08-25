@@ -1,7 +1,6 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.Chatroom;
-import com.dife.api.model.File;
 import com.dife.api.model.Member;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,7 +22,7 @@ public class ChatRedisDto {
 	@Size(max = 300)
 	private String message;
 
-	private List<File> files;
+	private List<String> imgCode;
 
 	private Member member;
 	private Chatroom chatroom;

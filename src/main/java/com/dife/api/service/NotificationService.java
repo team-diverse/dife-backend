@@ -46,16 +46,20 @@ public class NotificationService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		NotificationToken notificationToken = new NotificationToken();
-		notificationToken.setPushToken(requestDto.getPushToken());
-		notificationToken.setDeviceId(requestDto.getDeviceId());
-		notificationToken.setMember(member);
+		if (!isTokenAlive(requestDto.getDeviceId(), member)) {
+			NotificationToken notificationToken = new NotificationToken();
+			notificationToken.setPushToken(requestDto.getPushToken());
+			notificationToken.setDeviceId(requestDto.getDeviceId());
+			notificationToken.setMember(member);
 
-		member.getNotificationTokens().add(notificationToken);
+			member.getNotificationTokens().add(notificationToken);
 
-		notificationTokenRepository.save(notificationToken);
-
-		return modelMapper.map(notificationToken, NotificationTokenResponseDto.class);
+			notificationTokenRepository.save(notificationToken);
+			return modelMapper.map(notificationToken, NotificationTokenResponseDto.class);
+		}
+		return modelMapper.map(
+				notificationTokenRepository.findByDeviceId(requestDto.getDeviceId()),
+				NotificationTokenResponseDto.class);
 	}
 
 	public List<NotificationTokenResponseDto> getNotificationTokens(String memberEmail) {
@@ -68,15 +72,16 @@ public class NotificationService {
 				.collect(toList());
 	}
 
-	public List<NotificationResponseDto> getNotifications(String memberEmail) {
+	public List<NotificationResponseDto> getNotifications(String deviceId, String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		List<NotificationToken> notificationTokens =
-				notificationTokenRepository.findAllByMember(member);
+		NotificationToken notificationToken =
+				notificationTokenRepository
+						.findAllByMemberAndDeviceId(member, deviceId)
+						.orElseThrow(NotificationAuthorizationException::new);
 
-		return notificationTokens.stream()
-				.flatMap(notificationToken -> notificationToken.getNotifications().stream())
+		return notificationToken.getNotifications().stream()
 				.map(notification -> modelMapper.map(notification, NotificationResponseDto.class))
 				.collect(toList());
 	}
@@ -143,5 +148,20 @@ public class NotificationService {
 				}
 			}
 		}
+	}
+
+	public boolean isTokenAlive(String deviceId, Member member) {
+
+		if (notificationTokenRepository.existsByDeviceId(deviceId)) {
+			NotificationToken notificationToken =
+					notificationTokenRepository
+							.findByDeviceId(deviceId)
+							.orElseThrow(NotificationAuthorizationException::new);
+			if (notificationToken.getMember() == member) return true;
+			notificationToken.getMember().getNotificationTokens().remove(notificationToken);
+			notificationTokenRepository.delete(notificationToken);
+			return false;
+		}
+		return false;
 	}
 }

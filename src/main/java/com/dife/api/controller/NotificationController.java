@@ -28,10 +28,11 @@ public class NotificationController implements SwaggerNotificationController {
 		return ResponseEntity.ok(responseDtos);
 	}
 
-	@GetMapping
-	public ResponseEntity<List<NotificationResponseDto>> getNotifications(Authentication auth) {
+	@GetMapping("/{deviceId}")
+	public ResponseEntity<List<NotificationResponseDto>> getNotifications(
+			@PathVariable("deviceId") String deviceId, Authentication auth) {
 		List<NotificationResponseDto> responseDtos =
-				notificationService.getNotifications(auth.getName());
+				notificationService.getNotifications(deviceId, auth.getName());
 		return ResponseEntity.ok(responseDtos);
 	}
 

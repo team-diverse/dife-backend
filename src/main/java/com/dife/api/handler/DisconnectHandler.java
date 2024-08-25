@@ -16,13 +16,12 @@ public class DisconnectHandler {
 
 	private final SimpMessageSendingOperations messagingTemplate;
 
-	public boolean isEnterDisconnectChecked(
+	public boolean canEnterChatroom(
 			Chatroom chatroom, Member member, String sessionId, String password) {
 
 		if (!isValidGroupChatroom(chatroom, password)
 				|| isFull(chatroom)
 				|| isExistsAlready(chatroom, member)) {
-			disconnect(chatroom.getId(), sessionId);
 			return false;
 		}
 		return true;
@@ -71,7 +70,6 @@ public class DisconnectHandler {
 	}
 
 	public void disconnect(Long chatroomId, String sessionId) {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		accessor.setSessionId(sessionId);
 		accessor.setDestination("/sub/chatroom/" + chatroomId);
