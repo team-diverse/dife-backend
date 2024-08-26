@@ -130,6 +130,7 @@ public class ChatroomService {
 
 		setting.setCount(setting.getCount() + 1);
 		setting.setDescription(trimmedDescription);
+		setting.setIsPublic(isPublic);
 
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
@@ -230,17 +231,9 @@ public class ChatroomService {
 			givenSetting.setMaxCount(maxCountValue);
 		}
 
-		if (Boolean.FALSE.equals(isPublic)) {
-			givenSetting.setPassword(password);
-		}
-
-		if (givenSetting.getIsPublic() != null && isPublic == null)
-			givenSetting.setIsPublic(givenSetting.getIsPublic());
-		else if (isPublic == null) throw new ChatroomException("공개/비공개 여부는 필수입니다!");
-		else givenSetting.setIsPublic(isPublic);
-
-		if (Boolean.FALSE.equals(isPublic)) {
-			givenSetting.setPassword(password);
+		if (isPublic != null) {
+			givenSetting.setIsPublic(isPublic);
+			if (!isPublic) givenSetting.setPassword(password);
 		}
 
 		if (profileImg != null && !profileImg.isEmpty()) {
@@ -248,6 +241,9 @@ public class ChatroomService {
 			File file = modelMapper.map(profileImgPath, File.class);
 			givenSetting.setProfileImg(file);
 		}
+
+		givenChatroom.setChatroomSetting(givenSetting);
+		chatroomRepository.save(givenChatroom);
 
 		ChatroomResponseDto responseDto =
 				chatroomModelMapper.map(givenSetting, ChatroomResponseDto.class);

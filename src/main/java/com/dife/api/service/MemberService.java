@@ -130,10 +130,10 @@ public class MemberService {
 			member.setProfileImg(file);
 		}
 
-		member.setUsername(username);
-		member.setCountry(country);
-		member.setBio(bio);
-		member.setMbti(mbti);
+		if (username != null) member.setUsername(username);
+		if (country != null) member.setCountry(country);
+		if (bio != null) member.setBio(bio);
+		if (mbti != null) member.setMbti(mbti);
 
 		if (hobbies != null) {
 			Set<String> safeHobbies = hobbies;
