@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1724477160246-1" author="suyeon">
+        <createTable tableName="bookmark">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_bookmark"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="message" type="varchar(300)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="post_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-2" author="suyeon">
+        <createTable tableName="bookmark_translation">
+            <column name="bookmark_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="translation_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-3" author="suyeon">
+        <createTable tableName="chat">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_chat"/>
+            </column>
+            <column name="message" type="varchar(300)"/>
+            <column name="chatroom_id" type="bigint"/>
+            <column name="member_id" type="bigint"/>
+            <column name="created" type="datetime"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-4" author="suyeon">
+        <createTable tableName="chat_img_code">
+            <column name="chat_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="img_code" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-5" author="suyeon">
+        <createTable tableName="chatroom">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_chatroom"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="chatroom_type" type="varchar(20)"/>
+            <column name="chatroom_setting_id" type="bigint"/>
+            <column name="manager_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-6" author="suyeon">
+        <createTable tableName="chatroom_likes">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_chatroom_likes"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="chatroom_id" type="bigint"/>
+            <column name="member_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-7" author="suyeon">
+        <createTable tableName="chatroom_member">
+            <column name="chatroom_id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_chatroom_member"/>
+            </column>
+            <column name="member_id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_chatroom_member"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-8" author="suyeon">
+        <createTable tableName="chatroom_setting">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_chatroom_setting"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="description" type="varchar(60)"/>
+            <column name="profile_img_id" type="bigint"/>
+            <column name="count" type="INT"/>
+            <column name="max_count" type="INT"/>
+            <column name="is_public" type="boolean"/>
+            <column name="password" type="varchar(5)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-9" author="suyeon">
+        <createTable tableName="comment">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_comment"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="content" type="varchar(255)"/>
+            <column name="is_public" type="boolean"/>
+            <column name="writer_id" type="bigint"/>
+            <column name="post_id" type="bigint"/>
+            <column name="parent_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-10" author="suyeon">
+        <createTable tableName="comment_likes">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_comment_likes"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="comment_id" type="bigint"/>
+            <column name="member_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-11" author="suyeon">
+        <createTable tableName="connect">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_connect"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="from_member_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="to_member_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-12" author="suyeon">
+        <createTable tableName="file">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_file"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="original_name" type="varchar(255)"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="url" type="text"/>
+            <column name="size" type="bigint"/>
+            <column name="format" type="varchar(10)"/>
+            <column name="post_id" type="bigint"/>
+            <column name="chat_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-13" author="suyeon">
+        <createTable tableName="group_purpose">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_group_purpose"/>
+            </column>
+            <column name="name" type="varchar(50)"/>
+            <column name="chatroom_setting_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-14" author="suyeon">
+        <createTable tableName="hobby">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_hobby"/>
+            </column>
+            <column name="name" type="varchar(50)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="chatroom_setting_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-15" author="suyeon">
+        <createTable tableName="language">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_language"/>
+            </column>
+            <column name="name" type="varchar(50)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="chatroom_setting_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-16" author="suyeon">
+        <createTable tableName="member">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_member"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="email" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="varchar(30)"/>
+            <column name="name" type="varchar(50)"/>
+            <column name="student_id" type="varchar(30)"/>
+            <column name="major" type="varchar(50)"/>
+            <column name="role" type="varchar(50)"/>
+            <column name="verification_file_id" type="bigint"/>
+            <column name="country" type="varchar(50)"/>
+            <column name="is_public" type="boolean"/>
+            <column name="mbti" type="char(4)"/>
+            <column name="profile_img_id" type="bigint"/>
+            <column name="bio" type="varchar(255)"/>
+            <column name="is_verified" type="boolean"/>
+            <column name="is_deleted" type="boolean"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-17" author="suyeon">
+        <createTable tableName="member_blocks">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_member_blocks"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="member_id" type="bigint"/>
+            <column name="blacklisted_member_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-18" author="suyeon">
+        <createTable tableName="member_likelist">
+            <column name="likelisted_member_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="member_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-19" author="suyeon">
+        <createTable tableName="notification">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_notification"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="type" type="varchar(30)"/>
+            <column name="type_id" type="bigint"/>
+            <column name="chat_member_email" type="varchar(100)"/>
+            <column name="message" type="varchar(255)"/>
+            <column name="notification_token_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-20" author="suyeon">
+        <createTable tableName="notification_token">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_notification_token"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="push_token" type="varchar(255)"/>
+            <column name="device_id" type="varchar(255)"/>
+            <column name="member_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-21" author="suyeon">
+        <createTable tableName="post">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_post"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="title" type="varchar(100)"/>
+            <column name="content" type="varchar(255)"/>
+            <column name="is_public" type="boolean"/>
+            <column name="board_type" type="varchar(20)"/>
+            <column name="member_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-22" author="suyeon">
+        <createTable tableName="post_blocks">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_post_blocks"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="post_id" type="bigint"/>
+            <column name="member_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-23" author="suyeon">
+        <createTable tableName="post_likes">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_post_likes"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="post_id" type="bigint"/>
+            <column name="member_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-24" author="suyeon">
+        <createTable tableName="report">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_report"/>
+            </column>
+            <column name="created" type="datetime"/>
+            <column name="modified" type="datetime"/>
+            <column name="type" type="varchar(20)"/>
+            <column name="description" type="varchar(255)"/>
+            <column name="member_id" type="bigint"/>
+            <column name="post_id" type="bigint"/>
+            <column name="comment_id" type="bigint"/>
+            <column name="receiver_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-25" author="suyeon">
+        <createTable tableName="translation">
+            <column autoIncrement="true" name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_translation"/>
+            </column>
+            <column name="detected_source_language" type="varchar(255)"/>
+            <column name="text" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-26" author="suyeon">
+        <createTable tableName="translation_bookmarks">
+            <column name="translation_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bookmarks_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1724477160246-27" author="suyeon">
+        <addUniqueConstraint columnNames="from_member_id, to_member_id" constraintName="uc_8696a20e4c4fbce8beb84daf4"
+                             tableName="connect"/>
+    </changeSet>
+    <changeSet id="1724477160246-28" author="suyeon">
+        <addUniqueConstraint columnNames="chatroom_setting_id" constraintName="uc_chatroom_chatroom_setting"
+                             tableName="chatroom"/>
+    </changeSet>
+    <changeSet id="1724477160246-29" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="bookmark"
+                                 constraintName="FK_BOOKMARK_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-30" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="bookmark" constraintName="FK_BOOKMARK_ON_POST"
+                                 referencedColumnNames="id" referencedTableName="post"/>
+    </changeSet>
+    <changeSet id="1724477160246-31" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chatroom_id" baseTableName="chatroom_likes"
+                                 constraintName="FK_CHATROOM_LIKES_ON_CHATROOM" referencedColumnNames="id"
+                                 referencedTableName="chatroom"/>
+    </changeSet>
+    <changeSet id="1724477160246-32" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="chatroom_likes"
+                                 constraintName="FK_CHATROOM_LIKES_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-33" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chatroom_setting_id" baseTableName="chatroom"
+                                 constraintName="FK_CHATROOM_ON_CHATROOM_SETTING" referencedColumnNames="id"
+                                 referencedTableName="chatroom_setting"/>
+    </changeSet>
+    <changeSet id="1724477160246-34" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="manager_id" baseTableName="chatroom"
+                                 constraintName="FK_CHATROOM_ON_MANAGER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-35" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="profile_img_id" baseTableName="chatroom_setting"
+                                 constraintName="FK_CHATROOM_SETTING_ON_PROFILEIMG" referencedColumnNames="id"
+                                 referencedTableName="file"/>
+    </changeSet>
+    <changeSet id="1724477160246-36" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chatroom_id" baseTableName="chat" constraintName="FK_CHAT_ON_CHATROOM"
+                                 referencedColumnNames="id" referencedTableName="chatroom"/>
+    </changeSet>
+    <changeSet id="1724477160246-37" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="chat" constraintName="FK_CHAT_ON_MEMBER"
+                                 referencedColumnNames="id" referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-38" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="comment_id" baseTableName="comment_likes"
+                                 constraintName="FK_COMMENT_LIKES_ON_COMMENT" referencedColumnNames="id"
+                                 referencedTableName="comment"/>
+    </changeSet>
+    <changeSet id="1724477160246-39" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="comment_likes"
+                                 constraintName="FK_COMMENT_LIKES_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-40" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="parent_id" baseTableName="comment"
+                                 constraintName="FK_COMMENT_ON_PARENT" referencedColumnNames="id"
+                                 referencedTableName="comment"/>
+    </changeSet>
+    <changeSet id="1724477160246-41" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="comment" constraintName="FK_COMMENT_ON_POST"
+                                 referencedColumnNames="id" referencedTableName="post"/>
+    </changeSet>
+    <changeSet id="1724477160246-42" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="writer_id" baseTableName="comment"
+                                 constraintName="FK_COMMENT_ON_WRITER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-43" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="from_member_id" baseTableName="connect"
+                                 constraintName="FK_CONNECT_ON_FROM_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-44" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="to_member_id" baseTableName="connect"
+                                 constraintName="FK_CONNECT_ON_TO_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-45" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chat_id" baseTableName="file" constraintName="FK_FILE_ON_CHAT"
+                                 referencedColumnNames="id" referencedTableName="chat"/>
+    </changeSet>
+    <changeSet id="1724477160246-46" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="file" constraintName="FK_FILE_ON_POST"
+                                 referencedColumnNames="id" referencedTableName="post"/>
+    </changeSet>
+    <changeSet id="1724477160246-47" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chatroom_setting_id" baseTableName="group_purpose"
+                                 constraintName="FK_GROUP_PURPOSE_ON_CHATROOM_SETTING" referencedColumnNames="id"
+                                 referencedTableName="chatroom_setting"/>
+    </changeSet>
+    <changeSet id="1724477160246-48" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chatroom_setting_id" baseTableName="hobby"
+                                 constraintName="FK_HOBBY_ON_CHATROOM_SETTING" referencedColumnNames="id"
+                                 referencedTableName="chatroom_setting"/>
+    </changeSet>
+    <changeSet id="1724477160246-49" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="hobby" constraintName="FK_HOBBY_ON_MEMBER"
+                                 referencedColumnNames="id" referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-50" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chatroom_setting_id" baseTableName="language"
+                                 constraintName="FK_LANGUAGE_ON_CHATROOM_SETTING" referencedColumnNames="id"
+                                 referencedTableName="chatroom_setting"/>
+    </changeSet>
+    <changeSet id="1724477160246-51" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="language"
+                                 constraintName="FK_LANGUAGE_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-52" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="blacklisted_member_id" baseTableName="member_blocks"
+                                 constraintName="FK_MEMBER_BLOCKS_ON_BLACKLISTED_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-53" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="member_blocks"
+                                 constraintName="FK_MEMBER_BLOCKS_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-54" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="profile_img_id" baseTableName="member"
+                                 constraintName="FK_MEMBER_ON_PROFILEIMG" referencedColumnNames="id"
+                                 referencedTableName="file"/>
+    </changeSet>
+    <changeSet id="1724477160246-55" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="verification_file_id" baseTableName="member"
+                                 constraintName="FK_MEMBER_ON_VERIFICATIONFILE" referencedColumnNames="id"
+                                 referencedTableName="file"/>
+    </changeSet>
+    <changeSet id="1724477160246-56" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="notification_token_id" baseTableName="notification"
+                                 constraintName="FK_NOTIFICATION_ON_NOTIFICATION_TOKEN" referencedColumnNames="id"
+                                 referencedTableName="notification_token"/>
+    </changeSet>
+    <changeSet id="1724477160246-57" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="notification_token"
+                                 constraintName="FK_NOTIFICATION_TOKEN_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-58" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="post_blocks"
+                                 constraintName="FK_POST_BLOCKS_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-59" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_blocks"
+                                 constraintName="FK_POST_BLOCKS_ON_POST" referencedColumnNames="id"
+                                 referencedTableName="post"/>
+    </changeSet>
+    <changeSet id="1724477160246-60" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="post_likes"
+                                 constraintName="FK_POST_LIKES_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-61" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_likes"
+                                 constraintName="FK_POST_LIKES_ON_POST" referencedColumnNames="id"
+                                 referencedTableName="post"/>
+    </changeSet>
+    <changeSet id="1724477160246-62" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="post" constraintName="FK_POST_ON_MEMBER"
+                                 referencedColumnNames="id" referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-63" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="comment_id" baseTableName="report"
+                                 constraintName="FK_REPORT_ON_COMMENT" referencedColumnNames="id"
+                                 referencedTableName="comment"/>
+    </changeSet>
+    <changeSet id="1724477160246-64" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="report" constraintName="FK_REPORT_ON_MEMBER"
+                                 referencedColumnNames="id" referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-65" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="report" constraintName="FK_REPORT_ON_POST"
+                                 referencedColumnNames="id" referencedTableName="post"/>
+    </changeSet>
+    <changeSet id="1724477160246-66" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="receiver_id" baseTableName="report"
+                                 constraintName="FK_REPORT_ON_RECEIVER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-67" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="bookmark_id" baseTableName="bookmark_translation"
+                                 constraintName="FK_BOOKMARK_TRANSLATION_ON_BOOKMARK" referencedColumnNames="id"
+                                 referencedTableName="bookmark"/>
+    </changeSet>
+    <changeSet id="1724477160246-68" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="bookmark_translation"
+                                 constraintName="FK_BOOKMARK_TRANSLATION_ON_TRANSLATION" referencedColumnNames="id"
+                                 referencedTableName="translation"/>
+    </changeSet>
+    <changeSet id="1724477160246-69" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chatroom_id" baseTableName="chatroom_member"
+                                 constraintName="FK_CHATROOM_MEMBER_ON_CHATROOM" referencedColumnNames="id"
+                                 referencedTableName="chatroom"/>
+    </changeSet>
+    <changeSet id="1724477160246-70" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="chatroom_member"
+                                 constraintName="FK_CHATROOM_MEMBER_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-71" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chat_id" baseTableName="chat_img_code"
+                                 constraintName="FK_CHAT_IMG_CODE_ON_CHAT" referencedColumnNames="id"
+                                 referencedTableName="chat"/>
+    </changeSet>
+    <changeSet id="1724477160246-72" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="likelisted_member_id" baseTableName="member_likelist"
+                                 constraintName="FK_MEMBER_LIKELIST_LIKELISTED_MEMBER_ID_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-73" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="member_likelist"
+                                 constraintName="FK_MEMBER_LIKELIST_MEMBER_ID_ON_MEMBER" referencedColumnNames="id"
+                                 referencedTableName="member"/>
+    </changeSet>
+    <changeSet id="1724477160246-74" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="bookmarks_id" baseTableName="translation_bookmarks"
+                                 constraintName="FK_TRANSLATION_BOOKMARKS_ON_BOOKMARK" referencedColumnNames="id"
+                                 referencedTableName="bookmark"/>
+    </changeSet>
+    <changeSet id="1724477160246-75" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_bookmarks"
+                                 constraintName="FK_TRANSLATION_BOOKMARKS_ON_TRANSLATION" referencedColumnNames="id"
+                                 referencedTableName="translation"/>
+    </changeSet>
+    <changeSet id="add-type-column-to-group_purpose-20240824-1815" author="seungho">
+        <addColumn tableName="group_purpose">
+            <column name="type" type="varchar(50)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="remove-url-column-from-file-20240824-2307" author="seungho">
+        <dropColumn tableName="file" columnName="url"/>
+    </changeSet>
+
+    <changeSet id="add-type-column-from-file-20240826-0125" author="suyeon">
+        <addColumn tableName="file">
+            <column name="is_secret" type="boolean"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
