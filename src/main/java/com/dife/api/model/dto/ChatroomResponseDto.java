@@ -44,6 +44,8 @@ public class ChatroomResponseDto {
 
 	private LocalDateTime modified;
 
+	private Boolean isEntered;
+
 	private Set<Member> members;
 
 	private Set<Chat> chats;

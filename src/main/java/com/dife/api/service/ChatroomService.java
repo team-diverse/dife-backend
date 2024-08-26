@@ -325,6 +325,7 @@ public class ChatroomService {
 		responseDto.setManager(chatroom.getManager());
 		responseDto.setName(chatroom.getName());
 		responseDto.setProfileImg(chatroom.getChatroomSetting().getProfileImg());
+		if (chatroom.getMembers().contains(member)) responseDto.setIsEntered(true);
 		responseDto.setMembers(chatroom.getMembers());
 		responseDto.setCreated(setting.getCreated());
 		responseDto.setModified(setting.getModified());
