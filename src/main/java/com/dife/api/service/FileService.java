@@ -87,9 +87,6 @@ public class FileService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		File file = fileRepository.findById(fileId).orElseThrow(S3FileNotFoundException::new);
-		log.info(String.valueOf(file.getIsSecret()));
-		log.info(String.valueOf(member.getVerificationFile().getId()));
-		log.info(String.valueOf(fileId));
 		if (file.getIsSecret() && !fileId.equals(member.getVerificationFile().getId()))
 			throw new MemberException("회원만이 본인 인증 파일에 접근할 수 있습니다.");
 		return generatePresignedUrl(file.getName());

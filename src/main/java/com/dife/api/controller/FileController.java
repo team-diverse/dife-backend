@@ -17,4 +17,9 @@ public class FileController implements SwaggerFileController {
 	public ResponseEntity<String> getFile(@PathVariable("id") Long id, Authentication auth) {
 		return ResponseEntity.ok(fileService.getPresignUrl(id, auth.getName()));
 	}
+
+	@GetMapping
+	public ResponseEntity<String> getFile(@RequestParam("name") String name) {
+		return ResponseEntity.ok(fileService.getPresignUrl(name));
+	}
 }
