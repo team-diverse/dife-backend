@@ -34,4 +34,8 @@ public class Report extends BaseTimeEntity {
 	@ManyToOne
 	@JoinColumn(name = "receiver_id")
 	private Member receiver;
+
+	@ManyToOne
+	@JoinColumn(name = "chatroom_id")
+	private Chatroom chatroom;
 }
