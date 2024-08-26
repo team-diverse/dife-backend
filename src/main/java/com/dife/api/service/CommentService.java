@@ -7,6 +7,7 @@ import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.CommentCreateRequestDto;
 import com.dife.api.model.dto.CommentResponseDto;
+import com.dife.api.model.dto.MemberResponseDto;
 import com.dife.api.repository.CommentRepository;
 import com.dife.api.repository.LikeCommentRepository;
 import com.dife.api.repository.MemberRepository;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +34,10 @@ public class CommentService {
 	private final ModelMapper modelMapper;
 	private final CommentRepository commentRepository;
 	private final LikeCommentRepository likeCommentRepository;
+
+	@Autowired
+	@Qualifier("memberModelMapper")
+	private ModelMapper memberModelMapper;
 
 	private final NotificationService notificationService;
 
@@ -70,6 +77,9 @@ public class CommentService {
 		commentRepository.save(comment);
 
 		CommentResponseDto responseDto = modelMapper.map(comment, CommentResponseDto.class);
+		MemberResponseDto memberDto = memberModelMapper.map(writer, MemberResponseDto.class);
+		responseDto.setWriter(memberDto);
+
 		if (comment.getParentComment() != null) {
 			responseDto.setParentComment(comment.getParentComment());
 			List<NotificationToken> parentCommentTokens =
@@ -89,6 +99,9 @@ public class CommentService {
 	public CommentResponseDto getComment(Comment comment, Member member) {
 		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
 
+		MemberResponseDto memberDto =
+				memberModelMapper.map(comment.getWriter(), MemberResponseDto.class);
+		dto.setWriter(memberDto);
 		dto.setPost(comment.getPost());
 		dto.setLikesCount(comment.getCommentLikes().size());
 

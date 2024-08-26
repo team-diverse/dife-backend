@@ -3,8 +3,8 @@ package com.dife.api.controller;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import com.dife.api.model.dto.ReportRequestDto;
-import com.dife.api.model.dto.ReportResponseDto;
 import com.dife.api.service.ReportService;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,10 +18,10 @@ public class ReportController implements SwaggerReportController {
 	private final ReportService reportService;
 
 	@PostMapping
-	public ResponseEntity<ReportResponseDto> createDeclaration(
-			@RequestBody ReportRequestDto requestDto, Authentication auth) {
+	public ResponseEntity<Void> createDeclaration(
+			@RequestBody ReportRequestDto requestDto, Authentication auth) throws IOException {
 
-		ReportResponseDto responseDto = reportService.createReport(requestDto, auth.getName());
-		return ResponseEntity.status(CREATED).body(responseDto);
+		reportService.createReport(requestDto, auth.getName());
+		return new ResponseEntity<>(CREATED);
 	}
 }
