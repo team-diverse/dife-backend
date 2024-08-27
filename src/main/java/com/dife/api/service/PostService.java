@@ -31,6 +31,7 @@ public class PostService {
 	private final PostRepository postRepository;
 	private final LikePostRepository likePostRepository;
 	private final BlockPostRepository blockPostRepository;
+	private final BookmarkRepository bookmarkRepository;
 	private final FileService fileService;
 	private final BlockService blockService;
 	private final FileRepository fileRepository;
@@ -121,6 +122,9 @@ public class PostService {
 		responseDto.setCommentCount(post.getComments().size());
 		responseDto.setLikesCount(post.getPostLikes().size());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
+		responseDto.setIsBookmarked(bookmarkRepository.existsBookmarkByPostAndMember(post, member));
+		responseDto.setCreated(post.getCreated());
+		responseDto.setModified(post.getModified());
 
 		responseDto.setIsLiked(likePostRepository.existsByPostAndMember(post, member));
 

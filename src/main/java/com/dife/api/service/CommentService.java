@@ -8,10 +8,8 @@ import com.dife.api.model.*;
 import com.dife.api.model.dto.CommentCreateRequestDto;
 import com.dife.api.model.dto.CommentResponseDto;
 import com.dife.api.model.dto.MemberResponseDto;
-import com.dife.api.repository.CommentRepository;
-import com.dife.api.repository.LikeCommentRepository;
-import com.dife.api.repository.MemberRepository;
-import com.dife.api.repository.PostRepository;
+import com.dife.api.model.dto.PostResponseDto;
+import com.dife.api.repository.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +32,7 @@ public class CommentService {
 	private final ModelMapper modelMapper;
 	private final CommentRepository commentRepository;
 	private final LikeCommentRepository likeCommentRepository;
+	private final BookmarkRepository bookmarkRepository;
 
 	@Autowired
 	@Qualifier("memberModelMapper")
@@ -81,7 +80,8 @@ public class CommentService {
 		responseDto.setWriter(memberDto);
 
 		if (comment.getParentComment() != null) {
-			responseDto.setParentComment(comment.getParentComment());
+			responseDto.setParentComment(
+					modelMapper.map(comment.getParentComment(), CommentResponseDto.class));
 			List<NotificationToken> parentCommentTokens =
 					comment.getParentComment().getWriter().getNotificationTokens();
 			String parentMessage =
@@ -99,18 +99,18 @@ public class CommentService {
 	public CommentResponseDto getComment(Comment comment, Member member) {
 		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
 
-		MemberResponseDto memberDto =
-				memberModelMapper.map(comment.getWriter(), MemberResponseDto.class);
-		dto.setWriter(memberDto);
-		dto.setPost(comment.getPost());
+		dto.setWriter(memberModelMapper.map(comment.getWriter(), MemberResponseDto.class));
+		dto.setPost(modelMapper.map(comment.getPost(), PostResponseDto.class));
 		dto.setLikesCount(comment.getCommentLikes().size());
 
-		if (comment.getParentComment() != null) dto.setParentComment(comment.getParentComment());
+		if (comment.getParentComment() != null)
+			dto.setParentComment(modelMapper.map(comment.getParentComment(), CommentResponseDto.class));
 		if (comment.getChildrenComments() != null)
 			dto.setCommentsCount(comment.getChildrenComments().size());
 
-		boolean isLiked = likeCommentRepository.existsByCommentAndMember(comment, member);
-		dto.setIsLiked(isLiked);
+		dto.setIsLiked(likeCommentRepository.existsByCommentAndMember(comment, member));
+		dto.setCreated(comment.getCreated());
+		dto.setModified(comment.getModified());
 
 		return dto;
 	}

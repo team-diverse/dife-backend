@@ -25,6 +25,8 @@ public class PostResponseDto {
 
 	private Boolean isLiked = false;
 
+	private Boolean isBookmarked = false;
+
 	private Integer commentCount;
 
 	private Integer likesCount;

@@ -31,6 +31,7 @@ public class LikeService {
 
 	private final ModelMapper modelMapper;
 	private final NotificationService notificationService;
+	private final PostService postService;
 
 	public List<PostResponseDto> getLikedPosts(String memberEmail) {
 		Member member =
@@ -41,7 +42,7 @@ public class LikeService {
 		List<Post> posts =
 				postLikes.stream().map(PostLike::getPost).distinct().collect(Collectors.toList());
 
-		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
+		return posts.stream().map(b -> postService.getPost(b.getId(), memberEmail)).collect(toList());
 	}
 
 	public void createLike(LikeCreateRequestDto dto, String memberEmail) {

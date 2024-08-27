@@ -1,7 +1,5 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.Chatroom;
-import com.dife.api.model.Member;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -24,7 +22,7 @@ public class ChatRedisDto {
 
 	private List<String> imgCode;
 
-	private Member member;
-	private Chatroom chatroom;
+	private MemberResponseDto member;
+	private ChatroomResponseDto chatroom;
 	private LocalDateTime created;
 }

@@ -27,6 +27,8 @@ public class BookmarkService {
 	private final MemberRepository memberRepository;
 	private final ModelMapper modelMapper;
 
+	private final PostService postService;
+
 	public List<BookmarkResponseDto> getAllBookmarks(String memberEmail) {
 
 		Member member =
@@ -34,11 +36,17 @@ public class BookmarkService {
 		List<Bookmark> bookmarks = bookmarkRepository.findAllByMember(member);
 
 		return bookmarks.stream()
-				.map(b -> modelMapper.map(b, BookmarkResponseDto.class))
+				.map(
+						b -> {
+							BookmarkResponseDto responseDto = modelMapper.map(b, BookmarkResponseDto.class);
+							if (b.getMessage() == null)
+								responseDto.setPost(postService.getPost(b.getPost().getId(), memberEmail));
+							return responseDto;
+						})
 				.collect(toList());
 	}
 
-	public List<BookmarkResponseDto> getBookmarks(Long chatroomId, String memberEmail) {
+	public List<BookmarkResponseDto> getChatroomBookmarks(Long chatroomId, String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -105,7 +113,9 @@ public class BookmarkService {
 		bookmark.setMember(member);
 		bookmarkRepository.save(bookmark);
 
-		return modelMapper.map(bookmark, BookmarkResponseDto.class);
+		BookmarkResponseDto responseDto = modelMapper.map(bookmark, BookmarkResponseDto.class);
+		responseDto.setPost(postService.getPost(post.getId(), memberEmail));
+		return responseDto;
 	}
 
 	public void deleteBookmark(BookmarkCreateRequestDto requestDto, String memberEmail) {

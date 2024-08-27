@@ -1,7 +1,5 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.Comment;
-import com.dife.api.model.Post;
 import java.time.LocalDateTime;
 import lombok.*;
 
@@ -20,9 +18,11 @@ public class CommentResponseDto {
 
 	private Boolean isLiked;
 
-	private Post post;
+	private Boolean isBookmarked;
 
-	private Comment parentComment;
+	private PostResponseDto post;
+
+	private CommentResponseDto parentComment;
 
 	private Integer likesCount;
 
