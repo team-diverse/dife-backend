@@ -1,6 +1,7 @@
 package com.dife.api.controller;
 
 import com.dife.api.model.dto.LikeCreateRequestDto;
+import com.dife.api.model.dto.LikeResponseDto;
 import com.dife.api.model.dto.PostResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +26,7 @@ public interface SwaggerLikeController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = PostResponseDto.class))
 			})
-	ResponseEntity<List<PostResponseDto>> getLikedPosts(Authentication auth);
+	ResponseEntity<List<LikeResponseDto>> getLikedPosts(Authentication auth);
 
 	@Operation(
 			summary = "좋아요 생성 API",
