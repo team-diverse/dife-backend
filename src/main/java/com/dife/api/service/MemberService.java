@@ -41,6 +41,7 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final PostRepository postRepository;
+	private final FileRepository fileRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final LikePostRepository likePostRepository;
 	private final LikeCommentRepository likeCommentRepository;
@@ -110,16 +111,16 @@ public class MemberService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if (!member.getIsVerified()) {
-			if ((verificationFile.isEmpty() || verificationFile == null)
-					&& (member.getUsername().equals(""))) {
-				throw new MemberNotAddVerificationException();
-			} else {
-				if (verificationFile != null && !verificationFile.isEmpty()) {
-					FileDto verificationImgPath = fileService.upload(verificationFile);
-					File file = modelMapper.map(verificationImgPath, File.class);
-					member.setVerificationFile(file);
-				}
+		if ((verificationFile == null || verificationFile.isEmpty())
+				&& member.getUsername().equals("")) {
+			throw new MemberNotAddVerificationException();
+		} else {
+			if (verificationFile != null && !verificationFile.isEmpty()) {
+				FileDto verificationImgPath = fileService.upload(verificationFile);
+				File file = modelMapper.map(verificationImgPath, File.class);
+				file.setIsSecret(true);
+				fileRepository.save(file);
+				member.setVerificationFile(file);
 			}
 		}
 
@@ -129,10 +130,10 @@ public class MemberService {
 			member.setProfileImg(file);
 		}
 
-		member.setUsername(username);
-		member.setCountry(country);
-		member.setBio(bio);
-		member.setMbti(mbti);
+		if (username != null) member.setUsername(username);
+		if (country != null) member.setCountry(country);
+		if (bio != null) member.setBio(bio);
+		if (mbti != null) member.setMbti(mbti);
 
 		if (hobbies != null) {
 			Set<String> safeHobbies = hobbies;

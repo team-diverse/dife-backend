@@ -27,11 +27,16 @@ public interface SwaggerLikeController {
 			})
 	ResponseEntity<List<PostResponseDto>> getLikedPosts(Authentication auth);
 
-	@Operation(summary = "게시글/댓글 좋아요 생성 API", description = "사용자가 DTO를 작성해 게시글/댓글 좋아요를 생성하는 API입니다.")
+	@Operation(
+			summary = "좋아요 생성 API",
+			description =
+					"사용자가 DTO를 작성해 게시글/댓글/채팅방/회원 좋아요를 생성하는 API입니다. type은 POST/COMMENT/CHATROOM/MEMBER이 있습니다.")
 	@ApiResponse(responseCode = "201")
 	ResponseEntity<Void> createLike(LikeCreateRequestDto requestDto, Authentication auth);
 
-	@Operation(summary = "게시글/댓글 좋아요 취소 API", description = "사용자가 DTO를 작성해 게시글/댓글 좋아요를 취소하는 API입니다.")
+	@Operation(
+			summary = "좋아요 취소 API",
+			description = "사용자가 DTO를 작성해 좋아요를 취소하는 API입니다. 좋아요 생성과 같은 DTO를 사용합니다.")
 	@ApiResponse(responseCode = "200")
 	ResponseEntity<Void> deleteLikePost(LikeCreateRequestDto requestDto, Authentication auth);
 }

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/reports")
-public class ReportController {
+public class ReportController implements SwaggerReportController {
 
 	private final ReportService reportService;
 
