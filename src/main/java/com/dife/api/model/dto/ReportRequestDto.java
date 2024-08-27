@@ -20,5 +20,6 @@ public class ReportRequestDto {
 	private Long postId;
 	private Long commentId;
 	private Long receiverId;
+	private Long chatroomId;
 	private String message;
 }

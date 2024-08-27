@@ -20,6 +20,7 @@ public class ReportService {
 
 	private final PostRepository postRepository;
 	private final CommentRepository commentRepository;
+	private final ChatroomRepository chatroomRepository;
 	private final MemberRepository memberRepository;
 	private final ReportRepository reportRepository;
 
@@ -49,6 +50,11 @@ public class ReportService {
 					memberRepository
 							.findById(requestDto.getReceiverId())
 							.orElseThrow(MemberNotFoundException::new));
+		} else if (requestDto.getChatroomId() != null) {
+			report.setChatroom(
+					chatroomRepository
+							.findById(requestDto.getChatroomId())
+							.orElseThrow(ChatroomNotFoundException::new));
 		}
 
 		Optional.ofNullable(requestDto.getMessage()).ifPresent(report::setDescription);
