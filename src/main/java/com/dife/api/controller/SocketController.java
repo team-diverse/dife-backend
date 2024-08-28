@@ -2,7 +2,7 @@ package com.dife.api.controller;
 
 import com.dife.api.model.dto.ChatRequestDto;
 import com.dife.api.service.ChatService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.*;
@@ -18,7 +18,7 @@ public class SocketController {
 
 	@MessageMapping("/chatroom/chat")
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
-			throws JsonProcessingException {
+			throws IOException {
 		chatService.sendMessage(dto, headerAccessor);
 	}
 }

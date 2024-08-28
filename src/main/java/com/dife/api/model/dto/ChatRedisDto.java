@@ -20,6 +20,8 @@ public class ChatRedisDto {
 	@Size(max = 300)
 	private String message;
 
+	private String authorization;
+
 	private List<String> imgCode;
 
 	private MemberResponseDto member;

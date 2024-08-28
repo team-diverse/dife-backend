@@ -1,16 +1,17 @@
 package com.dife.api.service;
 
+import static io.lettuce.core.pubsub.PubSubOutput.Type.message;
+
 import com.dife.api.exception.ChatroomException;
 import com.dife.api.exception.ChatroomNotFoundException;
-import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.handler.DisconnectHandler;
 import com.dife.api.handler.NotificationHandler;
+import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.redis.RedisPublisher;
 import com.dife.api.repository.ChatRepository;
 import com.dife.api.repository.ChatroomRepository;
-import com.dife.api.repository.MemberRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.*;
 import java.io.File;
@@ -36,8 +37,6 @@ public class ChatService {
 	private final ChatroomRepository chatroomRepository;
 	private final ChatRepository chatRepository;
 
-	private final MemberRepository memberRepository;
-
 	private final RedisPublisher redisPublisher;
 	private final RedisLockChatServiceFacade chatServiceFacade;
 
@@ -49,6 +48,8 @@ public class ChatService {
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
 
+	private final JWTUtil jwtUtil;
+
 	@Autowired
 	@Qualifier("memberModelMapper")
 	private ModelMapper memberModelMapper;
@@ -58,17 +59,17 @@ public class ChatService {
 	private ModelMapper chatroomModelMapper;
 
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
-			throws JsonProcessingException {
+			throws IOException {
 		switch (dto.getChatType()) {
 			case ENTER:
 				enter(dto, headerAccessor);
 				break;
 			case CHAT:
-				chat(dto);
+				chat(dto, headerAccessor);
 				break;
 			case FILE:
 				try {
-					file(dto);
+					file(dto, headerAccessor);
 				} catch (Exception e) {
 					log.error("Error Message : {}", e.getMessage());
 				}
@@ -80,7 +81,7 @@ public class ChatService {
 	}
 
 	public void enter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
-			throws JsonProcessingException {
+			throws IOException {
 
 		Chatroom chatroom =
 				chatroomRepository
@@ -88,8 +89,10 @@ public class ChatService {
 						.orElseThrow(ChatroomNotFoundException::new);
 		Long chatroomId = chatroom.getId();
 		String sessionId = headerAccessor.getSessionId();
+		String token = dto.getAuthorization();
+		Long memberId = jwtUtil.getId(token);
 
-		Member member = memberService.getMemberEntityById(dto.getMemberId());
+		Member member = memberService.getMemberEntityById(memberId);
 		if (!disconnectHandler.canEnterChatroom(chatroom, member, sessionId, dto.getPassword())) {
 			disconnectHandler.disconnect(chatroom.getId(), sessionId);
 			return;
@@ -131,14 +134,19 @@ public class ChatService {
 				member, member, message, NotificationType.CHATROOM, chatroom.getId());
 	}
 
-	public void chat(ChatRequestDto dto) throws JsonProcessingException {
+	public void chat(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+			throws JsonProcessingException {
 
 		Chatroom chatroom =
 				chatroomRepository
 						.findById(dto.getChatroomId())
 						.orElseThrow(ChatroomNotFoundException::new);
 
-		Member member = memberService.getMemberEntityById(dto.getMemberId());
+		Member member = getMemberFromSocket(dto);
+		String sessionId = headerAccessor.getSessionId();
+
+		if (!disconnectHandler.isChatroomMember(chatroom, member))
+			disconnectHandler.disconnect(chatroom.getId(), sessionId);
 
 		Set<Member> blockedMembers = blockService.getBlackSet(member);
 
@@ -181,14 +189,14 @@ public class ChatService {
 	}
 
 	public void exit(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
-			throws JsonProcessingException {
+			throws IOException {
 
 		Chatroom chatroom =
 				chatroomRepository
 						.findById(dto.getChatroomId())
 						.orElseThrow(ChatroomNotFoundException::new);
 		ChatroomSetting setting = chatroom.getChatroomSetting();
-		Member member = memberService.getMemberEntityById(dto.getMemberId());
+		Member member = getMemberFromSocket(dto);
 
 		Long chatroomId = dto.getChatroomId();
 		String sessionId = headerAccessor.getSessionId();
@@ -222,19 +230,19 @@ public class ChatService {
 		return chat;
 	}
 
-	public ChatResponseDto file(ChatRequestDto requestDto) throws JsonProcessingException {
-		Member member =
-				memberRepository
-						.findById(requestDto.getMemberId())
-						.orElseThrow(MemberNotFoundException::new);
+	public ChatResponseDto file(ChatRequestDto requestDto, SimpMessageHeaderAccessor headerAccessor)
+			throws IOException {
+
+		Member member = getMemberFromSocket(requestDto);
+		String sessionId = headerAccessor.getSessionId();
 
 		Chatroom chatroom =
 				chatroomRepository
 						.findById(requestDto.getChatroomId())
 						.orElseThrow(ChatroomNotFoundException::new);
-		if (!chatroom.getMembers().contains(member)) {
-			throw new ChatroomException("채팅방 회원만이 채팅 파일을 보낼 수 있습니다!");
-		}
+
+		if (!disconnectHandler.isChatroomMember(chatroom, member))
+			disconnectHandler.disconnect(chatroom.getId(), sessionId);
 
 		List<String> imgCodes = requestDto.getImgCode();
 
@@ -314,5 +322,12 @@ public class ChatService {
 		chatRedisDto.setChatroom(chatroomModelMapper.map(chatroom, ChatroomResponseDto.class));
 
 		return chatRedisDto;
+	}
+
+	public Member getMemberFromSocket(ChatRequestDto requestDto) {
+		String token = requestDto.getAuthorization();
+		Long memberId = jwtUtil.getId(token);
+
+		return memberService.getMemberEntityById(memberId);
 	}
 }
