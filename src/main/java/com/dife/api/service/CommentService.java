@@ -8,7 +8,6 @@ import com.dife.api.model.*;
 import com.dife.api.model.dto.CommentCreateRequestDto;
 import com.dife.api.model.dto.CommentResponseDto;
 import com.dife.api.model.dto.MemberResponseDto;
-import com.dife.api.model.dto.PostResponseDto;
 import com.dife.api.repository.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +32,7 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final LikeCommentRepository likeCommentRepository;
 	private final BookmarkRepository bookmarkRepository;
+	private final PostService postService;
 
 	@Autowired
 	@Qualifier("memberModelMapper")
@@ -100,7 +100,7 @@ public class CommentService {
 		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
 
 		dto.setWriter(memberModelMapper.map(comment.getWriter(), MemberResponseDto.class));
-		dto.setPost(modelMapper.map(comment.getPost(), PostResponseDto.class));
+		dto.setPost(postService.getPost(comment.getPost().getId(), member.getEmail()));
 		dto.setLikesCount(comment.getCommentLikes().size());
 
 		if (comment.getParentComment() != null)
