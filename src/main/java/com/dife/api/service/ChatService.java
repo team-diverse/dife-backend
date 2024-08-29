@@ -20,6 +20,8 @@ import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,14 @@ public class ChatService {
 	private final BlockService blockService;
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
+
+	@Autowired
+	@Qualifier("memberModelMapper")
+	private ModelMapper memberModelMapper;
+
+	@Autowired
+	@Qualifier("chatroomModelMapper")
+	private ModelMapper chatroomModelMapper;
 
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
@@ -107,8 +117,7 @@ public class ChatService {
 					chatroomMember, member, message, NotificationType.CHATROOM, chatroomId);
 		}
 
-		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
-		redisPublisher.publish(chatRedisDto);
+		redisPublisher.publish(dealDto(chat, member, chatroom));
 		chatroomRepository.save(chatroom);
 	}
 
@@ -186,8 +195,7 @@ public class ChatService {
 		String exitMessage = username + "님이 퇴장하셨습니다!";
 		Chat chat = saveChat(member, chatroom, exitMessage);
 
-		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
-		redisPublisher.publish(chatRedisDto);
+		redisPublisher.publish(dealDto(chat, member, chatroom));
 		notificationHandler.isAlone(chatroom, sessionId);
 
 		chatroom.setChatroomSetting(setting);
@@ -285,9 +293,16 @@ public class ChatService {
 			}
 		}
 
-		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
-		redisPublisher.publish(chatRedisDto);
+		redisPublisher.publish(dealDto(chat, member, chatroom));
 
 		return modelMapper.map(chat, ChatResponseDto.class);
+	}
+
+	public ChatRedisDto dealDto(Chat chat, Member member, Chatroom chatroom) {
+		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
+		chatRedisDto.setMember(memberModelMapper.map(member, MemberResponseDto.class));
+		chatRedisDto.setChatroom(chatroomModelMapper.map(chatroom, ChatroomResponseDto.class));
+
+		return chatRedisDto;
 	}
 }

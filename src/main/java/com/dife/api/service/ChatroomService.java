@@ -34,6 +34,10 @@ public class ChatroomService {
 
 	private final BlockService blockService;
 
+	@Autowired
+	@Qualifier("memberModelMapper")
+	private ModelMapper memberModelMapper;
+
 	private final ModelMapper modelMapper;
 
 	@Autowired
@@ -248,7 +252,8 @@ public class ChatroomService {
 		ChatroomResponseDto responseDto =
 				chatroomModelMapper.map(givenSetting, ChatroomResponseDto.class);
 		responseDto.setName(givenChatroom.getName());
-		responseDto.setManager(givenChatroom.getManager());
+		responseDto.setManager(
+				memberModelMapper.map(givenChatroom.getManager(), MemberResponseDto.class));
 
 		return responseDto;
 	}
@@ -322,11 +327,11 @@ public class ChatroomService {
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 		ChatroomResponseDto responseDto = chatroomModelMapper.map(setting, ChatroomResponseDto.class);
-		responseDto.setManager(chatroom.getManager());
+		responseDto.setManager(memberModelMapper.map(chatroom.getManager(), MemberResponseDto.class));
 		responseDto.setName(chatroom.getName());
 		responseDto.setProfileImg(chatroom.getChatroomSetting().getProfileImg());
 		if (chatroom.getMembers().contains(member)) responseDto.setIsEntered(true);
-		responseDto.setMembers(chatroom.getMembers());
+		responseDto.getMembers().add(memberModelMapper.map(member, MemberResponseDto.class));
 		responseDto.setCreated(setting.getCreated());
 		responseDto.setModified(setting.getModified());
 

@@ -19,9 +19,9 @@ public class ChatResponseDto {
 	@Size(max = 300)
 	private String message;
 
-	private LocalDateTime created;
-
 	private String username;
 
 	private List<String> imgCode;
+
+	private LocalDateTime created;
 }

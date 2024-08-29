@@ -1,6 +1,5 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.Post;
 import com.dife.api.model.Translation;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +15,6 @@ public class BookmarkResponseDto {
 	private Long id;
 	private String message;
 	private List<Translation> translations;
-	private Post post;
+	private PostResponseDto post;
 	private LocalDateTime created;
 }
