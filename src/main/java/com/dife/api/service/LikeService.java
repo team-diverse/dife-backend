@@ -81,8 +81,33 @@ public class LikeService {
 		likePostRepository.save(postLike);
 
 		Member writer = post.getWriter();
-		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 게시글을 좋아해요!";
-		notificationService.addNotifications(writer, member, message, NotificationType.POST, postId);
+		translateLikePost(writer.getSettingLanguage(), writer, member, post);
+	}
+
+	private void translateLikePost(
+			SettingLanguageType settingLanguage, Member writer, Member member, Post post) {
+		String message = "WOW!😆 " + member.getUsername() + " likes your post!";
+
+		switch (settingLanguage) {
+			case EN:
+				message = "WOW!😆 " + member.getUsername() + " likes your post!";
+				break;
+			case KO:
+				message = "WOW!😆 " + member.getUsername() + " 님이 회원님의 게시글을 좋아해요!";
+				break;
+			case ZH:
+				message = "WOW!😆 " + member.getUsername() + " 您喜欢了会员的帖子！";
+				break;
+			case JA:
+				message = "WOW!😆 " + member.getUsername() + " あなたが会員の投稿に「いいね！」しました！";
+				break;
+			case ES:
+				message = "WOW!😆 " + member.getUsername() + " ¡Te gusta la publicación del miembro!";
+				break;
+		}
+
+		notificationService.addNotifications(
+				writer, member, message, NotificationType.POST, post.getId());
 	}
 
 	public void createLikeComment(Long commentId, String memberEmail) {
@@ -100,8 +125,33 @@ public class LikeService {
 		likeCommentRepository.save(commentLike);
 
 		Member writer = comment.getWriter();
-		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 댓글을 좋아해요!";
-		notificationService.addNotifications(writer, member, message, NotificationType.POST, commentId);
+		translateLikeComment(writer.getSettingLanguage(), writer, member, comment);
+	}
+
+	private void translateLikeComment(
+			SettingLanguageType settingLanguage, Member writer, Member member, Comment comment) {
+		String message = "WOW!😆 " + member.getUsername() + " likes your comment!";
+
+		switch (settingLanguage) {
+			case EN:
+				message = "WOW!😆 " + member.getUsername() + " likes your comment!";
+				break;
+			case KO:
+				message = "WOW!😆 " + member.getUsername() + " 님이 회원님의 댓글을 좋아해요!";
+				break;
+			case ZH:
+				message = "WOW!😆 " + member.getUsername() + " 喜欢了评论！";
+				break;
+			case JA:
+				message = "WOW!😆 " + member.getUsername() + " コメントに「いいね！」しました！";
+				break;
+			case ES:
+				message = "WOW!😆 " + member.getUsername() + " ¡Te gusta el comentario!";
+				break;
+		}
+
+		notificationService.addNotifications(
+				writer, member, message, NotificationType.POST, comment.getId());
 	}
 
 	public void createLikeChatroom(Long chatroomId, String memberEmail) {

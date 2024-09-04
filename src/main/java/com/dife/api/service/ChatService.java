@@ -111,14 +111,45 @@ public class ChatService {
 		chatroomMembers.add(member);
 
 		for (Member chatroomMember : chatroomMembers) {
-			String message =
-					"WELCOME! 😊 " + chatroom.getName() + "방에 " + member.getUsername() + "님이 입장하셨습니다!";
-			notificationService.addNotifications(
-					chatroomMember, member, message, NotificationType.CHATROOM, chatroomId);
+			translateChatroomEnter(chatroomMember.getSettingLanguage(), member, chatroom);
 		}
 
 		redisPublisher.publish(dealDto(chat, member, chatroom));
 		chatroomRepository.save(chatroom);
+	}
+
+	private void translateChatroomEnter(
+			SettingLanguageType settingLanguage, Member member, Chatroom chatroom) {
+		String message =
+				"WELCOME! 😊 In Room " + chatroom.getName() + member.getUsername() + " entered!";
+
+		switch (settingLanguage) {
+			case EN:
+				message = "WELCOME! 😊 In Room " + chatroom.getName() + member.getUsername() + " entered!";
+				break;
+			case KO:
+				message =
+						"WELCOME! 😊 " + chatroom.getName() + " 방에 " + member.getUsername() + " 님이 입장하셨습니다!";
+				break;
+			case ZH:
+				message = "WELCOME! 😊 " + chatroom.getName() + "房间有 " + member.getUsername() + " 进入了！";
+				break;
+			case JA:
+				message =
+						"WELCOME! 😊 " + chatroom.getName() + "ルームに " + member.getUsername() + " さんが参加しました！";
+				break;
+			case ES:
+				message =
+						"WELCOME! 😊 "
+								+ chatroom.getName()
+								+ " sala ha sido ingresada por "
+								+ member.getUsername()
+								+ "!";
+				break;
+		}
+
+		notificationService.addNotifications(
+				member, member, message, NotificationType.CHATROOM, chatroom.getId());
 	}
 
 	public void chat(ChatRequestDto dto) throws JsonProcessingException {

@@ -34,7 +34,7 @@ INSERT INTO member (ID, EMAIL, PASSWORD, USERNAME, NAME, STUDENT_ID, MAJOR, COUN
 VALUES ('4', 'syr820@kookmin.ac.kr', '$2a$10$Y/3KpS26JfwZl/.MCmpXd.n56NnFwfjkwaHQ5726.j69UQQ/gzgWi', 'syr820', '서예린', '20221575', '공업디자인학과', 'KO', 1, 0, 'ISTJ', 'ADMIN', 'hiiii', 1, 'ES');
 
 INSERT INTO member (ID, EMAIL, PASSWORD, USERNAME, NAME, STUDENT_ID, MAJOR, COUNTRY, IS_PUBLIC, IS_DELETED, MBTI, ROLE, BIO, IS_VERIFIED, SETTING_LANGUAGE)
-VALUES ('5', 'gusuyeon23@gmail.com', '$2a$10$Y/3KpS26JfwZl/.MCmpXd.n56NnFwfjkwaHQ5726.j69UQQ/gzgWi', 'sooya', '구수연', '20211863', '소프트웨어학과', 'US', 1, 0,'ENTJ', 'ADMIN', 'Backend Suyeon Test account', 1, 'EN');
+VALUES ('5', 'gusuyeon23@gmail.com', '$2a$10$Y/3KpS26JfwZl/.MCmpXd.n56NnFwfjkwaHQ5726.j69UQQ/gzgWi', 'sooya', '구수연', '20211863', '소프트웨어학과', 'US', 1, 0,'ENTJ', 'ADMIN', 'Backend Suyeon Test account', 1, 'ES');
 
 INSERT INTO language(ID, MEMBER_ID, NAME)
 VALUES ('1', '5', 'KOREAN');

@@ -91,9 +91,7 @@ public class ConnectService {
 		connect.setStatus(ConnectStatus.PENDING);
 		connectRepository.save(connect);
 
-		String message = "Hi!🤝 " + currentMember.getUsername() + "님이 회원님과의 커넥트를 맺고 싶어해요!";
-		notificationService.addNotifications(
-				toMember, currentMember, message, NotificationType.CONNECT, connect.getId());
+		translateCreateConnect(toMember.getSettingLanguage(), currentMember, toMember, connect);
 
 		return modelMapper.map(connect, ConnectResponseDto.class);
 	}
@@ -147,11 +145,60 @@ public class ConnectService {
 	}
 
 	private void createNotifications(Member member, String otherMemberEmail, Long typeId) {
-		List<NotificationToken> notificationTokens = member.getNotificationTokens();
 
 		Member otherMember =
 				memberRepository.findByEmail(otherMemberEmail).orElseThrow(MemberNotFoundException::new);
-		String message = "YEAH!🙌 " + otherMember.getUsername() + "님과의 커넥트가 성사되었어요!";
+		translateSuccessConnect(member.getSettingLanguage(), member, otherMember, typeId);
+	}
+
+	private void translateCreateConnect(
+			SettingLanguageType settingLanguageType, Member member, Member otherMember, Connect connect) {
+
+		String message = "Hi!🤝 " + member.getUsername() + " wants to make connect with you!";
+
+		switch (settingLanguageType) {
+			case EN:
+				message = "Hi!🤝 " + member.getUsername() + " wants to make connect with you!";
+				break;
+			case KO:
+				message = "Hi!🤝 " + member.getUsername() + " 님이 회원님과 커넥트를 맺고 싶어 해요!";
+				break;
+			case ZH:
+				message = "Hi!🤝 " + member.getUsername() + " 想与您建立连接！";
+				break;
+			case JA:
+				message = "Hi!🤝 " + member.getUsername() + " があなたと接続したいと考えています！";
+				break;
+			case ES:
+				message = "Hi!🤝 " + member.getUsername() + " quiere conectarse contigo!";
+				break;
+		}
+
+		notificationService.addNotifications(
+				otherMember, member, message, NotificationType.CONNECT, connect.getId());
+	}
+
+	private void translateSuccessConnect(
+			SettingLanguageType settingLanguageType, Member member, Member otherMember, Long typeId) {
+		String message = "YEAH!🙌 Succeed Connect With " + otherMember.getUsername() + "!";
+		switch (settingLanguageType) {
+			case EN:
+				message = "YEAH!🙌 Succeed Connect With " + otherMember.getUsername() + "!";
+				break;
+			case KO:
+				message = "YEAH!🙌 " + otherMember.getUsername() + " 님과의 커넥트가 성사되었어요!";
+				break;
+			case ZH:
+				message = "YEAH!🙌 " + otherMember.getUsername() + " 与您的连接成功建立！";
+				break;
+			case JA:
+				message = "YEAH!🙌 " + otherMember.getUsername() + " あなたとの接続が成功しました！";
+				break;
+			case ES:
+				message =
+						"YEAH!🙌 " + otherMember.getUsername() + " ¡La conexión con usted ha sido exitosa!";
+				break;
+		}
 
 		notificationService.addNotifications(
 				member, otherMember, message, NotificationType.CONNECT, typeId);
