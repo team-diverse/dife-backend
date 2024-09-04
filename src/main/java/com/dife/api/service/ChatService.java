@@ -118,27 +118,26 @@ public class ChatService {
 		chatroomRepository.save(chatroom);
 	}
 
-	private void translateChatroomEnter(
-			SettingLanguageType settingLanguage, Member member, Chatroom chatroom) {
+	private void translateChatroomEnter(String settingLanguage, Member member, Chatroom chatroom) {
 		String message =
 				"WELCOME! 😊 In Room " + chatroom.getName() + member.getUsername() + " entered!";
 
 		switch (settingLanguage) {
-			case EN:
+			case "EN":
 				message = "WELCOME! 😊 In Room " + chatroom.getName() + member.getUsername() + " entered!";
 				break;
-			case KO:
+			case "KO":
 				message =
 						"WELCOME! 😊 " + chatroom.getName() + " 방에 " + member.getUsername() + " 님이 입장하셨습니다!";
 				break;
-			case ZH:
+			case "ZH":
 				message = "WELCOME! 😊 " + chatroom.getName() + "房间有 " + member.getUsername() + " 进入了！";
 				break;
-			case JA:
+			case "JA":
 				message =
 						"WELCOME! 😊 " + chatroom.getName() + "ルームに " + member.getUsername() + " さんが参加しました！";
 				break;
-			case ES:
+			case "ES":
 				message =
 						"WELCOME! 😊 "
 								+ chatroom.getName()
