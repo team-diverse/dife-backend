@@ -49,6 +49,7 @@ public interface SwaggerMemberController {
 						schema = @Schema(implementation = MemberResponseDto.class))
 			})
 	public ResponseEntity<MemberResponseDto> update(
+			@RequestParam(name = "password", required = false) String password,
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "country", required = false) String country,
 			@RequestParam(name = "settingLanguage", required = false) String settingLanguage,
@@ -59,8 +60,7 @@ public interface SwaggerMemberController {
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
-			Authentication auth)
-			throws IOException;
+			Authentication auth);
 
 	@Operation(
 			summary = "회원 ID별 조회 API",

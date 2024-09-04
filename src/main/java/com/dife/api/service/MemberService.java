@@ -9,7 +9,6 @@ import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.*;
 import com.dife.api.repository.*;
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,7 +40,6 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final PostRepository postRepository;
-	private final FileRepository fileRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final LikePostRepository likePostRepository;
 	private final LikeCommentRepository likeCommentRepository;
@@ -99,6 +97,7 @@ public class MemberService {
 	}
 
 	public MemberResponseDto update(
+			String password,
 			String username,
 			String country,
 			String settingLanguage,
@@ -109,109 +108,120 @@ public class MemberService {
 			Boolean isPublic,
 			MultipartFile profileImg,
 			MultipartFile verificationFile,
-			String memberEmail)
-			throws IOException {
+			String memberEmail) {
+
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if ((verificationFile == null || verificationFile.isEmpty())
-				&& member.getUsername().equals("")) {
-			throw new MemberNotAddVerificationException();
-		} else {
-			if (verificationFile != null && !verificationFile.isEmpty()) {
-				FileDto verificationImgPath = fileService.upload(verificationFile);
-				File file = modelMapper.map(verificationImgPath, File.class);
-				file.setIsSecret(true);
-				fileRepository.save(file);
-				member.setVerificationFile(file);
-			}
-		}
+		if (password != null) updatePassword(member, password);
 
-		if (profileImg != null && !profileImg.isEmpty()) {
-			FileDto profileImgPath = fileService.upload(profileImg);
-			File file = modelMapper.map(profileImgPath, File.class);
-			member.setProfileImg(file);
-		}
+		boolean notAddVerificationFile =
+				(verificationFile == null || verificationFile.isEmpty())
+						&& member.getUsername().equals("Diver");
+		if (notAddVerificationFile) throw new MemberNotAddVerificationException();
+
+		boolean hasToUploadVerificationFile = verificationFile != null && !verificationFile.isEmpty();
+		if (hasToUploadVerificationFile) updateFile(member, verificationFile, true);
+
+		boolean hasToUploadProfile = profileImg != null && !profileImg.isEmpty();
+		if (hasToUploadProfile) updateFile(member, profileImg, false);
 
 		if (username != null) member.setUsername(username);
 		if (country != null) member.setCountry(country);
 		member.setSettingLanguage(settingLanguage != null ? settingLanguage : "EN");
 		if (bio != null) member.setBio(bio);
 		if (mbti != null) member.setMbti(mbti);
-
-		if (hobbies != null) {
-			Set<String> safeHobbies = hobbies;
-
-			Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByMember(member);
-			Map<String, Hobby> nameToHobbyMap =
-					existingHobbies.stream()
-							.collect(
-									Collectors.toMap(
-											Hobby::getName, Function.identity(), (existing, replacement) -> existing));
-
-			Set<Hobby> updatedHobbies = new HashSet<>();
-
-			for (String hobbyName : safeHobbies) {
-				if (nameToHobbyMap.containsKey(hobbyName)) {
-					updatedHobbies.add(nameToHobbyMap.get(hobbyName));
-				} else {
-					Hobby nHobby = new Hobby();
-					nHobby.setName(hobbyName);
-					nHobby.setMember(member);
-					hobbyRepository.save(nHobby);
-					updatedHobbies.add(nHobby);
-				}
-			}
-			existingHobbies.stream()
-					.filter(hobby -> !hobbies.contains(hobby.getName()))
-					.forEach(hobbyRepository::delete);
-
-			member.setHobbies(updatedHobbies);
-		}
-
-		if (languages != null) {
-			Set<String> safeLanguages = languages;
-
-			Set<Language> existingLanguages = languageRepository.findLanguagesByMember(member);
-			Map<String, Language> nameToLanguageMap =
-					existingLanguages.stream()
-							.collect(
-									Collectors.toMap(
-											Language::getName, Function.identity(), (existing, replacement) -> existing));
-
-			Set<Language> updatedLanguages = new HashSet<>();
-
-			for (String languageName : safeLanguages) {
-				if (nameToLanguageMap.containsKey(languageName)) {
-					updatedLanguages.add(nameToLanguageMap.get(languageName));
-				} else {
-					Language nLanguage = new Language();
-					nLanguage.setName(languageName);
-					nLanguage.setMember(member);
-					languageRepository.save(nLanguage);
-					updatedLanguages.add(nLanguage);
-				}
-			}
-			existingLanguages.stream()
-					.filter(language -> !languages.contains(language.getName()))
-					.forEach(languageRepository::delete);
-
-			member.setLanguages(updatedLanguages);
-		}
-
 		if (isPublic != null) member.setIsPublic(isPublic);
+
+		if (hobbies != null) updateHobbies(member, hobbies);
+		if (languages != null) updateLanguages(member, languages);
+
 		memberRepository.save(member);
 
 		return memberModelMapper.map(member, MemberResponseDto.class);
 	}
 
+	private void updatePassword(Member member, String password) {
+		if (member.getIsPasswordChanged()) {
+			member.setPassword(passwordEncoder.encode(password));
+			member.setIsPasswordChanged(false);
+		} else throw new MemberException("비밀번호 편집 자격이 없습니다!");
+	}
+
+	private void updateFile(Member member, MultipartFile givenFile, Boolean isVerificationFile) {
+		FileDto verificationImgPath = fileService.upload(givenFile);
+		File file = modelMapper.map(verificationImgPath, File.class);
+
+		if (isVerificationFile) {
+			file.setIsSecret(true);
+			member.setVerificationFile(file);
+		} else member.setProfileImg(file);
+	}
+
+	private void updateHobbies(Member member, Set<String> hobbies) {
+		Set<String> safeHobbies = hobbies;
+
+		Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByMember(member);
+		Map<String, Hobby> nameToHobbyMap =
+				existingHobbies.stream()
+						.collect(
+								Collectors.toMap(
+										Hobby::getName, Function.identity(), (existing, replacement) -> existing));
+
+		Set<Hobby> updatedHobbies = new HashSet<>();
+
+		for (String hobbyName : safeHobbies) {
+			if (nameToHobbyMap.containsKey(hobbyName)) {
+				updatedHobbies.add(nameToHobbyMap.get(hobbyName));
+			} else {
+				Hobby nHobby = new Hobby();
+				nHobby.setName(hobbyName);
+				nHobby.setMember(member);
+				hobbyRepository.save(nHobby);
+				updatedHobbies.add(nHobby);
+			}
+		}
+		existingHobbies.stream()
+				.filter(hobby -> !hobbies.contains(hobby.getName()))
+				.forEach(hobbyRepository::delete);
+
+		member.setHobbies(updatedHobbies);
+	}
+
+	private void updateLanguages(Member member, Set<String> languages) {
+		Set<String> safeLanguages = languages;
+
+		Set<Language> existingLanguages = languageRepository.findLanguagesByMember(member);
+		Map<String, Language> nameToLanguageMap =
+				existingLanguages.stream()
+						.collect(
+								Collectors.toMap(
+										Language::getName, Function.identity(), (existing, replacement) -> existing));
+
+		Set<Language> updatedLanguages = new HashSet<>();
+
+		for (String languageName : safeLanguages) {
+			if (nameToLanguageMap.containsKey(languageName)) {
+				updatedLanguages.add(nameToLanguageMap.get(languageName));
+			} else {
+				Language nLanguage = new Language();
+				nLanguage.setName(languageName);
+				nLanguage.setMember(member);
+				languageRepository.save(nLanguage);
+				updatedLanguages.add(nLanguage);
+			}
+		}
+		existingLanguages.stream()
+				.filter(language -> !languages.contains(language.getName()))
+				.forEach(languageRepository::delete);
+
+		member.setLanguages(updatedLanguages);
+	}
+
 	public ResponseEntity<LoginSuccessDto> login(LoginDto dto) {
 
-		String email = dto.getEmail();
-		String password = dto.getPassword();
-
 		UsernamePasswordAuthenticationToken authToken =
-				new UsernamePasswordAuthenticationToken(email, password, null);
+				new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword(), null);
 		Authentication authentication = authenticationManager.authenticate(authToken);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -226,13 +236,10 @@ public class MemberService {
 		String refreshToken =
 				jwtUtil.createJwt(memberId, "refreshToken", "dife", REFRESH_TOKEN_VALIDITY_DURATION);
 
-		ResponseEntity<LoginSuccessDto> responseEntity =
-				ResponseEntity.status(OK).body(new LoginSuccessDto(memberId, accessToken, refreshToken));
-
-		return responseEntity;
+		return ResponseEntity.status(OK).body(new LoginSuccessDto(memberId, accessToken, refreshToken));
 	}
 
-	public MemberResponseDto getMember(String email) throws IOException {
+	public MemberResponseDto getMember(String email) {
 
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
@@ -243,7 +250,7 @@ public class MemberService {
 		return responseDto;
 	}
 
-	public MemberResponseDto getMemberById(Long id, String memberEmail) throws IOException {
+	public MemberResponseDto getMemberById(Long id, String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
@@ -479,6 +486,7 @@ public class MemberService {
 		String newPassword = sb.toString();
 		String encodedPassword = passwordEncoder.encode(newPassword);
 		member.setPassword(encodedPassword);
+		member.setIsPasswordChanged(true);
 		memberRepository.save(member);
 
 		SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
@@ -494,7 +502,7 @@ public class MemberService {
 		javaMailSender.send(simpleMailMessage);
 	}
 
-	public List<MemberResponseDto> getRandomMembers(int count, String email) throws IOException {
+	public List<MemberResponseDto> getRandomMembers(int count, String email) {
 		Member currentMember = getMemberEntityByEmail(email);
 
 		List<Member> validRandomMembers =
@@ -506,22 +514,14 @@ public class MemberService {
 						.filter(member -> !blockService.isBlackListMember(currentMember, member))
 						.collect(Collectors.toList());
 
-		if (validRandomMembers.isEmpty()) {
-			return new ArrayList<>();
-		}
+		if (validRandomMembers.isEmpty()) return new ArrayList<>();
 
 		Collections.shuffle(validRandomMembers);
 		List<Member> randomMembers = validRandomMembers.stream().limit(count).toList();
 
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
-		for (Member member : randomMembers) {
-			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
-			responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
-			if (responseDto.getProfileImg() != null)
-				responseDto.setProfilePresignUrl(
-						fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
-			memberResponseDtos.add(responseDto);
-		}
+		for (Member member : randomMembers)
+			memberResponseDtos.add(getMemberResponseDto(member, currentMember));
 		return memberResponseDtos;
 	}
 
@@ -529,8 +529,7 @@ public class MemberService {
 			Set<MbtiCategory> mbtiCategories,
 			Set<String> hobbies,
 			Set<String> languages,
-			String memberEmail)
-			throws IOException {
+			String memberEmail) {
 
 		Member currentMember =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -561,19 +560,11 @@ public class MemberService {
 														.anyMatch(hobby -> safeHobbies.contains(hobby.getName())))
 						.collect(Collectors.toList());
 
-		if (validMembers.isEmpty()) {
-			throw new MemberNotFoundException();
-		}
+		if (validMembers.isEmpty()) throw new MemberNotFoundException();
 
 		List<MemberResponseDto> memberResponseDtos = new ArrayList<>();
-		for (Member member : validMembers) {
-			MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
-			responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
-			if (responseDto.getProfileImg() != null)
-				responseDto.setProfilePresignUrl(
-						fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
-			memberResponseDtos.add(responseDto);
-		}
+		for (Member member : validMembers)
+			memberResponseDtos.add(getMemberResponseDto(member, currentMember));
 		return memberResponseDtos;
 	}
 
@@ -587,25 +578,23 @@ public class MemberService {
 
 		Set<Member> blockedMembers = blockService.getBlackSet(currentMember);
 
-		if (members.isEmpty()) {
-			throw new MemberNotFoundException();
-		}
+		if (members.isEmpty()) throw new MemberNotFoundException();
 
 		return members.stream()
 				.filter(this::isValidMember)
 				.filter(member -> !blockedMembers.contains(member))
-				.map(
-						member -> {
-							MemberResponseDto responseDto =
-									memberModelMapper.map(member, MemberResponseDto.class);
-							responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
-							if (responseDto.getProfileImg() != null) {
-								responseDto.setProfilePresignUrl(
-										fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
-							}
-							return responseDto;
-						})
+				.map(member -> getMemberResponseDto(member, currentMember))
 				.collect(Collectors.toList());
+	}
+
+	private MemberResponseDto getMemberResponseDto(Member member, Member currentMember) {
+		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
+		responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
+		if (responseDto.getProfileImg() != null) {
+			responseDto.setProfilePresignUrl(
+					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+		}
+		return responseDto;
 	}
 
 	public boolean isValidMember(Member member) {
