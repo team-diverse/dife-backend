@@ -91,8 +91,7 @@ public class CommentService {
 		return responseDto;
 	}
 
-	public void translationAddChildrenComment(
-			SettingLanguageType settingLanguage, Comment comment, Post post) {
+	public void translationAddChildrenComment(String settingLanguage, Comment comment, Post post) {
 
 		List<NotificationToken> parentCommentTokens =
 				comment.getParentComment().getWriter().getNotificationTokens();
@@ -100,20 +99,20 @@ public class CommentService {
 		String parentMessage =
 				"WOW!😆 " + comment.getWriter().getUsername() + " added comment on your comment!";
 		switch (settingLanguage) {
-			case KO:
+			case "KO":
 				parentMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 님이 회원님의 댓글에 댓글을 추가했어요!";
 				break;
-			case EN:
+			case "EN":
 				parentMessage =
 						"WOW!😆 " + comment.getWriter().getUsername() + " added comment on your comment!";
 				break;
-			case ZH:
+			case "ZH":
 				parentMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 您对会员的评论添加了回复！";
 				break;
-			case JA:
+			case "JA":
 				parentMessage = "WOW!😆 " + comment.getWriter().getUsername() + " あなたが会員のコメントに返信を追加しました！";
 				break;
-			case ES:
+			case "ES":
 				parentMessage =
 						"WOW!😆 "
 								+ comment.getWriter().getUsername()
@@ -124,28 +123,27 @@ public class CommentService {
 		addNotifications(parentCommentTokens, parentMessage, NotificationType.POST, post.getId());
 	}
 
-	public void translationAddComment(
-			SettingLanguageType settingLanguage, Comment comment, Post post) {
+	public void translationAddComment(String settingLanguage, Comment comment, Post post) {
 
 		List<NotificationToken> postTokens = post.getWriter().getNotificationTokens();
 
 		String postMessage =
 				"WOW!😆 " + comment.getWriter().getUsername() + "added comment on your post!";
 		switch (settingLanguage) {
-			case KO:
+			case "KO":
 				postMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 님이 회원님의 게시글에 댓글을 추가했어요!";
 				break;
-			case EN:
+			case "EN":
 				postMessage =
 						"WOW!😆 " + comment.getWriter().getUsername() + " added comment on your post!";
 				break;
-			case ZH:
+			case "ZH":
 				postMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 您对会员的帖子添加了评论！";
 				break;
-			case JA:
+			case "JA":
 				postMessage = "WOW!😆 " + comment.getWriter().getUsername() + " あなたが会員の投稿にコメントを追加しました！";
 				break;
-			case ES:
+			case "ES":
 				postMessage =
 						"WOW!😆 "
 								+ comment.getWriter().getUsername()

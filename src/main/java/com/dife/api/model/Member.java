@@ -43,8 +43,9 @@ public class Member extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
 
-	@Enumerated(EnumType.STRING)
-	private SettingLanguageType settingLanguage = SettingLanguageType.EN;
+	private String settingLanguage = "EN";
+
+	private Integer translationCount = 0;
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Set<Language> languages = new HashSet<>();

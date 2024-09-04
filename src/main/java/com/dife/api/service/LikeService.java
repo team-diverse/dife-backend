@@ -84,24 +84,23 @@ public class LikeService {
 		translateLikePost(writer.getSettingLanguage(), writer, member, post);
 	}
 
-	private void translateLikePost(
-			SettingLanguageType settingLanguage, Member writer, Member member, Post post) {
+	private void translateLikePost(String settingLanguage, Member writer, Member member, Post post) {
 		String message = "WOW!😆 " + member.getUsername() + " likes your post!";
 
 		switch (settingLanguage) {
-			case EN:
+			case "EN":
 				message = "WOW!😆 " + member.getUsername() + " likes your post!";
 				break;
-			case KO:
+			case "KO":
 				message = "WOW!😆 " + member.getUsername() + " 님이 회원님의 게시글을 좋아해요!";
 				break;
-			case ZH:
+			case "ZH":
 				message = "WOW!😆 " + member.getUsername() + " 您喜欢了会员的帖子！";
 				break;
-			case JA:
+			case "JA":
 				message = "WOW!😆 " + member.getUsername() + " あなたが会員の投稿に「いいね！」しました！";
 				break;
-			case ES:
+			case "ES":
 				message = "WOW!😆 " + member.getUsername() + " ¡Te gusta la publicación del miembro!";
 				break;
 		}
@@ -129,23 +128,23 @@ public class LikeService {
 	}
 
 	private void translateLikeComment(
-			SettingLanguageType settingLanguage, Member writer, Member member, Comment comment) {
+			String settingLanguage, Member writer, Member member, Comment comment) {
 		String message = "WOW!😆 " + member.getUsername() + " likes your comment!";
 
 		switch (settingLanguage) {
-			case EN:
+			case "EN":
 				message = "WOW!😆 " + member.getUsername() + " likes your comment!";
 				break;
-			case KO:
+			case "KO":
 				message = "WOW!😆 " + member.getUsername() + " 님이 회원님의 댓글을 좋아해요!";
 				break;
-			case ZH:
+			case "ZH":
 				message = "WOW!😆 " + member.getUsername() + " 喜欢了评论！";
 				break;
-			case JA:
+			case "JA":
 				message = "WOW!😆 " + member.getUsername() + " コメントに「いいね！」しました！";
 				break;
-			case ES:
+			case "ES":
 				message = "WOW!😆 " + member.getUsername() + " ¡Te gusta el comentario!";
 				break;
 		}

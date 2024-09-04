@@ -4,7 +4,6 @@ import static org.springframework.http.HttpStatus.*;
 
 import com.dife.api.jwt.JWTUtil;
 import com.dife.api.model.MbtiCategory;
-import com.dife.api.model.SettingLanguageType;
 import com.dife.api.model.dto.*;
 import com.dife.api.service.MemberService;
 import jakarta.validation.Valid;
@@ -54,7 +53,7 @@ public class MemberController implements SwaggerMemberController {
 	public ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "country", required = false) String country,
-			@RequestParam(name = "settingLanguage", required = false) SettingLanguageType settingLanguage,
+			@RequestParam(name = "settingLanguage", required = false) String settingLanguage,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,

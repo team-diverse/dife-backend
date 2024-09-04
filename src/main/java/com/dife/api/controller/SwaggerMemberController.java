@@ -1,7 +1,6 @@
 package com.dife.api.controller;
 
 import com.dife.api.model.MbtiCategory;
-import com.dife.api.model.SettingLanguageType;
 import com.dife.api.model.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -52,7 +51,7 @@ public interface SwaggerMemberController {
 	public ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "country", required = false) String country,
-			@RequestParam(name = "settingLanguage", required = false) SettingLanguageType settingLanguage,
+			@RequestParam(name = "settingLanguage", required = false) String settingLanguage,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
