@@ -31,7 +31,6 @@ public class CommentService {
 	private final ModelMapper modelMapper;
 	private final CommentRepository commentRepository;
 	private final LikeCommentRepository likeCommentRepository;
-	private final BookmarkRepository bookmarkRepository;
 	private final PostService postService;
 
 	@Autowired
@@ -77,23 +76,84 @@ public class CommentService {
 
 		CommentResponseDto responseDto = modelMapper.map(comment, CommentResponseDto.class);
 		MemberResponseDto memberDto = memberModelMapper.map(writer, MemberResponseDto.class);
+		responseDto.setPost(postService.getPost(comment.getPost().getId(), memberEmail));
 		responseDto.setWriter(memberDto);
 
 		if (comment.getParentComment() != null) {
 			responseDto.setParentComment(
 					modelMapper.map(comment.getParentComment(), CommentResponseDto.class));
-			List<NotificationToken> parentCommentTokens =
-					comment.getParentComment().getWriter().getNotificationTokens();
-			String parentMessage =
-					"WOW!😆 " + comment.getWriter().getUsername() + "님이 회원님이 댓글을 남긴 게시글에 다른 댓글이 추가되었어요!";
-			addNotifications(parentCommentTokens, parentMessage, NotificationType.POST, post.getId());
+			translationAddChildrenComment(
+					comment.getParentComment().getWriter().getSettingLanguage(), comment, post);
 		}
 
-		List<NotificationToken> postTokens = post.getWriter().getNotificationTokens();
-		String postMessage = "WOW!😆 " + comment.getWriter().getUsername() + "님이 회원님의 게시글에 댓글이 추가되었어요!";
-		addNotifications(postTokens, postMessage, NotificationType.POST, post.getId());
+		translationAddComment(post.getWriter().getSettingLanguage(), comment, post);
 
 		return responseDto;
+	}
+
+	public void translationAddChildrenComment(
+			SettingLanguageType settingLanguage, Comment comment, Post post) {
+
+		List<NotificationToken> parentCommentTokens =
+				comment.getParentComment().getWriter().getNotificationTokens();
+
+		String parentMessage =
+				"WOW!😆 " + comment.getWriter().getUsername() + " added comment on your comment!";
+		switch (settingLanguage) {
+			case KO:
+				parentMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 님이 회원님의 댓글에 댓글을 추가했어요!";
+				break;
+			case EN:
+				parentMessage =
+						"WOW!😆 " + comment.getWriter().getUsername() + " added comment on your comment!";
+				break;
+			case ZH:
+				parentMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 您对会员的评论添加了回复！";
+				break;
+			case JA:
+				parentMessage = "WOW!😆 " + comment.getWriter().getUsername() + " あなたが会員のコメントに返信を追加しました！";
+				break;
+			case ES:
+				parentMessage =
+						"WOW!😆 "
+								+ comment.getWriter().getUsername()
+								+ " ¡Has añadido un comentario a la respuesta del miembro!";
+				break;
+		}
+
+		addNotifications(parentCommentTokens, parentMessage, NotificationType.POST, post.getId());
+	}
+
+	public void translationAddComment(
+			SettingLanguageType settingLanguage, Comment comment, Post post) {
+
+		List<NotificationToken> postTokens = post.getWriter().getNotificationTokens();
+
+		String postMessage =
+				"WOW!😆 " + comment.getWriter().getUsername() + "added comment on your post!";
+		switch (settingLanguage) {
+			case KO:
+				postMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 님이 회원님의 게시글에 댓글을 추가했어요!";
+				break;
+			case EN:
+				postMessage =
+						"WOW!😆 " + comment.getWriter().getUsername() + " added comment on your post!";
+				break;
+			case ZH:
+				postMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 您对会员的帖子添加了评论！";
+				break;
+			case JA:
+				postMessage = "WOW!😆 " + comment.getWriter().getUsername() + " あなたが会員の投稿にコメントを追加しました！";
+				break;
+			case ES:
+				postMessage =
+						"WOW!😆 "
+								+ comment.getWriter().getUsername()
+								+ " ¡Has añadido un comentario a la publicación del miembro!";
+				break;
+		}
+
+		addNotifications(postTokens, postMessage, NotificationType.POST, post.getId());
 	}
 
 	public CommentResponseDto getComment(Comment comment, Member member) {
