@@ -333,7 +333,10 @@ public class ChatroomService {
 		responseDto.setName(chatroom.getName());
 		responseDto.setProfileImg(chatroom.getChatroomSetting().getProfileImg());
 		if (chatroom.getMembers().contains(member)) responseDto.setIsEntered(true);
-		responseDto.getMembers().add(memberModelMapper.map(member, MemberResponseDto.class));
+		responseDto.setMembers(
+				chatroom.getMembers().stream()
+						.map(m -> memberModelMapper.map(m, MemberResponseDto.class))
+						.collect(Collectors.toSet()));
 		responseDto.setCreated(setting.getCreated());
 		responseDto.setModified(setting.getModified());
 
