@@ -2,6 +2,7 @@ package com.dife.api.model.dto;
 
 import com.dife.api.model.File;
 import com.dife.api.model.MbtiCategory;
+import com.dife.api.model.SettingLanguageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -43,6 +44,9 @@ public class MemberResponseDto {
 	@Schema(description = "MBTI", example = "ENTJ")
 	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
+
+	@Enumerated(EnumType.STRING)
+	private SettingLanguageType settingLanguage;
 
 	@Schema(description = "언어", example = "Korean, English")
 	private Set<String> languages;

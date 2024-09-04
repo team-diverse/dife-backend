@@ -99,6 +99,7 @@ public class MemberService {
 	public MemberResponseDto update(
 			String username,
 			String country,
+			SettingLanguageType settingLanguage,
 			String bio,
 			MbtiCategory mbti,
 			Set<String> hobbies,
@@ -132,6 +133,7 @@ public class MemberService {
 
 		if (username != null) member.setUsername(username);
 		if (country != null) member.setCountry(country);
+		member.setSettingLanguage(settingLanguage != null ? settingLanguage : SettingLanguageType.EN);
 		if (bio != null) member.setBio(bio);
 		if (mbti != null) member.setMbti(mbti);
 
