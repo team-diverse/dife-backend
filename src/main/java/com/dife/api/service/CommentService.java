@@ -11,6 +11,8 @@ import com.dife.api.model.dto.MemberResponseDto;
 import com.dife.api.repository.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -91,34 +93,29 @@ public class CommentService {
 		return responseDto;
 	}
 
+	private String translationDivide(Comment comment, String settingLanguage, Boolean isChildren) {
+		String username = comment.getWriter().getUsername();
+		String baseMessage = "WOW!😆 " + username + " ";
+
+		ResourceBundle resourceBundle;
+		if (isChildren) {
+			resourceBundle =
+					ResourceBundle.getBundle("notification.addChildrenComment", Locale.getDefault());
+		} else {
+			resourceBundle = ResourceBundle.getBundle("notification.addComment", Locale.getDefault());
+		}
+
+		String messageSuffix = resourceBundle.getString(settingLanguage.toUpperCase());
+
+		return baseMessage + messageSuffix;
+	}
+
 	public void translationAddChildrenComment(String settingLanguage, Comment comment, Post post) {
 
 		List<NotificationToken> parentCommentTokens =
 				comment.getParentComment().getWriter().getNotificationTokens();
 
-		String parentMessage =
-				"WOW!😆 " + comment.getWriter().getUsername() + " added comment on your comment!";
-		switch (settingLanguage) {
-			case "KO":
-				parentMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 님이 회원님의 댓글에 댓글을 추가했어요!";
-				break;
-			case "EN":
-				parentMessage =
-						"WOW!😆 " + comment.getWriter().getUsername() + " added comment on your comment!";
-				break;
-			case "ZH":
-				parentMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 您对会员的评论添加了回复！";
-				break;
-			case "JA":
-				parentMessage = "WOW!😆 " + comment.getWriter().getUsername() + " あなたが会員のコメントに返信を追加しました！";
-				break;
-			case "ES":
-				parentMessage =
-						"WOW!😆 "
-								+ comment.getWriter().getUsername()
-								+ " ¡Has añadido un comentario a la respuesta del miembro!";
-				break;
-		}
+		String parentMessage = translationDivide(comment, settingLanguage, true);
 
 		addNotifications(parentCommentTokens, parentMessage, NotificationType.POST, post.getId());
 	}
@@ -127,29 +124,7 @@ public class CommentService {
 
 		List<NotificationToken> postTokens = post.getWriter().getNotificationTokens();
 
-		String postMessage =
-				"WOW!😆 " + comment.getWriter().getUsername() + "added comment on your post!";
-		switch (settingLanguage) {
-			case "KO":
-				postMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 님이 회원님의 게시글에 댓글을 추가했어요!";
-				break;
-			case "EN":
-				postMessage =
-						"WOW!😆 " + comment.getWriter().getUsername() + " added comment on your post!";
-				break;
-			case "ZH":
-				postMessage = "WOW!😆 " + comment.getWriter().getUsername() + " 您对会员的帖子添加了评论！";
-				break;
-			case "JA":
-				postMessage = "WOW!😆 " + comment.getWriter().getUsername() + " あなたが会員の投稿にコメントを追加しました！";
-				break;
-			case "ES":
-				postMessage =
-						"WOW!😆 "
-								+ comment.getWriter().getUsername()
-								+ " ¡Has añadido un comentario a la publicación del miembro!";
-				break;
-		}
+		String postMessage = translationDivide(comment, settingLanguage, false);
 
 		addNotifications(postTokens, postMessage, NotificationType.POST, post.getId());
 	}

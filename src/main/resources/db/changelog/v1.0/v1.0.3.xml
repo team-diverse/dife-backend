@@ -6,7 +6,7 @@
 
     <changeSet id="add-type-column-from-member-20240904-2350" author="suyeon">
         <addColumn tableName="member">
-            <column name="setting_language" type="varchar(255)"/>
+            <column name="setting_language" type="varchar(10)"/>
         </addColumn>
     </changeSet>
 

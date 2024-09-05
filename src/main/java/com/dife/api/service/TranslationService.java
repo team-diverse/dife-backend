@@ -39,7 +39,6 @@ public class TranslationService {
 
 	public TranslationResponseDto translate(TranslationRequestDto requestDto, String memberEmail) {
 
-		log.info(String.valueOf(requestDto.getPostId()));
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		if (requestDto.getBookmarkId() != null) return translateBookmark(requestDto, member);

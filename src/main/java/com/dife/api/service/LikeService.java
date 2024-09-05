@@ -7,6 +7,8 @@ import com.dife.api.model.dto.LikeResponseDto;
 import com.dife.api.model.dto.PostResponseDto;
 import com.dife.api.repository.*;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,31 +86,6 @@ public class LikeService {
 		translateLikePost(writer.getSettingLanguage(), writer, member, post);
 	}
 
-	private void translateLikePost(String settingLanguage, Member writer, Member member, Post post) {
-		String message = "WOW!😆 " + member.getUsername() + " likes your post!";
-
-		switch (settingLanguage) {
-			case "EN":
-				message = "WOW!😆 " + member.getUsername() + " likes your post!";
-				break;
-			case "KO":
-				message = "WOW!😆 " + member.getUsername() + " 님이 회원님의 게시글을 좋아해요!";
-				break;
-			case "ZH":
-				message = "WOW!😆 " + member.getUsername() + " 您喜欢了会员的帖子！";
-				break;
-			case "JA":
-				message = "WOW!😆 " + member.getUsername() + " あなたが会員の投稿に「いいね！」しました！";
-				break;
-			case "ES":
-				message = "WOW!😆 " + member.getUsername() + " ¡Te gusta la publicación del miembro!";
-				break;
-		}
-
-		notificationService.addNotifications(
-				writer, member, message, NotificationType.POST, post.getId());
-	}
-
 	public void createLikeComment(Long commentId, String memberEmail) {
 		Comment comment =
 				commentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
@@ -127,27 +104,35 @@ public class LikeService {
 		translateLikeComment(writer.getSettingLanguage(), writer, member, comment);
 	}
 
+	private String translationDivide(Member member, String settingLanguage, Boolean isPost) {
+		String username = member.getUsername();
+		String baseMessage = "WOW!😆 " + username + " ";
+
+		ResourceBundle resourceBundle;
+		if (isPost) {
+			resourceBundle = ResourceBundle.getBundle("notification.createLikePost", Locale.getDefault());
+		} else {
+			resourceBundle =
+					ResourceBundle.getBundle("notification.createLikeComment", Locale.getDefault());
+		}
+
+		String messageSuffix = resourceBundle.getString(settingLanguage.toUpperCase());
+
+		return baseMessage + messageSuffix;
+	}
+
+	private void translateLikePost(String settingLanguage, Member writer, Member member, Post post) {
+
+		String message = translationDivide(member, settingLanguage, true);
+
+		notificationService.addNotifications(
+				writer, member, message, NotificationType.POST, post.getId());
+	}
+
 	private void translateLikeComment(
 			String settingLanguage, Member writer, Member member, Comment comment) {
-		String message = "WOW!😆 " + member.getUsername() + " likes your comment!";
 
-		switch (settingLanguage) {
-			case "EN":
-				message = "WOW!😆 " + member.getUsername() + " likes your comment!";
-				break;
-			case "KO":
-				message = "WOW!😆 " + member.getUsername() + " 님이 회원님의 댓글을 좋아해요!";
-				break;
-			case "ZH":
-				message = "WOW!😆 " + member.getUsername() + " 喜欢了评论！";
-				break;
-			case "JA":
-				message = "WOW!😆 " + member.getUsername() + " コメントに「いいね！」しました！";
-				break;
-			case "ES":
-				message = "WOW!😆 " + member.getUsername() + " ¡Te gusta el comentario!";
-				break;
-		}
+		String message = translationDivide(member, settingLanguage, false);
 
 		notificationService.addNotifications(
 				writer, member, message, NotificationType.POST, comment.getId());

@@ -120,32 +120,12 @@ public class ChatService {
 
 	private void translateChatroomEnter(String settingLanguage, Member member, Chatroom chatroom) {
 		String message =
-				"WELCOME! 😊 In Room " + chatroom.getName() + member.getUsername() + " entered!";
+				"WELCOME! 😊 In Room " + chatroom.getName() + ", " + member.getUsername() + " ";
 
-		switch (settingLanguage) {
-			case "EN":
-				message = "WELCOME! 😊 In Room " + chatroom.getName() + member.getUsername() + " entered!";
-				break;
-			case "KO":
-				message =
-						"WELCOME! 😊 " + chatroom.getName() + " 방에 " + member.getUsername() + " 님이 입장하셨습니다!";
-				break;
-			case "ZH":
-				message = "WELCOME! 😊 " + chatroom.getName() + "房间有 " + member.getUsername() + " 进入了！";
-				break;
-			case "JA":
-				message =
-						"WELCOME! 😊 " + chatroom.getName() + "ルームに " + member.getUsername() + " さんが参加しました！";
-				break;
-			case "ES":
-				message =
-						"WELCOME! 😊 "
-								+ chatroom.getName()
-								+ " sala ha sido ingresada por "
-								+ member.getUsername()
-								+ "!";
-				break;
-		}
+		ResourceBundle resourceBundle =
+				ResourceBundle.getBundle("notification.enterChatroom", Locale.getDefault());
+
+		message += resourceBundle.getString(settingLanguage.toUpperCase());
 
 		notificationService.addNotifications(
 				member, member, message, NotificationType.CHATROOM, chatroom.getId());
