@@ -93,7 +93,7 @@ public interface SwaggerChatroomController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
-	ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
+	ResponseEntity<List<ChatroomResponseDto>> getChatrooms(
 			@RequestParam(name = "type", required = false) ChatroomType type,
 			Authentication authentication);
 
@@ -106,7 +106,7 @@ public interface SwaggerChatroomController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
-	ResponseEntity<ChatroomResponseDto> getGroupChatroom(
+	ResponseEntity<ChatroomResponseDto> getChatroom(
 			@PathVariable(name = "id") Long id, Authentication auth) throws IOException;
 
 	@Operation(

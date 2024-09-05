@@ -38,7 +38,7 @@ public class ChatroomController implements SwaggerChatroomController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
+	public ResponseEntity<List<ChatroomResponseDto>> getChatrooms(
 			@RequestParam(name = "type", required = false) ChatroomType type,
 			Authentication authentication) {
 		List<ChatroomResponseDto> responseDto =
@@ -47,7 +47,7 @@ public class ChatroomController implements SwaggerChatroomController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(
+	public ResponseEntity<ChatroomResponseDto> getChatroom(
 			@PathVariable(name = "id") Long chatroomId, Authentication auth) throws IOException {
 		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
