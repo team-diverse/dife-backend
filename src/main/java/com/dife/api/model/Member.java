@@ -24,6 +24,8 @@ public class Member extends BaseTimeEntity {
 
 	@NotNull private String password = "";
 
+	private String verifyCode = "";
+
 	private String username = "Diver";
 
 	private String name = "";

@@ -34,9 +34,6 @@ public class MemberResponseDto {
 	@Schema(description = "프로필 공개 여부", example = "true")
 	private Boolean isPublic;
 
-	@Schema(description = "탈퇴된 회원 여부", example = "true")
-	private Boolean isDeleted = false;
-
 	@Schema(description = "프로필 좋아요 여부", example = "true")
 	private Boolean isLiked = false;
 
