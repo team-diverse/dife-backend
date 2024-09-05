@@ -43,4 +43,9 @@ public class Chat implements TranslateTable {
 	public String getTextToTranslate() {
 		return message;
 	}
+
+	@Override
+	public String getTitleToTranslate() {
+		return null;
+	}
 }

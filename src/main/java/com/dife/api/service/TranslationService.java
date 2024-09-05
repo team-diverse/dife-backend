@@ -6,6 +6,7 @@ import com.dife.api.model.dto.TranslationRequestDto;
 import com.dife.api.model.dto.TranslationResponseDto;
 import com.dife.api.repository.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +71,10 @@ public class TranslationService {
 			throw new TranslationFullException();
 		}
 
-		requestDto.setText(Collections.singletonList(translatable.getTextToTranslate()));
+		if (requestDto.getPostId() != null)
+			requestDto.setText(
+					Arrays.asList(translatable.getTitleToTranslate(), translatable.getTextToTranslate()));
+		else requestDto.setText(Collections.singletonList(translatable.getTextToTranslate()));
 		requestDto.setTarget_lang(member.getSettingLanguage());
 		return createTranslationResponse(requestDto, member);
 	}
