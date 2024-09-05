@@ -113,7 +113,7 @@ public class MemberService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if (password != null) updatePassword(member, password);
+		if (password != null) member.setPassword(passwordEncoder.encode(password));
 
 		boolean notAddVerificationFile =
 				(verificationFile == null || verificationFile.isEmpty())
@@ -139,13 +139,6 @@ public class MemberService {
 		memberRepository.save(member);
 
 		return memberModelMapper.map(member, MemberResponseDto.class);
-	}
-
-	private void updatePassword(Member member, String password) {
-		if (member.getIsPasswordChanged()) {
-			member.setPassword(passwordEncoder.encode(password));
-			member.setIsPasswordChanged(false);
-		} else throw new MemberException("비밀번호 편집 자격이 없습니다!");
 	}
 
 	private void updateFile(Member member, MultipartFile givenFile, Boolean isVerificationFile) {
@@ -483,10 +476,8 @@ public class MemberService {
 			sb.append(charset.charAt(random.nextInt(charset.length())));
 		}
 
-		String newPassword = sb.toString();
-		String encodedPassword = passwordEncoder.encode(newPassword);
-		member.setPassword(encodedPassword);
-		member.setIsPasswordChanged(true);
+		String verifyCode = sb.toString();
+		member.setVerifyCode(verifyCode);
 		memberRepository.save(member);
 
 		SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
@@ -494,12 +485,26 @@ public class MemberService {
 		simpleMailMessage.setSubject("🤿 DIFE 비밀번호 변경 메일 🤿");
 		simpleMailMessage.setText(
 				"비밀번호를 잊으셨나요? 🥹\n"
-						+ "걱정하지 마세요!. 새 비밀번호를 부여해드릴게요!\n"
-						+ "새 비밀번호 : "
-						+ newPassword
+						+ "걱정하지 마세요!. 비밀번호를 변경할 수 있는 인증번호를 부여해드릴게요!\n"
+						+ "비밀번호 재설정 페이지로 돌아가 주세요!"
+						+ "인증번호 : "
+						+ verifyCode
 						+ "\n"
 						+ "안전한 인터넷 환경에서 항상 비밀번호를 관리하세요.");
 		javaMailSender.send(simpleMailMessage);
+	}
+
+	public void verifyChangePasswordCode(String verifyCode, String newPassword, String memberEmail) {
+		Member member = getMemberEntityByEmail(memberEmail);
+
+		if (Objects.equals(member.getVerifyCode(), "")) throw new VerifyCodeNotFoundException();
+
+		if (Objects.equals(verifyCode, member.getVerifyCode())) {
+			String encodedPassword = passwordEncoder.encode(newPassword);
+			member.setPassword(encodedPassword);
+			memberRepository.save(member);
+
+		} else throw new MemberException("비밀번호 변경 코드가 일치하지 않습니다!");
 	}
 
 	public List<MemberResponseDto> getRandomMembers(int count, String email) {

@@ -110,8 +110,18 @@ public class MemberController implements SwaggerMemberController {
 	}
 
 	@GetMapping("/change-password")
-	public ResponseEntity<Void> changePassword(@RequestParam(name = "email") String email) {
+	public ResponseEntity<Void> sendChangeVerify(@RequestParam(name = "email") String email) {
 		memberService.changePassword(email);
+
+		return new ResponseEntity<>(OK);
+	}
+
+	@PatchMapping("/change-password")
+	public ResponseEntity<Void> changePassword(
+			@RequestParam(name = "verifyCode", required = false) String verifyCode,
+			@RequestParam(name = "newPassword", required = false) String newPassword,
+			@RequestParam(name = "email", required = false) String email) {
+		memberService.verifyChangePasswordCode(verifyCode, newPassword, email);
 
 		return new ResponseEntity<>(OK);
 	}
