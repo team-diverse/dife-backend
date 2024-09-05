@@ -7,6 +7,8 @@ import com.dife.api.model.dto.LikeResponseDto;
 import com.dife.api.model.dto.PostResponseDto;
 import com.dife.api.repository.*;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,8 +83,7 @@ public class LikeService {
 		likePostRepository.save(postLike);
 
 		Member writer = post.getWriter();
-		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 게시글을 좋아해요!";
-		notificationService.addNotifications(writer, member, message, NotificationType.POST, postId);
+		translateLikePost(writer.getSettingLanguage(), writer, member, post);
 	}
 
 	public void createLikeComment(Long commentId, String memberEmail) {
@@ -100,8 +101,41 @@ public class LikeService {
 		likeCommentRepository.save(commentLike);
 
 		Member writer = comment.getWriter();
-		String message = "WOW!😆 " + member.getUsername() + "님이 회원님의 댓글을 좋아해요!";
-		notificationService.addNotifications(writer, member, message, NotificationType.POST, commentId);
+		translateLikeComment(writer.getSettingLanguage(), writer, member, comment);
+	}
+
+	private String translationDivide(Member member, String settingLanguage, Boolean isPost) {
+		String username = member.getUsername();
+		String baseMessage = "WOW!😆 " + username + " ";
+
+		ResourceBundle resourceBundle;
+		if (isPost) {
+			resourceBundle = ResourceBundle.getBundle("notification.createLikePost", Locale.getDefault());
+		} else {
+			resourceBundle =
+					ResourceBundle.getBundle("notification.createLikeComment", Locale.getDefault());
+		}
+
+		String messageSuffix = resourceBundle.getString(settingLanguage.toUpperCase());
+
+		return baseMessage + messageSuffix;
+	}
+
+	private void translateLikePost(String settingLanguage, Member writer, Member member, Post post) {
+
+		String message = translationDivide(member, settingLanguage, true);
+
+		notificationService.addNotifications(
+				writer, member, message, NotificationType.POST, post.getId());
+	}
+
+	private void translateLikeComment(
+			String settingLanguage, Member writer, Member member, Comment comment) {
+
+		String message = translationDivide(member, settingLanguage, false);
+
+		notificationService.addNotifications(
+				writer, member, message, NotificationType.POST, comment.getId());
 	}
 
 	public void createLikeChatroom(Long chatroomId, String memberEmail) {

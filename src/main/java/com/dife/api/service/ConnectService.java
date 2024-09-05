@@ -11,6 +11,8 @@ import com.dife.api.repository.ConnectRepository;
 import com.dife.api.repository.MemberRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -91,9 +93,7 @@ public class ConnectService {
 		connect.setStatus(ConnectStatus.PENDING);
 		connectRepository.save(connect);
 
-		String message = "Hi!🤝 " + currentMember.getUsername() + "님이 회원님과의 커넥트를 맺고 싶어해요!";
-		notificationService.addNotifications(
-				toMember, currentMember, message, NotificationType.CONNECT, connect.getId());
+		translateCreateConnect(toMember.getSettingLanguage(), currentMember, toMember, connect);
 
 		return modelMapper.map(connect, ConnectResponseDto.class);
 	}
@@ -147,11 +147,39 @@ public class ConnectService {
 	}
 
 	private void createNotifications(Member member, String otherMemberEmail, Long typeId) {
-		List<NotificationToken> notificationTokens = member.getNotificationTokens();
 
 		Member otherMember =
 				memberRepository.findByEmail(otherMemberEmail).orElseThrow(MemberNotFoundException::new);
-		String message = "YEAH!🙌 " + otherMember.getUsername() + "님과의 커넥트가 성사되었어요!";
+		translateSuccessConnect(member.getSettingLanguage(), member, otherMember, typeId);
+	}
+
+	private String translationDivide(String settingLanguage, Boolean isSuccess) {
+		ResourceBundle resourceBundle;
+		if (isSuccess) {
+			resourceBundle = ResourceBundle.getBundle("notification.successConnect", Locale.getDefault());
+		} else {
+			resourceBundle = ResourceBundle.getBundle("notification.createConnect", Locale.getDefault());
+		}
+
+		return resourceBundle.getString(settingLanguage.toUpperCase());
+	}
+
+	private void translateCreateConnect(
+			String settingLanguageType, Member member, Member otherMember, Connect connect) {
+
+		String message = "Hi!🤝 " + member.getUsername() + " ";
+
+		message += translationDivide(settingLanguageType, false);
+
+		notificationService.addNotifications(
+				otherMember, member, message, NotificationType.CONNECT, connect.getId());
+	}
+
+	private void translateSuccessConnect(
+			String settingLanguageType, Member member, Member otherMember, Long typeId) {
+		String message = "YEAH!🙌 With " + otherMember.getUsername() + " ";
+
+		message += translationDivide(settingLanguageType, true);
 
 		notificationService.addNotifications(
 				member, otherMember, message, NotificationType.CONNECT, typeId);

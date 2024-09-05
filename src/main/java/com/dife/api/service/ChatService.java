@@ -111,14 +111,24 @@ public class ChatService {
 		chatroomMembers.add(member);
 
 		for (Member chatroomMember : chatroomMembers) {
-			String message =
-					"WELCOME! 😊 " + chatroom.getName() + "방에 " + member.getUsername() + "님이 입장하셨습니다!";
-			notificationService.addNotifications(
-					chatroomMember, member, message, NotificationType.CHATROOM, chatroomId);
+			translateChatroomEnter(chatroomMember.getSettingLanguage(), member, chatroom);
 		}
 
 		redisPublisher.publish(dealDto(chat, member, chatroom));
 		chatroomRepository.save(chatroom);
+	}
+
+	private void translateChatroomEnter(String settingLanguage, Member member, Chatroom chatroom) {
+		String message =
+				"WELCOME! 😊 In Room " + chatroom.getName() + ", " + member.getUsername() + " ";
+
+		ResourceBundle resourceBundle =
+				ResourceBundle.getBundle("notification.enterChatroom", Locale.getDefault());
+
+		message += resourceBundle.getString(settingLanguage.toUpperCase());
+
+		notificationService.addNotifications(
+				member, member, message, NotificationType.CHATROOM, chatroom.getId());
 	}
 
 	public void chat(ChatRequestDto dto) throws JsonProcessingException {

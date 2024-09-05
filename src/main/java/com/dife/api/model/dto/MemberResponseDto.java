@@ -44,6 +44,10 @@ public class MemberResponseDto {
 	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
 
+	private String settingLanguage = "EN";
+
+	private Integer translationCount = 0;
+
 	@Schema(description = "언어", example = "Korean, English")
 	private Set<String> languages;
 

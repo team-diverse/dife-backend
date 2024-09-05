@@ -86,6 +86,8 @@ public class MemberService {
 		String encodedPassword = passwordEncoder.encode(dto.getPassword());
 		member.setPassword(encodedPassword);
 
+		member.setTranslationCount(0);
+
 		memberRepository.save(member);
 		return modelMapper.map(member, RegisterResponseDto.class);
 	}
@@ -99,6 +101,7 @@ public class MemberService {
 	public MemberResponseDto update(
 			String username,
 			String country,
+			String settingLanguage,
 			String bio,
 			MbtiCategory mbti,
 			Set<String> hobbies,
@@ -132,6 +135,7 @@ public class MemberService {
 
 		if (username != null) member.setUsername(username);
 		if (country != null) member.setCountry(country);
+		member.setSettingLanguage(settingLanguage != null ? settingLanguage : "EN");
 		if (bio != null) member.setBio(bio);
 		if (mbti != null) member.setMbti(mbti);
 

@@ -53,6 +53,7 @@ public class MemberController implements SwaggerMemberController {
 	public ResponseEntity<MemberResponseDto> update(
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "country", required = false) String country,
+			@RequestParam(name = "settingLanguage", required = false) String settingLanguage,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
@@ -67,6 +68,7 @@ public class MemberController implements SwaggerMemberController {
 				memberService.update(
 						username,
 						country,
+						settingLanguage,
 						bio,
 						mbti,
 						hobbies,

@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Translation API", description = "DEEPL API를 이용한 번역 서비스 API")
 public interface SwaggerTranslationController {
@@ -23,5 +25,6 @@ public interface SwaggerTranslationController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = TranslationResponseDto.class))
 			})
-	ResponseEntity<TranslationResponseDto> translate(TranslationRequestDto requestDto);
+	ResponseEntity<TranslationResponseDto> translate(
+			@RequestBody TranslationRequestDto requestDto, Authentication auth);
 }
