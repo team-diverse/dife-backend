@@ -499,12 +499,13 @@ public class MemberService {
 
 		if (Objects.equals(member.getVerifyCode(), "")) throw new VerifyCodeNotFoundException();
 
-		if (Objects.equals(verifyCode, member.getVerifyCode())) {
+		if (Objects.equals(verifyCode, member.getVerifyCode()) && newPassword != null) {
 			String encodedPassword = passwordEncoder.encode(newPassword);
 			member.setPassword(encodedPassword);
 			memberRepository.save(member);
 
-		} else throw new MemberException("비밀번호 변경 코드가 일치하지 않습니다!");
+		} else if (!Objects.equals(verifyCode, member.getVerifyCode()))
+			throw new MemberException("비밀번호 변경 코드가 일치하지 않습니다!");
 	}
 
 	public List<MemberResponseDto> getRandomMembers(int count, String email) {
