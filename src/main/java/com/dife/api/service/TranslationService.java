@@ -26,10 +26,11 @@ import org.springframework.web.client.RestTemplate;
 public class TranslationService {
 
 	private final String deeplApiUrl = "https://api-free.deepl.com/v2/translate";
-	private static final Integer RESTRICTED_TRANSLATION_COUNT = 15;
+	private static final Integer RESTRICTED_TRANSLATION_COUNT = 200;
 	private final BookmarkRepository bookmarkRepository;
 	private final TranslationRepository translationRepository;
 	private final PostRepository postRepository;
+	private final CommentRepository commentRepository;
 	private final MemberRepository memberRepository;
 	private final ChatRepository chatRepository;
 
@@ -43,6 +44,7 @@ public class TranslationService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		if (requestDto.getBookmarkId() != null) return translateBookmark(requestDto, member);
 		if (requestDto.getPostId() != null) return translatePost(requestDto, member);
+		if (requestDto.getCommentId() != null) return translateComment(requestDto, member);
 		if (requestDto.getChatId() != null) return translateChat(requestDto, member);
 		return translateBasic(requestDto);
 	}
@@ -98,6 +100,20 @@ public class TranslationService {
 			throw new TranslationFullException();
 
 		requestDto.setText(Arrays.asList(post.getTitle(), post.getContent()));
+		requestDto.setTarget_lang(member.getSettingLanguage());
+		return createTranslationResponse(requestDto, member);
+	}
+
+	public TranslationResponseDto translateComment(TranslationRequestDto requestDto, Member member) {
+		Comment comment =
+				commentRepository
+						.findById(requestDto.getCommentId())
+						.orElseThrow(CommentNotFoundException::new);
+
+		if (member.getTranslationCount() > RESTRICTED_TRANSLATION_COUNT)
+			throw new TranslationFullException();
+
+		requestDto.setText(Collections.singletonList(comment.getContent()));
 		requestDto.setTarget_lang(member.getSettingLanguage());
 		return createTranslationResponse(requestDto, member);
 	}

@@ -15,6 +15,7 @@ public class TranslationRequestDto {
 	private List<String> text;
 	private String target_lang;
 	private Long postId;
+	private Long commentId;
 	private Long chatId;
 	private Long bookmarkId;
 }
