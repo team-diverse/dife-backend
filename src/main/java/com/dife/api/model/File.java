@@ -23,8 +23,6 @@ public class File extends BaseTimeEntity {
 
 	private String name;
 
-	private Boolean isSecret = false;
-
 	private Long size;
 
 	@Enumerated(EnumType.STRING)

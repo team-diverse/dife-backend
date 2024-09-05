@@ -1,5 +1,9 @@
 package com.dife.api.model.dto;
 
+import com.dife.api.model.Comment;
+import com.dife.api.model.Member;
+import com.dife.api.model.Post;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import lombok.*;
 
@@ -18,11 +22,9 @@ public class CommentResponseDto {
 
 	private Boolean isLiked;
 
-	private Boolean isBookmarked;
+	private Post post;
 
-	private PostResponseDto post;
-
-	private CommentResponseDto parentComment;
+	private Comment parentComment;
 
 	private Integer likesCount;
 
@@ -30,7 +32,8 @@ public class CommentResponseDto {
 
 	private Integer bookmarkCount;
 
-	private MemberResponseDto writer;
+	@JsonProperty("writer")
+	private Member writer;
 
 	private LocalDateTime created;
 

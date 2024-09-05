@@ -3,7 +3,6 @@ package com.dife.api.model.dto;
 import com.dife.api.model.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 import lombok.*;
 
@@ -17,7 +16,7 @@ public class ChatroomResponseDto {
 
 	private Long id;
 
-	private MemberResponseDto manager;
+	private Member manager;
 
 	private String name;
 
@@ -39,13 +38,13 @@ public class ChatroomResponseDto {
 
 	private Boolean isLiked = false;
 
+	private String password;
+
 	private LocalDateTime created;
 
 	private LocalDateTime modified;
 
-	private Boolean isEntered;
-
-	private Set<MemberResponseDto> members = new HashSet<>();
+	private Set<Member> members;
 
 	private Set<Chat> chats;
 }

@@ -1,7 +1,6 @@
 package com.dife.api.controller;
 
 import com.dife.api.model.ChatroomType;
-import com.dife.api.model.GroupPurposeType;
 import com.dife.api.model.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,14 +21,14 @@ public interface SwaggerChatroomController {
 
 	@Operation(summary = "채팅방 중복 이름 확인 API", description = "사용자가 채팅방 이름을 검색해 중복성을 검사하는 API입니다.")
 	@ApiResponse(responseCode = "200")
-	ResponseEntity<Void> checkChatroomName(@RequestParam(name = "name") String name);
+	ResponseEntity<Void> checkUsername(@RequestParam(name = "name") String name);
 
 	@Operation(
-			summary = "채팅방 생성 API",
+			summary = "채팅방 생성1 API",
 			description = "사용자가 multipart/form-data 형태의 POST요청으로 그룹 채팅방을 생성하는 API입니다.")
 	@ApiResponse(
 			responseCode = "201",
-			description = "그룹 채팅방 생성 성공 예시",
+			description = "그룹 채팅방1 생성 성공 예시",
 			content = {
 				@Content(
 						mediaType = "application/json",
@@ -43,17 +42,15 @@ public interface SwaggerChatroomController {
 			@RequestParam(name = "toMemberId", required = false) Long toMemberId,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "maxCount", required = false) Optional<Integer> maxCount,
-			@RequestParam(name = "purposes", required = false) Set<GroupPurposeType> purposes,
+			@RequestParam(name = "purposes", required = false) Set<String> purposes,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@RequestParam(name = "password", required = false) String password,
-			Authentication authentication)
-			throws IOException;
+			Authentication authentication);
 
 	@Operation(
 			summary = "채팅방 세부사항 업데이트 API",
-			description =
-					"사용자가 multipart/form-data 형태의 PUT요청으로 그룹 채팅방 정보 업데이트를 진행하는 API입니다. 방장만이 접근할 수 있는 API입니다.")
+			description = "사용자가 DTO를 작성해 PUT요청으로 그룹 채팅방 정보 업데이트를 진행하는 API입니다. 방장만이 접근할 수 있는 API입니다.")
 	@ApiResponse(
 			responseCode = "200",
 			description = "그룹 채팅방 업데이트 성공 예시",
@@ -67,12 +64,11 @@ public interface SwaggerChatroomController {
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "maxCount", required = false) Optional<Integer> maxCount,
-			@RequestParam(name = "purpose", required = false) Set<GroupPurposeType> purposes,
+			@RequestParam(name = "purpose", required = false) Set<String> purposes,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
 			@RequestParam(name = "password", required = false) String password,
-			Authentication auth)
-			throws IOException;
+			Authentication auth);
 
 	@Operation(summary = "채팅방 회원 강퇴 API", description = "채팅방 방장만이 회원 강퇴 권한을 갖는 API입니다.")
 	@ApiResponse(responseCode = "200", description = "그룹 채팅방 강퇴 성공 예시")
@@ -110,7 +106,7 @@ public interface SwaggerChatroomController {
 			@PathVariable(name = "id") Long id, Authentication auth) throws IOException;
 
 	@Operation(
-			summary = "그룹 채팅방 필터 조회 API",
+			summary = "그룹 채팅방 필터 검색 조회 API",
 			description =
 					"세부적인 그룹 채팅방 조회 필터링 선택지를 사용자에게 제시해 해당하는 그룹 채팅방을 조회할 수 있게 됩니다. 채팅방 목적, 취미, 언어의 복수 선택, 단일 종류 선택 가능한 name Set을 입력받게 됩니다.")
 	@ApiResponse(
@@ -124,12 +120,12 @@ public interface SwaggerChatroomController {
 	ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
-			@RequestParam(name = "purposes", required = false) Set<GroupPurposeType> purposes,
+			@RequestParam(name = "purposes", required = false) Set<String> purposes,
 			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount,
 			Authentication auth);
 
 	@Operation(
-			summary = "채팅방 검색 조회 API",
+			summary = "채팅방 필터 검색 조회 API",
 			description = "채팅방 이름, 한줄 소개에 해당 검색어가 포함되는 채팅방들을 조회하는 API입니다.")
 	@ApiResponse(
 			responseCode = "200",
@@ -139,8 +135,8 @@ public interface SwaggerChatroomController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = ChatroomResponseDto.class))
 			})
-	ResponseEntity<List<ChatroomResponseDto>> getSearchChatrooms(
-			@RequestParam(name = "keyword") String keyword, Authentication auth);
+	ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
+			@RequestParam(name = "keyword") String keyword);
 
 	@Operation(summary = "회원이 좋아요 누른 그룹 채팅방 목록 조회 API")
 	@ApiResponse(

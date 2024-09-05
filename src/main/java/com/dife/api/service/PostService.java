@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,16 +29,10 @@ public class PostService {
 	private final PostRepository postRepository;
 	private final LikePostRepository likePostRepository;
 	private final BlockPostRepository blockPostRepository;
-	private final BookmarkRepository bookmarkRepository;
 	private final FileService fileService;
 	private final BlockService blockService;
 	private final FileRepository fileRepository;
 	private final MemberRepository memberRepository;
-
-	@Autowired
-	@Qualifier("memberModelMapper")
-	private ModelMapper memberModelMapper;
-
 	private final ModelMapper modelMapper;
 
 	public PostResponseDto createPost(
@@ -83,9 +75,7 @@ public class PostService {
 
 		postRepository.save(post);
 
-		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
-		responseDto.setWriter(memberModelMapper.map(post.getWriter(), MemberResponseDto.class));
-		return responseDto;
+		return modelMapper.map(post, PostResponseDto.class);
 	}
 
 	@Transactional(readOnly = true)
@@ -118,13 +108,9 @@ public class PostService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
-		responseDto.setWriter(memberModelMapper.map(post.getWriter(), MemberResponseDto.class));
 		responseDto.setCommentCount(post.getComments().size());
 		responseDto.setLikesCount(post.getPostLikes().size());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
-		responseDto.setIsBookmarked(bookmarkRepository.existsBookmarkByPostAndMember(post, member));
-		responseDto.setCreated(post.getCreated());
-		responseDto.setModified(post.getModified());
 
 		responseDto.setIsLiked(likePostRepository.existsByPostAndMember(post, member));
 
@@ -175,9 +161,7 @@ public class PostService {
 
 		postRepository.save(post);
 
-		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
-		responseDto.setWriter(memberModelMapper.map(post.getWriter(), MemberResponseDto.class));
-		return responseDto;
+		return modelMapper.map(post, PostResponseDto.class);
 	}
 
 	public void createBlock(Long postId, String memberEmail) {
@@ -250,8 +234,6 @@ public class PostService {
 				.map(
 						post -> {
 							PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
-							responseDto.setWriter(
-									memberModelMapper.map(post.getWriter(), MemberResponseDto.class));
 							responseDto.setCommentCount(post.getComments().size());
 							responseDto.setLikesCount(post.getPostLikes().size());
 							responseDto.setBookmarkCount(post.getBookmarks().size());

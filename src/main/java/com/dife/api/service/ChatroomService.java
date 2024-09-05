@@ -34,10 +34,6 @@ public class ChatroomService {
 
 	private final BlockService blockService;
 
-	@Autowired
-	@Qualifier("memberModelMapper")
-	private ModelMapper memberModelMapper;
-
 	private final ModelMapper modelMapper;
 
 	@Autowired
@@ -134,7 +130,6 @@ public class ChatroomService {
 
 		setting.setCount(setting.getCount() + 1);
 		setting.setDescription(trimmedDescription);
-		setting.setIsPublic(isPublic);
 
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
@@ -235,9 +230,17 @@ public class ChatroomService {
 			givenSetting.setMaxCount(maxCountValue);
 		}
 
-		if (isPublic != null) {
-			givenSetting.setIsPublic(isPublic);
-			if (!isPublic) givenSetting.setPassword(password);
+		if (Boolean.FALSE.equals(isPublic)) {
+			givenSetting.setPassword(password);
+		}
+
+		if (givenSetting.getIsPublic() != null && isPublic == null)
+			givenSetting.setIsPublic(givenSetting.getIsPublic());
+		else if (isPublic == null) throw new ChatroomException("공개/비공개 여부는 필수입니다!");
+		else givenSetting.setIsPublic(isPublic);
+
+		if (Boolean.FALSE.equals(isPublic)) {
+			givenSetting.setPassword(password);
 		}
 
 		if (profileImg != null && !profileImg.isEmpty()) {
@@ -246,14 +249,10 @@ public class ChatroomService {
 			givenSetting.setProfileImg(file);
 		}
 
-		givenChatroom.setChatroomSetting(givenSetting);
-		chatroomRepository.save(givenChatroom);
-
 		ChatroomResponseDto responseDto =
 				chatroomModelMapper.map(givenSetting, ChatroomResponseDto.class);
 		responseDto.setName(givenChatroom.getName());
-		responseDto.setManager(
-				memberModelMapper.map(givenChatroom.getManager(), MemberResponseDto.class));
+		responseDto.setManager(givenChatroom.getManager());
 
 		return responseDto;
 	}
@@ -327,11 +326,10 @@ public class ChatroomService {
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
 		ChatroomResponseDto responseDto = chatroomModelMapper.map(setting, ChatroomResponseDto.class);
-		responseDto.setManager(memberModelMapper.map(chatroom.getManager(), MemberResponseDto.class));
+		responseDto.setManager(chatroom.getManager());
 		responseDto.setName(chatroom.getName());
 		responseDto.setProfileImg(chatroom.getChatroomSetting().getProfileImg());
-		if (chatroom.getMembers().contains(member)) responseDto.setIsEntered(true);
-		responseDto.getMembers().add(memberModelMapper.map(member, MemberResponseDto.class));
+		responseDto.setMembers(chatroom.getMembers());
 		responseDto.setCreated(setting.getCreated());
 		responseDto.setModified(setting.getModified());
 

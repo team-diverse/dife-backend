@@ -7,16 +7,16 @@ import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.CommentCreateRequestDto;
 import com.dife.api.model.dto.CommentResponseDto;
-import com.dife.api.model.dto.MemberResponseDto;
-import com.dife.api.repository.*;
+import com.dife.api.repository.CommentRepository;
+import com.dife.api.repository.LikeCommentRepository;
+import com.dife.api.repository.MemberRepository;
+import com.dife.api.repository.PostRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,12 +31,6 @@ public class CommentService {
 	private final ModelMapper modelMapper;
 	private final CommentRepository commentRepository;
 	private final LikeCommentRepository likeCommentRepository;
-	private final BookmarkRepository bookmarkRepository;
-	private final PostService postService;
-
-	@Autowired
-	@Qualifier("memberModelMapper")
-	private ModelMapper memberModelMapper;
 
 	private final NotificationService notificationService;
 
@@ -76,12 +70,8 @@ public class CommentService {
 		commentRepository.save(comment);
 
 		CommentResponseDto responseDto = modelMapper.map(comment, CommentResponseDto.class);
-		MemberResponseDto memberDto = memberModelMapper.map(writer, MemberResponseDto.class);
-		responseDto.setWriter(memberDto);
-
 		if (comment.getParentComment() != null) {
-			responseDto.setParentComment(
-					modelMapper.map(comment.getParentComment(), CommentResponseDto.class));
+			responseDto.setParentComment(comment.getParentComment());
 			List<NotificationToken> parentCommentTokens =
 					comment.getParentComment().getWriter().getNotificationTokens();
 			String parentMessage =
@@ -99,18 +89,15 @@ public class CommentService {
 	public CommentResponseDto getComment(Comment comment, Member member) {
 		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
 
-		dto.setWriter(memberModelMapper.map(comment.getWriter(), MemberResponseDto.class));
-		dto.setPost(postService.getPost(comment.getPost().getId(), member.getEmail()));
+		dto.setPost(comment.getPost());
 		dto.setLikesCount(comment.getCommentLikes().size());
 
-		if (comment.getParentComment() != null)
-			dto.setParentComment(modelMapper.map(comment.getParentComment(), CommentResponseDto.class));
+		if (comment.getParentComment() != null) dto.setParentComment(comment.getParentComment());
 		if (comment.getChildrenComments() != null)
 			dto.setCommentsCount(comment.getChildrenComments().size());
 
-		dto.setIsLiked(likeCommentRepository.existsByCommentAndMember(comment, member));
-		dto.setCreated(comment.getCreated());
-		dto.setModified(comment.getModified());
+		boolean isLiked = likeCommentRepository.existsByCommentAndMember(comment, member);
+		dto.setIsLiked(isLiked);
 
 		return dto;
 	}

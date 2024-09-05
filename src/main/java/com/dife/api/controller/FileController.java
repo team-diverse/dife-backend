@@ -1,9 +1,9 @@
 package com.dife.api.controller;
 
 import com.dife.api.service.FileService;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,13 +13,9 @@ public class FileController implements SwaggerFileController {
 
 	private final FileService fileService;
 
-	@GetMapping("/{id}")
-	public ResponseEntity<String> getFile(@PathVariable("id") Long id, Authentication auth) {
-		return ResponseEntity.ok(fileService.getPresignUrl(id, auth.getName()));
-	}
-
 	@GetMapping
-	public ResponseEntity<String> getFile(@RequestParam("name") String name) {
-		return ResponseEntity.ok(fileService.getPresignUrl(name));
+	public ResponseEntity<String> getFile(@RequestParam(name = "fileName") String fileName)
+			throws IOException {
+		return ResponseEntity.ok(fileService.getPresignUrl(fileName));
 	}
 }
