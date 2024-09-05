@@ -1,17 +1,15 @@
 package com.dife.api.service;
 
-import static java.util.stream.Collectors.toList;
-
 import com.dife.api.exception.*;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.LikeCreateRequestDto;
+import com.dife.api.model.dto.LikeResponseDto;
 import com.dife.api.model.dto.PostResponseDto;
 import com.dife.api.repository.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,19 +27,27 @@ public class LikeService {
 	private final LikeChatroomRepository likeChatroomRepository;
 	private final ChatroomRepository chatroomRepository;
 
-	private final ModelMapper modelMapper;
 	private final NotificationService notificationService;
+	private final PostService postService;
 
-	public List<PostResponseDto> getLikedPosts(String memberEmail) {
+	public List<LikeResponseDto> getLikedPosts(String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		List<PostLike> postLikes = likePostRepository.findPostLikesByMember(member);
 
-		List<Post> posts =
-				postLikes.stream().map(PostLike::getPost).distinct().collect(Collectors.toList());
+		List<LikeResponseDto> likeResponseDtos =
+				postLikes.stream()
+						.map(
+								postLike -> {
+									Post post = postLike.getPost();
+									PostResponseDto postResponseDto = postService.getPost(post.getId(), memberEmail);
 
-		return posts.stream().map(b -> modelMapper.map(b, PostResponseDto.class)).collect(toList());
+									return new LikeResponseDto(postLike.getId(), postResponseDto);
+								})
+						.collect(Collectors.toList());
+
+		return likeResponseDtos;
 	}
 
 	public void createLike(LikeCreateRequestDto dto, String memberEmail) {

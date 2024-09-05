@@ -1,14 +1,19 @@
 package com.dife.api.service;
 
+import com.dife.api.exception.MemberException;
+import com.dife.api.exception.MemberNotFoundException;
 import com.dife.api.exception.file.S3FileNameInvalidException;
 import com.dife.api.exception.file.S3FileNotFoundException;
 import com.dife.api.model.File;
 import com.dife.api.model.Format;
+import com.dife.api.model.Member;
 import com.dife.api.model.dto.FileDto;
 import com.dife.api.repository.FileRepository;
+import com.dife.api.repository.MemberRepository;
 import java.io.IOException;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -26,8 +31,10 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class FileService {
 	private final FileRepository fileRepository;
+	private final MemberRepository memberRepository;
 	private final S3Client s3Client;
 	private final S3Presigner presigner;
 	private final ModelMapper modelMapper;
@@ -74,8 +81,14 @@ public class FileService {
 		return generatePresignedUrl(fileName);
 	}
 
-	public String getPresignUrl(Long fileId) {
+	public String getPresignUrl(Long fileId, String memberEmail) {
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
 		File file = fileRepository.findById(fileId).orElseThrow(S3FileNotFoundException::new);
+		if (file.getIsSecret() && !fileId.equals(member.getVerificationFile().getId()))
+			throw new MemberException("회원만이 본인 인증 파일에 접근할 수 있습니다.");
 		return generatePresignedUrl(file.getName());
 	}
 
