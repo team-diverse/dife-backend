@@ -22,6 +22,12 @@ public class MemberResponseDto {
 	@Schema(description = "이메일 주소", example = "gusuyeon@gmail.com")
 	private String email;
 
+	@Schema(description = "실명")
+	private String name;
+
+	@Schema(description = "학번")
+	private String studentId;
+
 	@Schema(description = "전공")
 	private String major;
 

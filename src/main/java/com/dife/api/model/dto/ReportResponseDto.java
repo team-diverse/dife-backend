@@ -1,5 +1,8 @@
 package com.dife.api.model.dto;
 
+import com.dife.api.model.Comment;
+import com.dife.api.model.Member;
+import com.dife.api.model.Post;
 import com.dife.api.model.ReportType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,13 +15,13 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReportRequestDto {
+public class ReportResponseDto {
 
 	@Enumerated(EnumType.STRING)
 	private ReportType type;
 
-	private Long postId;
-	private Long commentId;
-	private Long receiverId;
+	private Post post;
+	private Comment comment;
+	private Member receiver;
 	private String message;
 }

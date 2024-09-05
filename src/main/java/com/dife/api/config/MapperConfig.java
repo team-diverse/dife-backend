@@ -61,6 +61,8 @@ public class MapperConfig {
 													.map(GroupPurpose::getType)
 													.collect(Collectors.toSet()),
 									ChatroomResponseDto::setPurposes);
+							mapper.map(
+									src -> src.getChatroomSetting().getPassword(), ChatroomResponseDto::setPassword);
 						});
 
 		return modelMapper;
@@ -80,8 +82,6 @@ public class MapperConfig {
 				.typeMap(Member.class, MemberResponseDto.class)
 				.addMappings(
 						mapper -> {
-							mapper.map(Member::getCreated, MemberResponseDto::setCreated);
-							mapper.map(Member::getModified, MemberResponseDto::setModified);
 							mapper.map(Member::getUsername, MemberResponseDto::setUsername);
 							mapper.map(Member::getCountry, MemberResponseDto::setCountry);
 							mapper.map(Member::getBio, MemberResponseDto::setBio);

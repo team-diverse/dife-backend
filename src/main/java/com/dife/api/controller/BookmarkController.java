@@ -39,7 +39,7 @@ public class BookmarkController implements SwaggerBookmarkController {
 	public ResponseEntity<List<BookmarkResponseDto>> getBookmarkChats(
 			@PathVariable(name = "chatroomId") Long chatroomId, Authentication authentication) {
 		List<BookmarkResponseDto> bookmarks =
-				bookmarkService.getChatroomBookmarks(chatroomId, authentication.getName());
+				bookmarkService.getBookmarks(chatroomId, authentication.getName());
 		return ResponseEntity.ok(bookmarks);
 	}
 

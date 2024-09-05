@@ -26,9 +26,7 @@ public interface SwaggerBookmarkController {
 			})
 	ResponseEntity<List<BookmarkResponseDto>> getAllBookmarks(Authentication authentication);
 
-	@Operation(
-			summary = "북마크 생성 API",
-			description = "사용자가 DTO를 작성해 채팅/게시글 북마크를 생성하는 API입니다. 북마크 타입 : CHAT, POST, COMMENT")
+	@Operation(summary = "북마크 생성 API", description = "사용자가 DTO를 작성해 채팅/게시글 북마크를 생성하는 API입니다.")
 	@ApiResponse(
 			responseCode = "201",
 			description = "북마크 생성 성공 예시",

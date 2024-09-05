@@ -3,7 +3,6 @@ package com.dife.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -50,8 +49,4 @@ public class Chatroom extends BaseTimeEntity {
 	@OneToMany(mappedBy = "chatroom", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
 	private Set<Chat> chats = new HashSet<>();
-
-	@OneToMany(mappedBy = "chatroom")
-	@JsonIgnore
-	private List<Report> reports;
 }
