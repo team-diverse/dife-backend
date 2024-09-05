@@ -52,4 +52,9 @@ public class Comment extends BaseTimeEntity implements TranslateTable {
 	public String getTextToTranslate() {
 		return content;
 	}
+
+	@Override
+	public String getTitleToTranslate() {
+		return null;
+	}
 }

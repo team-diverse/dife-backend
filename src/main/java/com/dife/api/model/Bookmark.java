@@ -42,4 +42,9 @@ public class Bookmark extends BaseTimeEntity implements TranslateTable {
 	public String getTextToTranslate() {
 		return message;
 	}
+
+	@Override
+	public String getTitleToTranslate() {
+		return null;
+	}
 }

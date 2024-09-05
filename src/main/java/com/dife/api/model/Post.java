@@ -58,6 +58,11 @@ public class Post extends BaseTimeEntity implements TranslateTable {
 
 	@Override
 	public String getTextToTranslate() {
-		return title + "\n" + content;
+		return content;
+	}
+
+	@Override
+	public String getTitleToTranslate() {
+		return title;
 	}
 }
