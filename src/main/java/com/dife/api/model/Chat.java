@@ -17,7 +17,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "chat")
-public class Chat {
+public class Chat implements TranslateTable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +38,14 @@ public class Chat {
 	@ElementCollection private List<String> imgCode = new ArrayList<>();
 
 	private LocalDateTime created;
+
+	@Override
+	public String getTextToTranslate() {
+		return message;
+	}
+
+	@Override
+	public String getTitleToTranslate() {
+		return null;
+	}
 }

@@ -22,12 +22,6 @@ public class MemberResponseDto {
 	@Schema(description = "이메일 주소", example = "gusuyeon@gmail.com")
 	private String email;
 
-	@Schema(description = "실명")
-	private String name;
-
-	@Schema(description = "학번")
-	private String studentId;
-
 	@Schema(description = "전공")
 	private String major;
 
@@ -40,15 +34,16 @@ public class MemberResponseDto {
 	@Schema(description = "프로필 공개 여부", example = "true")
 	private Boolean isPublic;
 
-	@Schema(description = "탈퇴된 회원 여부", example = "true")
-	private Boolean isDeleted = false;
-
 	@Schema(description = "프로필 좋아요 여부", example = "true")
 	private Boolean isLiked = false;
 
 	@Schema(description = "MBTI", example = "ENTJ")
 	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
+
+	private String settingLanguage = "EN";
+
+	private Integer translationCount = 0;
 
 	@Schema(description = "언어", example = "Korean, English")
 	private Set<String> languages;

@@ -14,6 +14,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Tag(name = "Notification API", description = "알림 서비스 API")
 public interface SwaggerNotificationController {
 
+	@Operation(summary = "알림 토큰 조회 API", description = "인가를 이용해 사용자의 모든 종류의 알림 토큰을 조회하는 API입니다.")
+	@ApiResponse(
+			responseCode = "200",
+			description = "단일 알림 토큰 조회 예시",
+			content = {
+				@Content(
+						mediaType = "application/json",
+						schema = @Schema(implementation = NotificationTokenResponseDto.class))
+			})
+	ResponseEntity<List<NotificationTokenResponseDto>> getNotificationTokens(Authentication auth);
+
 	@Operation(summary = "알림 리스트 조회 API", description = "인가를 이용해 사용자의 알림을 조회하는 API입니다.")
 	@ApiResponse(
 			responseCode = "200",
@@ -37,4 +48,8 @@ public interface SwaggerNotificationController {
 			})
 	ResponseEntity<NotificationTokenResponseDto> createNotificationToken(
 			NotificationTokenRequestDto requestDto, Authentication auth);
+
+	@Operation(summary = "알림 삭제 API", description = "알림의 ID를 입력해 알림을 삭제할 수 있는 API입니다.")
+	@ApiResponse(responseCode = "200")
+	ResponseEntity<Void> deleteNotification(@PathVariable("id") Long id, Authentication auth);
 }

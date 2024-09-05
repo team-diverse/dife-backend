@@ -6,10 +6,10 @@ import com.dife.api.service.TranslationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/translations")
 @Slf4j
@@ -19,9 +19,9 @@ public class TranslationController implements SwaggerTranslationController {
 
 	@PostMapping
 	public ResponseEntity<TranslationResponseDto> translate(
-			@RequestBody TranslationRequestDto requestDto) {
+			@RequestBody TranslationRequestDto requestDto, Authentication auth) {
 
-		TranslationResponseDto response = translationService.translate(requestDto);
+		TranslationResponseDto response = translationService.translate(requestDto, auth.getName());
 
 		return ResponseEntity.ok(response);
 	}

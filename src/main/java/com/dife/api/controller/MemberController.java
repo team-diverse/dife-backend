@@ -51,8 +51,10 @@ public class MemberController implements SwaggerMemberController {
 
 	@PutMapping(consumes = "multipart/form-data")
 	public ResponseEntity<MemberResponseDto> update(
+			@RequestParam(name = "password", required = false) String password,
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "country", required = false) String country,
+			@RequestParam(name = "settingLanguage", required = false) String settingLanguage,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
@@ -60,13 +62,14 @@ public class MemberController implements SwaggerMemberController {
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
-			Authentication auth)
-			throws IOException {
+			Authentication auth) {
 
 		MemberResponseDto responseDto =
 				memberService.update(
+						password,
 						username,
 						country,
+						settingLanguage,
 						bio,
 						mbti,
 						hobbies,
@@ -80,13 +83,13 @@ public class MemberController implements SwaggerMemberController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<MemberResponseDto> getById(
-			@PathVariable(name = "id") Long id, Authentication auth) throws IOException {
+			@PathVariable(name = "id") Long id, Authentication auth) {
 		MemberResponseDto responseDto = memberService.getMemberById(id, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 
 	@GetMapping("/profile")
-	public ResponseEntity<MemberResponseDto> profile(Authentication auth) throws IOException {
+	public ResponseEntity<MemberResponseDto> profile(Authentication auth) {
 		MemberResponseDto responseDto = memberService.getMember(auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
@@ -107,8 +110,18 @@ public class MemberController implements SwaggerMemberController {
 	}
 
 	@GetMapping("/change-password")
-	public ResponseEntity<Void> changePassword(@RequestParam(name = "email") String email) {
+	public ResponseEntity<Void> sendChangeVerify(@RequestParam(name = "email") String email) {
 		memberService.changePassword(email);
+
+		return new ResponseEntity<>(OK);
+	}
+
+	@PatchMapping("/change-password")
+	public ResponseEntity<Void> changePassword(
+			@RequestParam(name = "verifyCode", required = false) String verifyCode,
+			@RequestParam(name = "newPassword", required = false) String newPassword,
+			@RequestParam(name = "email", required = false) String email) {
+		memberService.verifyChangePasswordCode(verifyCode, newPassword, email);
 
 		return new ResponseEntity<>(OK);
 	}
@@ -132,8 +145,7 @@ public class MemberController implements SwaggerMemberController {
 			@RequestParam(name = "mbtis", required = false) Set<MbtiCategory> mbtiCategories,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
-			Authentication auth)
-			throws IOException {
+			Authentication auth) {
 		List<MemberResponseDto> responseDto =
 				memberService.getFilterMembers(mbtiCategories, hobbies, languages, auth.getName());
 		return ResponseEntity.ok(responseDto);
