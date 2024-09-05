@@ -84,6 +84,8 @@ public class MemberService {
 		String encodedPassword = passwordEncoder.encode(dto.getPassword());
 		member.setPassword(encodedPassword);
 
+		member.setIsVerified(true);
+
 		member.setTranslationCount(0);
 
 		memberRepository.save(member);
