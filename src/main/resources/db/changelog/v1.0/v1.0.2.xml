@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-chatroom_id-column-to-report-table-20240904-2318" author="seungho">
+        <addColumn tableName="report">
+            <column name="chatroom_id" type="bigint"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="add-foreignkeyContraint-on-report-20240826-1120" author="suyeon">
+        <addForeignKeyConstraint baseColumnNames="chatroom_id" baseTableName="report"
+                                 constraintName="FK_REPORT_ON_CHATROOM" referencedColumnNames="id"
+                                 referencedTableName="chatroom"/>
+    </changeSet>
+</databaseChangeLog>

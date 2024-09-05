@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "comment")
-public class Comment extends BaseTimeEntity {
+public class Comment extends BaseTimeEntity implements TranslateTable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,4 +47,14 @@ public class Comment extends BaseTimeEntity {
 	@OneToMany(mappedBy = "comment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Report> reports;
+
+	@Override
+	public String getTextToTranslate() {
+		return content;
+	}
+
+	@Override
+	public String getTitleToTranslate() {
+		return null;
+	}
 }

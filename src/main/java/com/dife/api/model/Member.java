@@ -24,6 +24,8 @@ public class Member extends BaseTimeEntity {
 
 	@NotNull private String password = "";
 
+	private String verifyCode = "";
+
 	private String username = "Diver";
 
 	private String name = "";
@@ -42,6 +44,10 @@ public class Member extends BaseTimeEntity {
 
 	@Enumerated(EnumType.STRING)
 	private MbtiCategory mbti;
+
+	private String settingLanguage = "EN";
+
+	private Integer translationCount = 0;
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Set<Language> languages = new HashSet<>();

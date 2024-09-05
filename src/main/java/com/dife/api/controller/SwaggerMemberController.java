@@ -48,9 +48,11 @@ public interface SwaggerMemberController {
 						mediaType = "application/json",
 						schema = @Schema(implementation = MemberResponseDto.class))
 			})
-	ResponseEntity<MemberResponseDto> update(
+	public ResponseEntity<MemberResponseDto> update(
+			@RequestParam(name = "password", required = false) String password,
 			@RequestParam(name = "username", required = false) String username,
 			@RequestParam(name = "country", required = false) String country,
+			@RequestParam(name = "settingLanguage", required = false) String settingLanguage,
 			@RequestParam(name = "bio", required = false) String bio,
 			@RequestParam(name = "mbti", required = false) MbtiCategory mbti,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
@@ -58,8 +60,7 @@ public interface SwaggerMemberController {
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "verificationFile", required = false) MultipartFile verificationFile,
 			@RequestParam(name = "isPublic", required = false) Boolean isPublic,
-			Authentication auth)
-			throws IOException;
+			Authentication auth);
 
 	@Operation(
 			summary = "회원 ID별 조회 API",
@@ -108,10 +109,19 @@ public interface SwaggerMemberController {
 	ResponseEntity<Void> checkToken(@Valid @RequestBody RefreshTokenRequestDto requestDto);
 
 	@Operation(
-			summary = "비밀번호 변경 API",
-			description = "이메일을 발송해 유저는 변경된 비밀번호를 받아 유효한 로그인을 진행할 수 있게 됩니다.")
+			summary = "비밀번호 변경 인증번호 발송 API",
+			description = "이메일을 발송해 유저는 비밀번호 변경 인증번호를 받아 비밀번호 변경 권한을 갖게 됩니다.")
 	@ApiResponse(responseCode = "200", description = "비밀번호 변경 발송 예시")
-	ResponseEntity<Void> changePassword(@RequestParam(name = "email") String email);
+	public ResponseEntity<Void> sendChangeVerify(@RequestParam(name = "email") String email);
+
+	@Operation(
+			summary = "비밀번호 변경 API",
+			description = "이메일을 통해 인증번호를 받은 유저는 인증번호를 입력해 비밀번호를 입력해 비밀번호를 변경하게 됩니다.")
+	@ApiResponse(responseCode = "200", description = "비밀번호 변경 예시")
+	ResponseEntity<Void> changePassword(
+			@RequestParam(name = "verifyCode", required = false) String verifyCode,
+			@RequestParam(name = "newPassword", required = false) String newPassword,
+			@RequestParam(name = "email", required = false) String email);
 
 	@Operation(
 			summary = "홈화면 랜덤 10개 회원 조회 API",

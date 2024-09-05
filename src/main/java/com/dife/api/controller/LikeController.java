@@ -4,7 +4,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 import com.dife.api.model.dto.LikeCreateRequestDto;
-import com.dife.api.model.dto.PostResponseDto;
+import com.dife.api.model.dto.LikeResponseDto;
 import com.dife.api.service.LikeService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,8 @@ public class LikeController implements SwaggerLikeController {
 	private final LikeService likeService;
 
 	@GetMapping
-	public ResponseEntity<List<PostResponseDto>> getLikedPosts(Authentication auth) {
-		List<PostResponseDto> responseDto = likeService.getLikedPosts(auth.getName());
+	public ResponseEntity<List<LikeResponseDto>> getLikedPosts(Authentication auth) {
+		List<LikeResponseDto> responseDto = likeService.getLikedPosts(auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 

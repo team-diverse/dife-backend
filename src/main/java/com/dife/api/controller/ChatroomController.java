@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/api/chatrooms")
 @Slf4j
-public class ChatroomController {
+public class ChatroomController implements SwaggerChatroomController {
 
 	private final ChatroomService chatroomService;
 
@@ -38,7 +38,7 @@ public class ChatroomController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<ChatroomResponseDto>> getGroupChatrooms(
+	public ResponseEntity<List<ChatroomResponseDto>> getChatrooms(
 			@RequestParam(name = "type", required = false) ChatroomType type,
 			Authentication authentication) {
 		List<ChatroomResponseDto> responseDto =
@@ -47,7 +47,7 @@ public class ChatroomController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<ChatroomResponseDto> getGroupChatroom(
+	public ResponseEntity<ChatroomResponseDto> getChatroom(
 			@PathVariable(name = "id") Long chatroomId, Authentication auth) throws IOException {
 		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
@@ -137,7 +137,7 @@ public class ChatroomController {
 	}
 
 	@GetMapping("/search")
-	public ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
+	public ResponseEntity<List<ChatroomResponseDto>> getSearchChatrooms(
 			@RequestParam(name = "keyword") String keyword, Authentication auth) {
 		List<ChatroomResponseDto> responseDto =
 				chatroomService.getSearchChatrooms(keyword, auth.getName());

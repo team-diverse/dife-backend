@@ -14,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "bookmark")
-public class Bookmark extends BaseTimeEntity {
+public class Bookmark extends BaseTimeEntity implements TranslateTable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,4 +37,14 @@ public class Bookmark extends BaseTimeEntity {
 	@ManyToOne
 	@JoinColumn(name = "post_id")
 	private Post post;
+
+	@Override
+	public String getTextToTranslate() {
+		return message;
+	}
+
+	@Override
+	public String getTitleToTranslate() {
+		return null;
+	}
 }
