@@ -6,7 +6,6 @@ import com.dife.api.model.dto.TranslationRequestDto;
 import com.dife.api.model.dto.TranslationResponseDto;
 import com.dife.api.repository.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -65,66 +64,13 @@ public class TranslationService {
 		return response;
 	}
 
-	public TranslationResponseDto translateBookmark(TranslationRequestDto requestDto, Member member) {
-		Bookmark bookmark =
-				bookmarkRepository
-						.findById(requestDto.getBookmarkId())
-						.orElseThrow(BookmarkNotFoundException::new);
-
-		if (member.getTranslationCount() > RESTRICTED_TRANSLATION_COUNT)
+	public TranslationResponseDto translate(
+			TranslationRequestDto requestDto, TranslateTable translatable, Member member) {
+		if (member.getTranslationCount() > RESTRICTED_TRANSLATION_COUNT) {
 			throw new TranslationFullException();
-
-		requestDto.setText(Collections.singletonList(bookmark.getMessage()));
-		requestDto.setTarget_lang(member.getSettingLanguage());
-		TranslationResponseDto response = translateBasic(requestDto);
-
-		List<Translation> savedTranslations = new ArrayList<>();
-		for (Translation translation : response.getTranslations()) {
-			Translation savedTranslation = translationRepository.save(translation);
-			savedTranslations.add(savedTranslation);
 		}
 
-		bookmark.setTranslations(savedTranslations);
-		bookmarkRepository.save(bookmark);
-
-		member.setTranslationCount(member.getTranslationCount() + 1);
-		return response;
-	}
-
-	public TranslationResponseDto translatePost(TranslationRequestDto requestDto, Member member) {
-		Post post =
-				postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
-
-		if (member.getTranslationCount() > RESTRICTED_TRANSLATION_COUNT)
-			throw new TranslationFullException();
-
-		requestDto.setText(Arrays.asList(post.getTitle(), post.getContent()));
-		requestDto.setTarget_lang(member.getSettingLanguage());
-		return createTranslationResponse(requestDto, member);
-	}
-
-	public TranslationResponseDto translateComment(TranslationRequestDto requestDto, Member member) {
-		Comment comment =
-				commentRepository
-						.findById(requestDto.getCommentId())
-						.orElseThrow(CommentNotFoundException::new);
-
-		if (member.getTranslationCount() > RESTRICTED_TRANSLATION_COUNT)
-			throw new TranslationFullException();
-
-		requestDto.setText(Collections.singletonList(comment.getContent()));
-		requestDto.setTarget_lang(member.getSettingLanguage());
-		return createTranslationResponse(requestDto, member);
-	}
-
-	public TranslationResponseDto translateChat(TranslationRequestDto requestDto, Member member) {
-		Chat chat =
-				chatRepository.findById(requestDto.getChatId()).orElseThrow(ChatNotFoundException::new);
-
-		if (member.getTranslationCount() > RESTRICTED_TRANSLATION_COUNT)
-			throw new TranslationFullException();
-
-		requestDto.setText(Collections.singletonList(chat.getMessage()));
+		requestDto.setText(Collections.singletonList(translatable.getTextToTranslate()));
 		requestDto.setTarget_lang(member.getSettingLanguage());
 		return createTranslationResponse(requestDto, member);
 	}
@@ -140,9 +86,51 @@ public class TranslationService {
 			savedTranslations.add(savedTranslation);
 		}
 
+		if (requestDto.getBookmarkId() != null)
+			updateBookmarkWithTranslations(requestDto.getBookmarkId(), savedTranslations);
+
 		member.setTranslationCount(member.getTranslationCount() + 1);
 		response.setTranslations(savedTranslations);
 		return response;
+	}
+
+	private void updateBookmarkWithTranslations(Long bookmarkId, List<Translation> translations) {
+		Bookmark bookmark =
+				bookmarkRepository.findById(bookmarkId).orElseThrow(BookmarkNotFoundException::new);
+		bookmark.setTranslations(translations);
+		bookmarkRepository.save(bookmark);
+	}
+
+	public TranslationResponseDto translateBookmark(TranslationRequestDto requestDto, Member member) {
+		Bookmark bookmark =
+				bookmarkRepository
+						.findById(requestDto.getBookmarkId())
+						.orElseThrow(BookmarkNotFoundException::new);
+
+		return translate(requestDto, bookmark, member);
+	}
+
+	public TranslationResponseDto translatePost(TranslationRequestDto requestDto, Member member) {
+		Post post =
+				postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
+
+		return translate(requestDto, post, member);
+	}
+
+	public TranslationResponseDto translateComment(TranslationRequestDto requestDto, Member member) {
+		Comment comment =
+				commentRepository
+						.findById(requestDto.getCommentId())
+						.orElseThrow(CommentNotFoundException::new);
+
+		return translate(requestDto, comment, member);
+	}
+
+	public TranslationResponseDto translateChat(TranslationRequestDto requestDto, Member member) {
+		Chat chat =
+				chatRepository.findById(requestDto.getChatId()).orElseThrow(ChatNotFoundException::new);
+
+		return translate(requestDto, chat, member);
 	}
 
 	private HttpEntity<TranslationRequestDto> createHttpEntity(
