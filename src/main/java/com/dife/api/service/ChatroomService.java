@@ -254,12 +254,10 @@ public class ChatroomService {
 		responseDto.setName(givenChatroom.getName());
 		responseDto.setManager(
 				memberModelMapper.map(givenChatroom.getManager(), MemberResponseDto.class));
-
 		return responseDto;
 	}
 
 	public void checkManager(Long chatroomId, String memberEmail) {
-
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 		Member member =
@@ -339,6 +337,7 @@ public class ChatroomService {
 						.collect(Collectors.toSet()));
 		responseDto.setCreated(setting.getCreated());
 		responseDto.setModified(setting.getModified());
+		responseDto.setChatroomType(chatroom.getChatroomType());
 
 		boolean isLiked = likeChatroomRepository.existsByChatroomAndMember(chatroom, member);
 		responseDto.setIsLiked(isLiked);

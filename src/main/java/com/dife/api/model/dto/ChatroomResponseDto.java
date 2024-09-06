@@ -1,6 +1,7 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -44,6 +45,9 @@ public class ChatroomResponseDto {
 	private LocalDateTime modified;
 
 	private Boolean isEntered;
+
+	@JsonProperty("chatroom_type")
+	private ChatroomType chatroomType;
 
 	private Set<MemberResponseDto> members = new HashSet<>();
 
