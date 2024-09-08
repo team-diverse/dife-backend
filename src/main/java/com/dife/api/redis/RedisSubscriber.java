@@ -26,7 +26,11 @@ public class RedisSubscriber implements MessageListener {
 			String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(messageBody);
 
 			ChatRedisDto dto = objectMapper.readValue(publishMessage, ChatRedisDto.class);
-			String destination = "/sub/chatroom/" + dto.getChatroom().getId();
+
+			String destination;
+			if (dto.getGroupChatroom() != null)
+				destination = "/sub/chatroom/" + dto.getGroupChatroom().getId();
+			else destination = "/sub/chatroom/" + dto.getSingleChatroom().getId();
 
 			Map<String, Object> propagateMessage = objectMapper.convertValue(dto, Map.class);
 			messagingTemplate.convertAndSend(destination, propagateMessage);
