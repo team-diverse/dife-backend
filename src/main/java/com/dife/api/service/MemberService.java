@@ -115,13 +115,19 @@ public class MemberService {
 
 		if (password != null) member.setPassword(passwordEncoder.encode(password));
 
-		boolean notAddVerificationFile =
-				(verificationFile == null || verificationFile.isEmpty())
-						&& member.getUsername().equals("Diver");
-		if (notAddVerificationFile) throw new MemberNotAddVerificationException();
+		//		 TODO: UNCOMMENT THIS AFTER BETA
+		//		boolean notAddVerificationFile =
+		//				(verificationFile == null || verificationFile.isEmpty())
+		//						&& member.getUsername().equals("Diver");
+		//		if (notAddVerificationFile) {
+		//			throw new MemberNotAddVerificationException();
+		//		}
+		//		boolean hasToUploadVerificationFile = verificationFile != null &&
+		// !verificationFile.isEmpty();
+		//		if (hasToUploadVerificationFile) updateFile(member, verificationFile, true);
 
-		boolean hasToUploadVerificationFile = verificationFile != null && !verificationFile.isEmpty();
-		if (hasToUploadVerificationFile) updateFile(member, verificationFile, true);
+		//		 TODO: DELETE THIS AFTER BETA
+		member.setIsVerified(true);
 
 		boolean hasToUploadProfile = profileImg != null && !profileImg.isEmpty();
 		if (hasToUploadProfile) updateFile(member, profileImg, false);
