@@ -14,4 +14,21 @@
                                  constraintName="FK_REPORT_ON_CHATROOM" referencedColumnNames="id"
                                  referencedTableName="chatroom"/>
     </changeSet>
+
+    <changeSet id="add-type-column-from-member-20240904-2350" author="suyeon">
+        <addColumn tableName="member">
+            <column name="setting_language" type="varchar(10)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add-type-column-from-member-20240904-2355" author="suyeon">
+        <addColumn tableName="member">
+            <column name="translation_count" type="INT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="add-type-column-from-member-20240905-1900" author="suyeon">
+        <addColumn tableName="member">
+            <column name="verify_code" type="varchar(10)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
