@@ -1,7 +1,7 @@
 package com.dife.api.config;
 
 import com.dife.api.model.*;
-import com.dife.api.model.dto.ChatroomResponseDto;
+import com.dife.api.model.dto.GroupChatroomResponseDto;
 import com.dife.api.model.dto.MemberResponseDto;
 import java.util.Collections;
 import java.util.Optional;
@@ -33,7 +33,7 @@ public class MapperConfig {
 				.typeMap(GroupPurpose.class, String.class)
 				.setConverter(context -> context.getSource().getType().name());
 		modelMapper
-				.typeMap(Chatroom.class, ChatroomResponseDto.class)
+				.typeMap(Chatroom.class, GroupChatroomResponseDto.class)
 				.addMappings(
 						mapper -> {
 							mapper.map(
@@ -43,7 +43,7 @@ public class MapperConfig {
 													.stream()
 													.map(Hobby::getName)
 													.collect(Collectors.toSet()),
-									ChatroomResponseDto::setHobbies);
+									GroupChatroomResponseDto::setHobbies);
 
 							mapper.map(
 									src ->
@@ -52,7 +52,7 @@ public class MapperConfig {
 													.stream()
 													.map(Language::getName)
 													.collect(Collectors.toSet()),
-									ChatroomResponseDto::setLanguages);
+									GroupChatroomResponseDto::setLanguages);
 							mapper.map(
 									src ->
 											Optional.ofNullable(src.getChatroomSetting().getPurposes())
@@ -60,7 +60,7 @@ public class MapperConfig {
 													.stream()
 													.map(GroupPurpose::getType)
 													.collect(Collectors.toSet()),
-									ChatroomResponseDto::setPurposes);
+									GroupChatroomResponseDto::setPurposes);
 						});
 
 		return modelMapper;

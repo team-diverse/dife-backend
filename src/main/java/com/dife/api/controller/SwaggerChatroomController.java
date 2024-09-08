@@ -60,9 +60,9 @@ public interface SwaggerChatroomController {
 			content = {
 				@Content(
 						mediaType = "application/json",
-						schema = @Schema(implementation = ChatroomResponseDto.class))
+						schema = @Schema(implementation = GroupChatroomResponseDto.class))
 			})
-	ResponseEntity<ChatroomResponseDto> update(
+	ResponseEntity<GroupChatroomResponseDto> update(
 			@PathVariable(name = "id", required = false) Long id,
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
@@ -119,9 +119,9 @@ public interface SwaggerChatroomController {
 			content = {
 				@Content(
 						mediaType = "application/json",
-						schema = @Schema(implementation = ChatroomResponseDto.class))
+						schema = @Schema(implementation = GroupChatroomResponseDto.class))
 			})
-	ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
+	ResponseEntity<List<GroupChatroomResponseDto>> getFilterChatrooms(
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "purposes", required = false) Set<GroupPurposeType> purposes,
@@ -137,9 +137,9 @@ public interface SwaggerChatroomController {
 			content = {
 				@Content(
 						mediaType = "application/json",
-						schema = @Schema(implementation = ChatroomResponseDto.class))
+						schema = @Schema(implementation = GroupChatroomResponseDto.class))
 			})
-	ResponseEntity<List<ChatroomResponseDto>> getSearchChatrooms(
+	ResponseEntity<List<GroupChatroomResponseDto>> getSearchChatrooms(
 			@RequestParam(name = "keyword") String keyword, Authentication auth);
 
 	@Operation(summary = "회원이 좋아요 누른 그룹 채팅방 목록 조회 API")
@@ -149,14 +149,14 @@ public interface SwaggerChatroomController {
 			content = {
 				@Content(
 						mediaType = "application/json",
-						schema = @Schema(implementation = ChatroomResponseDto.class))
+						schema = @Schema(implementation = GroupChatroomResponseDto.class))
 			})
-	ResponseEntity<List<ChatroomResponseDto>> getLikeChatrooms(Authentication auth);
+	ResponseEntity<List<GroupChatroomResponseDto>> getLikeChatrooms(Authentication auth);
 
 	@Operation(
 			summary = "홈화면 랜덤 10개 채팅방 조회 API",
 			description = "홈화면에 보일 커넥트 준비상태 10개 회원 정보를 확인할 수 있습니다.")
 	@ApiResponse(responseCode = "200")
-	ResponseEntity<List<ChatroomResponseDto>> getRandomChatrooms(
+	ResponseEntity<List<GroupChatroomResponseDto>> getRandomChatrooms(
 			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth);
 }
