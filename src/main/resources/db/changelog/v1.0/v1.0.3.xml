@@ -4,24 +4,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="add-type-column-from-member-20240908-1700" author="suyeon">
-        <addColumn tableName="member">
-            <column name="setting_language" type="varchar(10)"/>
-        </addColumn>
-    </changeSet>
-
-    <changeSet id="add-type-column-from-member-20240908-1730" author="suyeon">
-        <addColumn tableName="member">
-            <column name="translation_count" type="INT"/>
-        </addColumn>
-    </changeSet>
-
-    <changeSet id="add-type-column-from-member-20240908-1800" author="suyeon">
-        <addColumn tableName="member">
-            <column name="verify_code" type="varchar(10)"/>
-        </addColumn>
-    </changeSet>
-
     <changeSet id="add-text-to-translate-column-to-bookmark-20240908-1900" author="suyeon">
         <addColumn tableName="bookmark">
             <column name="text_to_translate" type="varchar(255)"/>
