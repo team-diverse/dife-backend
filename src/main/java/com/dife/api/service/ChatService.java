@@ -47,7 +47,6 @@ public class ChatService {
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
 
-
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
 		switch (dto.getChatType()) {
