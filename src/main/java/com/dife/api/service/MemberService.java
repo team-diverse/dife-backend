@@ -122,7 +122,8 @@ public class MemberService {
 		//		if (notAddVerificationFile) {
 		//			throw new MemberNotAddVerificationException();
 		//		}
-		//		boolean hasToUploadVerificationFile = verificationFile != null && !verificationFile.isEmpty();
+		//		boolean hasToUploadVerificationFile = verificationFile != null &&
+		// !verificationFile.isEmpty();
 		//		if (hasToUploadVerificationFile) updateFile(member, verificationFile, true);
 
 		//		 TODO: DELETE THIS AFTER BETA
@@ -140,7 +141,6 @@ public class MemberService {
 
 		if (hobbies != null) updateHobbies(member, hobbies);
 		if (languages != null) updateLanguages(member, languages);
-
 
 		memberRepository.save(member);
 
