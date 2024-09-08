@@ -48,8 +48,8 @@ public class ChatroomController implements SwaggerChatroomController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ChatroomResponseDto> getChatroom(
-			@PathVariable(name = "id") Long chatroomId, Authentication auth) throws IOException {
-		ChatroomResponseDto responseDto = chatroomService.getChatroom(chatroomId, auth.getName());
+			@PathVariable(name = "id") Long chatroomId, Authentication auth) {
+		ChatroomResponseDto responseDto = chatroomService.getChatroomById(chatroomId, auth.getName());
 		return ResponseEntity.status(OK).body(responseDto);
 	}
 
@@ -88,7 +88,7 @@ public class ChatroomController implements SwaggerChatroomController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<ChatroomResponseDto> update(
+	public ResponseEntity<GroupChatroomResponseDto> update(
 			@PathVariable(name = "id", required = false) Long id,
 			@RequestParam(name = "profileImg", required = false) MultipartFile profileImg,
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
@@ -100,7 +100,7 @@ public class ChatroomController implements SwaggerChatroomController {
 			Authentication auth)
 			throws IOException {
 
-		ChatroomResponseDto responseDto =
+		GroupChatroomResponseDto responseDto =
 				chatroomService.update(
 						id,
 						profileImg,
@@ -125,35 +125,35 @@ public class ChatroomController implements SwaggerChatroomController {
 	}
 
 	@GetMapping("/filter")
-	public ResponseEntity<List<ChatroomResponseDto>> getFilterChatrooms(
+	public ResponseEntity<List<GroupChatroomResponseDto>> getFilterChatrooms(
 			@RequestParam(name = "hobbies", required = false) Set<String> hobbies,
 			@RequestParam(name = "languages", required = false) Set<String> languages,
 			@RequestParam(name = "purposes", required = false) Set<GroupPurposeType> purposes,
 			@RequestParam(name = "maxCount", required = false, defaultValue = "30") Integer maxCount,
 			Authentication auth) {
-		List<ChatroomResponseDto> responseDto =
+		List<GroupChatroomResponseDto> responseDto =
 				chatroomService.getFilterChatrooms(hobbies, purposes, languages, maxCount, auth.getName());
 		return ok(responseDto);
 	}
 
 	@GetMapping("/search")
-	public ResponseEntity<List<ChatroomResponseDto>> getSearchChatrooms(
+	public ResponseEntity<List<GroupChatroomResponseDto>> getSearchChatrooms(
 			@RequestParam(name = "keyword") String keyword, Authentication auth) {
-		List<ChatroomResponseDto> responseDto =
+		List<GroupChatroomResponseDto> responseDto =
 				chatroomService.getSearchChatrooms(keyword, auth.getName());
 		return ok(responseDto);
 	}
 
 	@GetMapping("/likes")
-	public ResponseEntity<List<ChatroomResponseDto>> getLikeChatrooms(Authentication auth) {
-		List<ChatroomResponseDto> responseDto = chatroomService.getLikedChatrooms(auth.getName());
+	public ResponseEntity<List<GroupChatroomResponseDto>> getLikeChatrooms(Authentication auth) {
+		List<GroupChatroomResponseDto> responseDto = chatroomService.getLikedChatrooms(auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 
 	@GetMapping("/random")
-	public ResponseEntity<List<ChatroomResponseDto>> getRandomChatrooms(
+	public ResponseEntity<List<GroupChatroomResponseDto>> getRandomChatrooms(
 			@RequestParam(name = "count", defaultValue = "1") int count, Authentication auth) {
-		List<ChatroomResponseDto> responseDto =
+		List<GroupChatroomResponseDto> responseDto =
 				chatroomService.getRandomChatrooms(count, auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}

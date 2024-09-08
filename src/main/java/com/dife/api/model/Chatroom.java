@@ -27,7 +27,7 @@ public class Chatroom extends BaseTimeEntity {
 	private String name = "";
 
 	@Enumerated(EnumType.STRING)
-	private ChatroomType chatroomType = ChatroomType.GROUP;
+	private ChatroomType chatroomType;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "chatroom_setting_id")
