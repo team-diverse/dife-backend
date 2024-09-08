@@ -22,12 +22,6 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="add-title-to-translate-column-to-bookmark-20240908-1900" author="suyeon">
-        <addColumn tableName="bookmark">
-            <column name="title_to_translate" type="varchar(10)"/>
-        </addColumn>
-    </changeSet>
-
     <changeSet id="add-text-to-translate-column-to-bookmark-20240908-1900" author="suyeon">
         <addColumn tableName="bookmark">
             <column name="text_to_translate" type="varchar(255)"/>
@@ -46,21 +40,9 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="add-title-to-translate-column-to-comment-20240908-1900" author="suyeon">
-        <addColumn tableName="comment">
-            <column name="title_to_comment" type="varchar(10)"/>
-        </addColumn>
-    </changeSet>
-
     <changeSet id="add-text-to-translate-column-to-comment-20240908-1900" author="suyeon">
         <addColumn tableName="comment">
             <column name="text_to_comment" type="varchar(255)"/>
-        </addColumn>
-    </changeSet>
-
-    <changeSet id="add-title-to-translate-column-to-chat-20240908-1900" author="suyeon">
-        <addColumn tableName="chat">
-            <column name="title_to_translate" type="varchar(10)"/>
         </addColumn>
     </changeSet>
 

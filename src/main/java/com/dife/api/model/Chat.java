@@ -19,6 +19,7 @@ import lombok.Setter;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "chat")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Chat implements TranslateTable {
 
 	@Id

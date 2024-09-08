@@ -1,5 +1,6 @@
 package com.dife.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -14,6 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "bookmark")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Bookmark extends BaseTimeEntity implements TranslateTable {
 
 	@Id
