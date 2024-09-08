@@ -7,7 +7,7 @@ import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.CommentCreateRequestDto;
 import com.dife.api.model.dto.CommentResponseDto;
-import com.dife.api.model.dto.MemberResponseDto;
+import com.dife.api.model.dto.MemberRestrictedResponseDto;
 import com.dife.api.repository.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -77,7 +77,8 @@ public class CommentService {
 		commentRepository.save(comment);
 
 		CommentResponseDto responseDto = modelMapper.map(comment, CommentResponseDto.class);
-		MemberResponseDto memberDto = memberModelMapper.map(writer, MemberResponseDto.class);
+		MemberRestrictedResponseDto memberDto =
+				modelMapper.map(writer, MemberRestrictedResponseDto.class);
 		responseDto.setPost(postService.getPost(comment.getPost().getId(), memberEmail));
 		responseDto.setWriter(memberDto);
 
@@ -132,7 +133,7 @@ public class CommentService {
 	public CommentResponseDto getComment(Comment comment, Member member) {
 		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
 
-		dto.setWriter(memberModelMapper.map(comment.getWriter(), MemberResponseDto.class));
+		dto.setWriter(modelMapper.map(comment.getWriter(), MemberRestrictedResponseDto.class));
 		dto.setPost(postService.getPost(comment.getPost().getId(), member.getEmail()));
 		dto.setLikesCount(comment.getCommentLikes().size());
 

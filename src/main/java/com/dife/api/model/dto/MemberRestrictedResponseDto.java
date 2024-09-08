@@ -14,19 +14,8 @@ public class MemberRestrictedResponseDto {
 
 	private Long id;
 
-	@Schema(description = "이메일 주소", example = "gusuyeon@gmail.com")
-	private String email;
-
 	@Schema(description = "닉네임", example = "sooya")
 	private String username;
-
-	@Schema(description = "국가코드", example = "KO")
-	private String country;
-
-	@Schema(description = "프로필 공개 여부", example = "true")
-	private Boolean isPublic;
-
-	private String settingLanguage = "EN";
 
 	@Schema(description = "S3에 저장되는 프로필 이미지", example = "cookie.jpeg")
 	private File profileImg;

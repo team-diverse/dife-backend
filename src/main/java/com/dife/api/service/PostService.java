@@ -84,7 +84,7 @@ public class PostService {
 		postRepository.save(post);
 
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
-		responseDto.setWriter(memberModelMapper.map(post.getWriter(), MemberResponseDto.class));
+		responseDto.setWriter(modelMapper.map(post.getWriter(), MemberRestrictedResponseDto.class));
 		return responseDto;
 	}
 
@@ -118,7 +118,7 @@ public class PostService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
-		responseDto.setWriter(memberModelMapper.map(post.getWriter(), MemberResponseDto.class));
+		responseDto.setWriter(modelMapper.map(post.getWriter(), MemberRestrictedResponseDto.class));
 		responseDto.setCommentCount(post.getComments().size());
 		responseDto.setLikesCount(post.getPostLikes().size());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
@@ -176,7 +176,7 @@ public class PostService {
 		postRepository.save(post);
 
 		PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
-		responseDto.setWriter(memberModelMapper.map(post.getWriter(), MemberResponseDto.class));
+		responseDto.setWriter(modelMapper.map(post.getWriter(), MemberRestrictedResponseDto.class));
 		return responseDto;
 	}
 
@@ -251,7 +251,7 @@ public class PostService {
 						post -> {
 							PostResponseDto responseDto = modelMapper.map(post, PostResponseDto.class);
 							responseDto.setWriter(
-									memberModelMapper.map(post.getWriter(), MemberResponseDto.class));
+									modelMapper.map(post.getWriter(), MemberRestrictedResponseDto.class));
 							responseDto.setCommentCount(post.getComments().size());
 							responseDto.setLikesCount(post.getPostLikes().size());
 							responseDto.setBookmarkCount(post.getBookmarks().size());
