@@ -380,20 +380,7 @@ public class ChatroomService {
 		}
 		List<Chat> chats = chatRepository.findChatsByChatroomId(chatroomId);
 
-		return chats.stream()
-				.map(
-						c -> {
-							ChatResponseDto responseDto = getChat(chatroomId, c.getId(), memberEmail);
-							if (chatroom.getChatroomType() == ChatroomType.GROUP)
-								responseDto.setGroupChatroom(
-										modelMapper.map(chatroom, GroupChatroomResponseDto.class));
-							else
-								responseDto.setSingleChatroom(
-										modelMapper.map(chatroom, SingleChatroomResponseDto.class));
-
-							return responseDto;
-						})
-				.collect(toList());
+		return chats.stream().map(c -> getChat(chatroomId, c.getId(), memberEmail)).collect(toList());
 	}
 
 	public ChatResponseDto getChat(Long chatroomId, Long chatId, String memberEmail) {
@@ -413,16 +400,14 @@ public class ChatroomService {
 						.findByChatroomIdAndId(chatroomId, chatId)
 						.orElseThrow(ChatNotFoundException::new);
 
-		ChatResponseDto responseDto = new ChatResponseDto();
+		ChatResponseDto responseDto = modelMapper.map(chat, ChatResponseDto.class);
 
 		if (chatroom.getChatroomType() == ChatroomType.GROUP)
 			responseDto.setGroupChatroom(modelMapper.map(chatroom, GroupChatroomResponseDto.class));
 		else responseDto.setSingleChatroom(modelMapper.map(chatroom, SingleChatroomResponseDto.class));
-		responseDto.setMessage(chat.getMessage());
 
 		if (chat.getImgCode() != null) responseDto.setImgCode(chat.getImgCode());
 		responseDto.setMember(modelMapper.map(member, MemberRestrictedResponseDto.class));
-		responseDto.setCreated(chat.getCreated());
 		return responseDto;
 	}
 
