@@ -122,12 +122,11 @@ public class MemberService {
 		//		if (notAddVerificationFile) {
 		//			throw new MemberNotAddVerificationException();
 		//		}
+		//		boolean hasToUploadVerificationFile = verificationFile != null && !verificationFile.isEmpty();
+		//		if (hasToUploadVerificationFile) updateFile(member, verificationFile, true);
 
 		//		 TODO: DELETE THIS AFTER BETA
 		member.setIsVerified(true);
-
-		boolean hasToUploadVerificationFile = verificationFile != null && !verificationFile.isEmpty();
-		if (hasToUploadVerificationFile) updateFile(member, verificationFile, true);
 
 		boolean hasToUploadProfile = profileImg != null && !profileImg.isEmpty();
 		if (hasToUploadProfile) updateFile(member, profileImg, false);
