@@ -20,8 +20,6 @@ import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,14 +47,6 @@ public class ChatService {
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
 
-	@Autowired
-	@Qualifier("memberModelMapper")
-	private ModelMapper memberModelMapper;
-
-	@Autowired
-	@Qualifier("chatroomModelMapper")
-	private ModelMapper chatroomModelMapper;
-
 	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
 		switch (dto.getChatType()) {
@@ -64,7 +54,7 @@ public class ChatService {
 				enter(dto, headerAccessor);
 				break;
 			case CHAT:
-				chat(dto);
+				chat(dto, headerAccessor);
 				break;
 			case FILE:
 				try {
@@ -91,6 +81,11 @@ public class ChatService {
 
 		Member member = memberService.getMemberEntityById(dto.getMemberId());
 		if (!disconnectHandler.canEnterChatroom(chatroom, member, sessionId, dto.getPassword())) {
+			disconnectHandler.disconnect(chatroom.getId(), sessionId);
+			return;
+		}
+
+		if (!chatroom.getMembers().contains(member)) {
 			disconnectHandler.disconnect(chatroom.getId(), sessionId);
 			return;
 		}
@@ -131,16 +126,23 @@ public class ChatService {
 				member, member, message, NotificationType.CHATROOM, chatroom.getId());
 	}
 
-	public void chat(ChatRequestDto dto) throws JsonProcessingException {
+	public void chat(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+			throws JsonProcessingException {
 
 		Chatroom chatroom =
 				chatroomRepository
 						.findById(dto.getChatroomId())
 						.orElseThrow(ChatroomNotFoundException::new);
 
+		String sessionId = headerAccessor.getSessionId();
 		Member member = memberService.getMemberEntityById(dto.getMemberId());
 
 		Set<Member> blockedMembers = blockService.getBlackSet(member);
+
+		if (!chatroom.getMembers().contains(member)) {
+			disconnectHandler.disconnect(chatroom.getId(), sessionId);
+			return;
+		}
 
 		if (dto.getMessage().length() >= 300) {
 			throw new ChatroomException("채팅 메시지는 300자 이하로 입력해주세요!");
@@ -176,8 +178,16 @@ public class ChatService {
 			}
 		}
 
-		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
-		redisPublisher.publish(chatRedisDto);
+		ChatRedisDto redisDto = new ChatRedisDto();
+		redisDto.setId(chat.getId());
+		redisDto.setMember(modelMapper.map(member, MemberRestrictedResponseDto.class));
+		redisDto.setMessage(chat.getMessage());
+		if (chatroom.getChatroomType() == ChatroomType.GROUP)
+			redisDto.setGroupChatroom(modelMapper.map(chatroom, GroupChatroomResponseDto.class));
+		else redisDto.setSingleChatroom(modelMapper.map(chatroom, SingleChatroomResponseDto.class));
+		redisDto.setCreated(chat.getCreated());
+
+		redisPublisher.publish(redisDto);
 	}
 
 	public void exit(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
@@ -192,6 +202,12 @@ public class ChatService {
 
 		Long chatroomId = dto.getChatroomId();
 		String sessionId = headerAccessor.getSessionId();
+
+		if (!chatroom.getMembers().contains(member)) {
+			disconnectHandler.disconnect(chatroom.getId(), sessionId);
+			return;
+		}
+
 		String username = (String) headerAccessor.getSessionAttributes().get("username");
 		dto.setUsername(username);
 
@@ -310,8 +326,11 @@ public class ChatService {
 
 	public ChatRedisDto dealDto(Chat chat, Member member, Chatroom chatroom) {
 		ChatRedisDto chatRedisDto = modelMapper.map(chat, ChatRedisDto.class);
-		chatRedisDto.setMember(memberModelMapper.map(member, MemberResponseDto.class));
-		chatRedisDto.setChatroom(chatroomModelMapper.map(chatroom, ChatroomResponseDto.class));
+		chatRedisDto.setMessage(chat.getMessage());
+		chatRedisDto.setMember(modelMapper.map(member, MemberRestrictedResponseDto.class));
+		if (chatroom.getChatroomType() == ChatroomType.GROUP)
+			chatRedisDto.setGroupChatroom(modelMapper.map(chatroom, GroupChatroomResponseDto.class));
+		else chatRedisDto.setSingleChatroom(modelMapper.map(chatroom, SingleChatroomResponseDto.class));
 
 		return chatRedisDto;
 	}

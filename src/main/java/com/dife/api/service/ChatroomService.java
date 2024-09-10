@@ -34,10 +34,6 @@ public class ChatroomService {
 
 	private final BlockService blockService;
 
-	@Autowired
-	@Qualifier("memberModelMapper")
-	private ModelMapper memberModelMapper;
-
 	private final ModelMapper modelMapper;
 
 	@Autowired
@@ -57,13 +53,22 @@ public class ChatroomService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		if (type == ChatroomType.SINGLE)
-			chatrooms = chatroomRepository.findAllByChatroomTypeAndMember(ChatroomType.SINGLE, member);
-		else if (type == ChatroomType.GROUP)
+		if (type == ChatroomType.SINGLE) {
+			chatrooms =
+					chatroomRepository.findAllByChatroomTypeAndMembersContains(ChatroomType.SINGLE, member);
+			return chatrooms.stream()
+					.map(chatroom -> getSingleChatroom(chatroom.getId(), memberEmail))
+					.collect(Collectors.toList());
+		} else if (type == ChatroomType.GROUP) {
 			chatrooms = chatroomRepository.findAllByChatroomType(ChatroomType.GROUP);
-		else chatrooms = chatroomRepository.findAllByChatroomTypeAndManager(ChatroomType.GROUP, member);
-
-		return getChatroomResponseDtos(chatrooms, member);
+			return chatrooms.stream()
+					.map(chatroom -> getGroupChatroom(chatroom.getId(), memberEmail))
+					.collect(Collectors.toList());
+		}
+		chatrooms = chatroomRepository.findAllByChatroomTypeAndManager(ChatroomType.GROUP, member);
+		return chatrooms.stream()
+				.map(chatroom -> getSingleChatroom(chatroom.getId(), memberEmail))
+				.collect(Collectors.toList());
 	}
 
 	public ChatroomResponseDto createChatroom(
@@ -94,12 +99,12 @@ public class ChatroomService {
 						isPublic,
 						password);
 			case SINGLE:
-				return createSingleChatroom(toMemberId, name, memberEmail);
+				return createSingleChatroom(toMemberId, memberEmail);
 		}
 		throw new ChatroomException("유효한 채팅방 생성 접근이 아닙니다!");
 	}
 
-	public ChatroomResponseDto createGroupChatroom(
+	public GroupChatroomResponseDto createGroupChatroom(
 			MultipartFile profileImg,
 			String name,
 			String description,
@@ -143,7 +148,7 @@ public class ChatroomService {
 				chatroom, profileImg, setting, maxCount, purposes, hobbies, languages, isPublic, password);
 	}
 
-	public ChatroomResponseDto createDetail(
+	public GroupChatroomResponseDto createDetail(
 			Chatroom givenChatroom,
 			MultipartFile profileImg,
 			ChatroomSetting givenSetting,
@@ -249,11 +254,11 @@ public class ChatroomService {
 		givenChatroom.setChatroomSetting(givenSetting);
 		chatroomRepository.save(givenChatroom);
 
-		ChatroomResponseDto responseDto =
-				chatroomModelMapper.map(givenSetting, ChatroomResponseDto.class);
+		GroupChatroomResponseDto responseDto =
+				chatroomModelMapper.map(givenSetting, GroupChatroomResponseDto.class);
 		responseDto.setName(givenChatroom.getName());
 		responseDto.setManager(
-				memberModelMapper.map(givenChatroom.getManager(), MemberResponseDto.class));
+				modelMapper.map(givenChatroom.getManager(), MemberRestrictedResponseDto.class));
 		return responseDto;
 	}
 
@@ -265,7 +270,7 @@ public class ChatroomService {
 		if (!chatroom.getManager().equals(member)) throw new MemberException("방장만이 채팅방 수정권한을 가집니다!");
 	}
 
-	public ChatroomResponseDto update(
+	public GroupChatroomResponseDto update(
 			Long id,
 			MultipartFile profileImg,
 			Optional<Integer> maxCount,
@@ -285,8 +290,8 @@ public class ChatroomService {
 				chatroom, profileImg, setting, maxCount, purposes, hobbies, languages, isPublic, password);
 	}
 
-	public ChatroomResponseDto createSingleChatroom(
-			Long toMemberId, String name, String currentMemberEmail) {
+	public SingleChatroomResponseDto createSingleChatroom(
+			Long toMemberId, String currentMemberEmail) {
 		Member currentMember =
 				memberRepository.findByEmail(currentMemberEmail).orElseThrow(MemberNotFoundException::new);
 		Member otherMember =
@@ -302,21 +307,32 @@ public class ChatroomService {
 			throw new SingleChatroomCreateDuplicateException();
 
 		Chatroom chatroom = new Chatroom();
-		chatroom.setName(name.trim());
-		ChatroomSetting setting = new ChatroomSetting();
 		chatroom.setChatroomType(ChatroomType.SINGLE);
 		Set<Member> memberSet = chatroom.getMembers();
 		memberSet.add(currentMember);
 		memberSet.add(otherMember);
-		setting.setMaxCount(memberSet.size() > 1 ? 2 : 1);
-		setting.setCount(memberSet.size());
-		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
 
-		return chatroomModelMapper.map(chatroom, ChatroomResponseDto.class);
+		return chatroomModelMapper.map(chatroom, SingleChatroomResponseDto.class);
 	}
 
-	public ChatroomResponseDto getChatroom(Long id, String memberEmail) throws IOException {
+	public SingleChatroomResponseDto getSingleChatroom(Long id, String memberEmail) {
+
+		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
+
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		if (!chatroom.getMembers().contains(member))
+			throw new ChatroomException("일대일 채팅방에 속한 회원만이 접근 가능합니다!");
+
+		SingleChatroomResponseDto responseDto =
+				chatroomModelMapper.map(chatroom, SingleChatroomResponseDto.class);
+
+		return responseDto;
+	}
+
+	public GroupChatroomResponseDto getGroupChatroom(Long id, String memberEmail) {
 
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
 
@@ -324,17 +340,18 @@ public class ChatroomService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		ChatroomSetting setting = chatroom.getChatroomSetting();
-		ChatroomResponseDto responseDto = chatroomModelMapper.map(setting, ChatroomResponseDto.class);
-		if (chatroom.getChatroomType() == ChatroomType.GROUP) {
-			responseDto.setManager(memberModelMapper.map(chatroom.getManager(), MemberResponseDto.class));
-		}
+		GroupChatroomResponseDto responseDto =
+				chatroomModelMapper.map(setting, GroupChatroomResponseDto.class);
+		responseDto.setManager(
+				modelMapper.map(chatroom.getManager(), MemberRestrictedResponseDto.class));
 		responseDto.setName(chatroom.getName());
-		responseDto.setProfileImg(chatroom.getChatroomSetting().getProfileImg());
 		if (chatroom.getMembers().contains(member)) responseDto.setIsEntered(true);
+
 		responseDto.setMembers(
 				chatroom.getMembers().stream()
-						.map(m -> memberModelMapper.map(m, MemberResponseDto.class))
+						.map(m -> modelMapper.map(m, MemberRestrictedResponseDto.class))
 						.collect(Collectors.toSet()));
+
 		responseDto.setCreated(setting.getCreated());
 		responseDto.setModified(setting.getModified());
 		responseDto.setChatroomType(chatroom.getChatroomType());
@@ -342,6 +359,13 @@ public class ChatroomService {
 		boolean isLiked = likeChatroomRepository.existsByChatroomAndMember(chatroom, member);
 		responseDto.setIsLiked(isLiked);
 		return responseDto;
+	}
+
+	public ChatroomResponseDto getChatroomById(Long id, String memberEmail) {
+		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
+
+		if (chatroom.getChatroomType() == ChatroomType.GROUP) return getGroupChatroom(id, memberEmail);
+		else return getSingleChatroom(id, memberEmail);
 	}
 
 	public List<ChatResponseDto> getChats(Long chatroomId, String memberEmail) {
@@ -356,7 +380,7 @@ public class ChatroomService {
 		}
 		List<Chat> chats = chatRepository.findChatsByChatroomId(chatroomId);
 
-		return chats.stream().map(c -> modelMapper.map(c, ChatResponseDto.class)).collect(toList());
+		return chats.stream().map(c -> getChat(chatroomId, c.getId(), memberEmail)).collect(toList());
 	}
 
 	public ChatResponseDto getChat(Long chatroomId, Long chatId, String memberEmail) {
@@ -374,9 +398,17 @@ public class ChatroomService {
 		Chat chat =
 				chatRepository
 						.findByChatroomIdAndId(chatroomId, chatId)
-						.orElseThrow(() -> new ChatroomException("존재하지 않는 채팅입니다!"));
+						.orElseThrow(ChatNotFoundException::new);
 
-		return modelMapper.map(chat, ChatResponseDto.class);
+		ChatResponseDto responseDto = modelMapper.map(chat, ChatResponseDto.class);
+
+		if (chatroom.getChatroomType() == ChatroomType.GROUP)
+			responseDto.setGroupChatroom(modelMapper.map(chatroom, GroupChatroomResponseDto.class));
+		else responseDto.setSingleChatroom(modelMapper.map(chatroom, SingleChatroomResponseDto.class));
+
+		if (chat.getImgCode() != null) responseDto.setImgCode(chat.getImgCode());
+		responseDto.setMember(modelMapper.map(member, MemberRestrictedResponseDto.class));
+		return responseDto;
 	}
 
 	public void increase(Long chatroomId) {
@@ -401,7 +433,7 @@ public class ChatroomService {
 		chatroomRepository.save(chatroom);
 	}
 
-	public List<ChatroomResponseDto> getFilterChatrooms(
+	public List<GroupChatroomResponseDto> getFilterChatrooms(
 			Set<String> hobbies,
 			Set<GroupPurposeType> purposes,
 			Set<String> languages,
@@ -445,10 +477,12 @@ public class ChatroomService {
 								})
 						.collect(Collectors.toList());
 
-		return getChatroomResponseDtos(validChatrooms, member);
+		return validChatrooms.stream()
+				.map(chatroom -> getGroupChatroom(chatroom.getId(), member.getEmail()))
+				.collect(Collectors.toList());
 	}
 
-	public List<ChatroomResponseDto> getSearchChatrooms(String keyword, String memberEmail) {
+	public List<GroupChatroomResponseDto> getSearchChatrooms(String keyword, String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -459,10 +493,12 @@ public class ChatroomService {
 		chatrooms = chatroomRepository.findAllByKeywordSearch(trimmedKeyword);
 		if (chatrooms.isEmpty()) throw new ChatroomNotFoundException();
 
-		return getChatroomResponseDtos(chatrooms, member);
+		return chatrooms.stream()
+				.map(chatroom -> getGroupChatroom(chatroom.getId(), member.getEmail()))
+				.collect(Collectors.toList());
 	}
 
-	public List<ChatroomResponseDto> getLikedChatrooms(String memberEmail) {
+	public List<GroupChatroomResponseDto> getLikedChatrooms(String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
@@ -474,25 +510,14 @@ public class ChatroomService {
 						.distinct()
 						.collect(Collectors.toList());
 
-		return getChatroomResponseDtos(chatrooms, member);
-	}
-
-	public List<ChatroomResponseDto> getChatroomResponseDtos(
-			List<Chatroom> chatrooms, Member member) {
 		return chatrooms.stream()
-				.map(
-						chatroom -> {
-							try {
-								return getChatroom(chatroom.getId(), member.getEmail());
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-						})
+				.map(chatroom -> getGroupChatroom(chatroom.getId(), member.getEmail()))
 				.collect(Collectors.toList());
 	}
 
-	public List<ChatroomResponseDto> getRandomChatrooms(int count, String email) {
-		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+	public List<GroupChatroomResponseDto> getRandomChatrooms(int count, String memberEmail) {
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		List<Chatroom> randomChatrooms =
 				chatroomRepository.findAll().stream()
@@ -501,7 +526,6 @@ public class ChatroomService {
 						.filter(c -> c.getChatroomSetting().getMaxCount() > c.getMembers().size())
 						.collect(toList());
 
-		log.info(String.valueOf(randomChatrooms.size()));
 		if (randomChatrooms.isEmpty()) {
 			return new ArrayList<>();
 		}
@@ -509,7 +533,9 @@ public class ChatroomService {
 		Collections.shuffle(randomChatrooms);
 		List<Chatroom> chatrooms = randomChatrooms.stream().limit(count).toList();
 
-		return getChatroomResponseDtos(chatrooms, member);
+		return chatrooms.stream()
+				.map(chatroom -> getGroupChatroom(chatroom.getId(), memberEmail))
+				.collect(Collectors.toList());
 	}
 
 	public void kickout(Long roomId, Long memberId, String memberEmail) {

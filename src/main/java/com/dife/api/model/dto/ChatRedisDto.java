@@ -22,7 +22,8 @@ public class ChatRedisDto {
 
 	private List<String> imgCode;
 
-	private MemberResponseDto member;
-	private ChatroomResponseDto chatroom;
+	private MemberRestrictedResponseDto member;
+	private GroupChatroomResponseDto groupChatroom;
+	private SingleChatroomResponseDto singleChatroom;
 	private LocalDateTime created;
 }
