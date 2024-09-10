@@ -4,7 +4,6 @@ import com.dife.api.exception.*;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.LikeCreateRequestDto;
 import com.dife.api.model.dto.LikeResponseDto;
-import com.dife.api.model.dto.PostResponseDto;
 import com.dife.api.repository.*;
 import java.util.List;
 import java.util.Locale;
@@ -12,6 +11,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +32,8 @@ public class LikeService {
 	private final NotificationService notificationService;
 	private final PostService postService;
 
+	private final ModelMapper modelMapper;
+
 	public List<LikeResponseDto> getLikedPosts(String memberEmail) {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -42,10 +44,10 @@ public class LikeService {
 				postLikes.stream()
 						.map(
 								postLike -> {
+									LikeResponseDto responseDto = modelMapper.map(postLike, LikeResponseDto.class);
 									Post post = postLike.getPost();
-									PostResponseDto postResponseDto = postService.getPost(post.getId(), memberEmail);
-
-									return new LikeResponseDto(postLike.getId(), postResponseDto);
+									responseDto.setPost(postService.getPost(post.getId(), memberEmail));
+									return responseDto;
 								})
 						.collect(Collectors.toList());
 

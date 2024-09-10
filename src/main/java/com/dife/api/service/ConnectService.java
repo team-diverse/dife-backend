@@ -7,6 +7,7 @@ import com.dife.api.model.*;
 import com.dife.api.model.dto.ConnectPatchRequestDto;
 import com.dife.api.model.dto.ConnectRequestDto;
 import com.dife.api.model.dto.ConnectResponseDto;
+import com.dife.api.model.dto.MemberRestrictedResponseDto;
 import com.dife.api.repository.ConnectRepository;
 import com.dife.api.repository.MemberRepository;
 import java.util.ArrayList;
@@ -69,7 +70,10 @@ public class ConnectService {
 
 		Connect connect = connections.stream().findFirst().orElseThrow(ConnectNotFoundException::new);
 
-		return modelMapper.map(connect, ConnectResponseDto.class);
+		ConnectResponseDto responseDto = modelMapper.map(connect, ConnectResponseDto.class);
+		responseDto.setToMember(modelMapper.map(otherMember, MemberRestrictedResponseDto.class));
+		responseDto.setFromMember(modelMapper.map(currentMember, MemberRestrictedResponseDto.class));
+		return responseDto;
 	}
 
 	public ConnectResponseDto saveConnect(ConnectRequestDto dto, String currentMemberEmail) {
@@ -95,7 +99,10 @@ public class ConnectService {
 
 		translateCreateConnect(toMember.getSettingLanguage(), currentMember, toMember, connect);
 
-		return modelMapper.map(connect, ConnectResponseDto.class);
+		ConnectResponseDto responseDto = modelMapper.map(connect, ConnectResponseDto.class);
+		responseDto.setToMember(modelMapper.map(toMember, MemberRestrictedResponseDto.class));
+		responseDto.setFromMember(modelMapper.map(currentMember, MemberRestrictedResponseDto.class));
+		return responseDto;
 	}
 
 	public void acceptConnect(ConnectPatchRequestDto requestDto, String currentMemberEmail) {

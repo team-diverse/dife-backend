@@ -1,6 +1,5 @@
 package com.dife.api.model.dto;
 
-import com.dife.api.model.Member;
 import com.dife.api.model.Notification;
 import java.util.List;
 import lombok.Getter;
@@ -16,7 +15,7 @@ public class NotificationTokenResponseDto {
 
 	private String deviceId;
 
-	private Member member;
+	private MemberRestrictedResponseDto member;
 
 	private List<Notification> notifications;
 }

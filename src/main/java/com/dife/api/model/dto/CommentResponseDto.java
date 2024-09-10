@@ -30,7 +30,7 @@ public class CommentResponseDto {
 
 	private Integer bookmarkCount;
 
-	private MemberResponseDto writer;
+	private MemberRestrictedResponseDto writer;
 
 	private LocalDateTime created;
 

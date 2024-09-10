@@ -39,5 +39,5 @@ public class PostResponseDto {
 
 	private List<File> files;
 
-	private MemberResponseDto writer;
+	private MemberRestrictedResponseDto writer;
 }
