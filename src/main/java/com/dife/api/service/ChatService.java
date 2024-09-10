@@ -105,9 +105,8 @@ public class ChatService {
 		Set<Member> chatroomMembers = chatroom.getMembers();
 		chatroomMembers.add(member);
 
-		for (Member chatroomMember : chatroomMembers) {
+		for (Member chatroomMember : chatroomMembers)
 			translateChatroomEnter(chatroomMember.getSettingLanguage(), member, chatroom);
-		}
 
 		redisPublisher.publish(dealDto(chat, member, chatroom));
 		chatroomRepository.save(chatroom);
@@ -144,9 +143,7 @@ public class ChatService {
 			return;
 		}
 
-		if (dto.getMessage().length() >= 300) {
-			throw new ChatroomException("채팅 메시지는 300자 이하로 입력해주세요!");
-		}
+		if (dto.getMessage().length() >= 300) throw new ChatroomException("채팅 메시지는 300자 이하로 입력해주세요!");
 
 		Chat chat = saveChat(member, chatroom, dto.getMessage());
 		Set<Member> chatroomMembers = chatroom.getMembers();
@@ -166,9 +163,7 @@ public class ChatService {
 					notification.setCreated(LocalDateTime.now());
 
 					String message = chat.getMessage();
-					if (message.length() > 30) {
-						message = message.substring(0, 30) + "...";
-					}
+					if (message.length() > 30) message = message.substring(0, 30) + "...";
 					notification.setMessage(message);
 					notificationToken.getNotifications().add(notification);
 

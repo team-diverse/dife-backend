@@ -83,8 +83,7 @@ public class ChatroomService {
 			Set<String> languages,
 			Boolean isPublic,
 			String password,
-			String memberEmail)
-			throws IOException {
+			String memberEmail) {
 		switch (chatroomType) {
 			case GROUP:
 				return createGroupChatroom(
@@ -114,8 +113,7 @@ public class ChatroomService {
 			Set<String> hobbies,
 			Set<String> languages,
 			Boolean isPublic,
-			String password)
-			throws IOException {
+			String password) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -157,81 +155,11 @@ public class ChatroomService {
 			Set<String> hobbies,
 			Set<String> languages,
 			Boolean isPublic,
-			String password)
-			throws IOException {
+			String password) {
 
-		if (purposes != null) {
-			Set<GroupPurpose> groupPurposes =
-					purposes.stream()
-							.map(
-									purposeType -> {
-										GroupPurpose groupPurpose = new GroupPurpose();
-										groupPurpose.setType(purposeType);
-										groupPurpose.setChatroomSetting(givenSetting);
-										return groupPurpose;
-									})
-							.collect(Collectors.toSet());
-			givenSetting.setPurposes(groupPurposes);
-		}
-
-		if (hobbies != null) {
-
-			Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByChatroomSetting(givenSetting);
-			Map<String, Hobby> nameToHobbyMap =
-					existingHobbies.stream()
-							.collect(
-									Collectors.toMap(
-											Hobby::getName, Function.identity(), (existing, replacement) -> existing));
-
-			Set<Hobby> updatedHobbies = new HashSet<>();
-
-			for (String hobbyName : hobbies) {
-				if (nameToHobbyMap.containsKey(hobbyName)) {
-					updatedHobbies.add(nameToHobbyMap.get(hobbyName));
-				} else {
-					Hobby nHobby = new Hobby();
-					nHobby.setName(hobbyName);
-					nHobby.setChatroomSetting(givenSetting);
-					hobbyRepository.save(nHobby);
-					updatedHobbies.add(nHobby);
-				}
-			}
-			existingHobbies.stream()
-					.filter(hobby -> !hobbies.contains(hobby.getName()))
-					.forEach(hobbyRepository::delete);
-
-			givenSetting.setHobbies(updatedHobbies);
-		}
-
-		if (languages != null) {
-
-			Set<Language> existingLanguages =
-					languageRepository.findLanguagesByChatroomSetting(givenSetting);
-			Map<String, Language> nameToLanguageMap =
-					existingLanguages.stream()
-							.collect(
-									Collectors.toMap(
-											Language::getName, Function.identity(), (existing, replacement) -> existing));
-
-			Set<Language> updatedLanguages = new HashSet<>();
-
-			for (String languageName : languages) {
-				if (nameToLanguageMap.containsKey(languageName)) {
-					updatedLanguages.add(nameToLanguageMap.get(languageName));
-				} else {
-					Language nLanguage = new Language();
-					nLanguage.setName(languageName);
-					nLanguage.setChatroomSetting(givenSetting);
-					languageRepository.save(nLanguage);
-					updatedLanguages.add(nLanguage);
-				}
-			}
-			existingLanguages.stream()
-					.filter(language -> !languages.contains(language.getName()))
-					.forEach(languageRepository::delete);
-
-			givenSetting.setLanguages(updatedLanguages);
-		}
+		if (purposes != null) setGroupPurposes(givenSetting, purposes);
+		if (hobbies != null) setHobbies(givenSetting, hobbies);
+		if (languages != null) setLanguages(givenSetting, languages);
 
 		if (maxCount.isEmpty() && givenSetting.getMaxCount() == 2) {
 			throw new ChatroomException("그룹 채팅방 인원을 입력해주세요!");
@@ -260,6 +188,76 @@ public class ChatroomService {
 		responseDto.setManager(
 				modelMapper.map(givenChatroom.getManager(), MemberRestrictedResponseDto.class));
 		return responseDto;
+	}
+
+	public void setGroupPurposes(ChatroomSetting setting, Set<GroupPurposeType> purposes) {
+		Set<GroupPurpose> groupPurposes =
+				purposes.stream()
+						.map(
+								purposeType -> {
+									GroupPurpose groupPurpose = new GroupPurpose();
+									groupPurpose.setType(purposeType);
+									groupPurpose.setChatroomSetting(setting);
+									return groupPurpose;
+								})
+						.collect(Collectors.toSet());
+		setting.setPurposes(groupPurposes);
+	}
+
+	public void setHobbies(ChatroomSetting setting, Set<String> hobbies) {
+		Set<Hobby> existingHobbies = hobbyRepository.findHobbiesByChatroomSetting(setting);
+		Map<String, Hobby> nameToHobbyMap =
+				existingHobbies.stream()
+						.collect(
+								Collectors.toMap(
+										Hobby::getName, Function.identity(), (existing, replacement) -> existing));
+
+		Set<Hobby> updatedHobbies = new HashSet<>();
+
+		for (String hobbyName : hobbies) {
+			if (nameToHobbyMap.containsKey(hobbyName)) {
+				updatedHobbies.add(nameToHobbyMap.get(hobbyName));
+			} else {
+				Hobby nHobby = new Hobby();
+				nHobby.setName(hobbyName);
+				nHobby.setChatroomSetting(setting);
+				hobbyRepository.save(nHobby);
+				updatedHobbies.add(nHobby);
+			}
+		}
+		existingHobbies.stream()
+				.filter(hobby -> !hobbies.contains(hobby.getName()))
+				.forEach(hobbyRepository::delete);
+
+		setting.setHobbies(updatedHobbies);
+	}
+
+	public void setLanguages(ChatroomSetting setting, Set<String> languages) {
+		Set<Language> existingLanguages = languageRepository.findLanguagesByChatroomSetting(setting);
+		Map<String, Language> nameToLanguageMap =
+				existingLanguages.stream()
+						.collect(
+								Collectors.toMap(
+										Language::getName, Function.identity(), (existing, replacement) -> existing));
+
+		Set<Language> updatedLanguages = new HashSet<>();
+
+		for (String languageName : languages) {
+			if (nameToLanguageMap.containsKey(languageName)) {
+				updatedLanguages.add(nameToLanguageMap.get(languageName));
+			} else {
+				Language nLanguage = new Language();
+				nLanguage.setName(languageName);
+				nLanguage.setChatroomSetting(setting);
+				languageRepository.save(nLanguage);
+				updatedLanguages.add(nLanguage);
+			}
+		}
+		existingLanguages.stream()
+				.filter(language -> !languages.contains(language.getName()))
+				.forEach(languageRepository::delete);
+
+		setting.setLanguages(updatedLanguages);
 	}
 
 	public void checkManager(Long chatroomId, String memberEmail) {
@@ -375,9 +373,8 @@ public class ChatroomService {
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 
-		if (!chatroom.getMembers().contains(member)) {
-			throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
-		}
+		if (!chatroom.getMembers().contains(member)) throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
+
 		List<Chat> chats = chatRepository.findChatsByChatroomId(chatroomId);
 
 		return chats.stream().map(c -> getChat(chatroomId, c.getId(), memberEmail)).collect(toList());
@@ -391,9 +388,7 @@ public class ChatroomService {
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 
-		if (!chatroom.getMembers().contains(member)) {
-			throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
-		}
+		if (!chatroom.getMembers().contains(member)) throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
 
 		Chat chat =
 				chatRepository
@@ -415,9 +410,7 @@ public class ChatroomService {
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 		ChatroomSetting setting = chatroom.getChatroomSetting();
-		if (setting.getCount() >= setting.getMaxCount()) {
-			return;
-		}
+		if (setting.getCount() >= setting.getMaxCount()) return;
 		setting.setCount(setting.getCount() + 1);
 		chatroom.setChatroomSetting(setting);
 		chatroomRepository.save(chatroom);
@@ -526,9 +519,7 @@ public class ChatroomService {
 						.filter(c -> c.getChatroomSetting().getMaxCount() > c.getMembers().size())
 						.collect(toList());
 
-		if (randomChatrooms.isEmpty()) {
-			return new ArrayList<>();
-		}
+		if (randomChatrooms.isEmpty()) return new ArrayList<>();
 
 		Collections.shuffle(randomChatrooms);
 		List<Chatroom> chatrooms = randomChatrooms.stream().limit(count).toList();

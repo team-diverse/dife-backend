@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,10 +34,6 @@ public class PostService {
 	private final BlockService blockService;
 	private final FileRepository fileRepository;
 	private final MemberRepository memberRepository;
-
-	@Autowired
-	@Qualifier("memberModelMapper")
-	private ModelMapper memberModelMapper;
 
 	private final ModelMapper modelMapper;
 
@@ -69,8 +63,7 @@ public class PostService {
 							.filter(this::isFileValid)
 							.map(
 									file -> {
-										FileDto fileDto = null;
-										fileDto = fileService.upload(file);
+										FileDto fileDto = fileService.upload(file);
 										File mappedFile = modelMapper.map(fileDto, File.class);
 										mappedFile.setPost(post);
 										return mappedFile;
@@ -94,11 +87,8 @@ public class PostService {
 
 		List<Post> posts;
 
-		if (type == null) {
-			posts = postRepository.findAll(sort);
-		} else {
-			posts = postRepository.findPostsByBoardType(type, sort);
-		}
+		if (type == null) posts = postRepository.findAll(sort);
+		else posts = postRepository.findPostsByBoardType(type, sort);
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
@@ -123,10 +113,9 @@ public class PostService {
 		responseDto.setLikesCount(post.getPostLikes().size());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
 		responseDto.setIsBookmarked(bookmarkRepository.existsBookmarkByPostAndMember(post, member));
+		responseDto.setIsLiked(likePostRepository.existsByPostAndMember(post, member));
 		responseDto.setCreated(post.getCreated());
 		responseDto.setModified(post.getModified());
-
-		responseDto.setIsLiked(likePostRepository.existsByPostAndMember(post, member));
 
 		return responseDto;
 	}
@@ -146,10 +135,10 @@ public class PostService {
 		Post post =
 				postRepository.findByWriterAndId(member, id).orElseThrow(PostNotFoundException::new);
 
-		post.setTitle((title != null && !title.isEmpty()) ? title : post.getTitle());
-		post.setContent((content != null && !content.isEmpty()) ? content : post.getContent());
-		post.setIsPublic(isPublic != null ? isPublic : post.getIsPublic());
-		post.setBoardType(boardType != null ? boardType : post.getBoardType());
+		if (title != null) post.setTitle(title);
+		if (content != null) post.setContent(content);
+		if (isPublic != null) post.setIsPublic(isPublic);
+		if (boardType != null) post.setBoardType(boardType);
 
 		postRepository.save(post);
 
@@ -159,8 +148,7 @@ public class PostService {
 							.filter(this::isFileValid)
 							.map(
 									file -> {
-										FileDto fileDto = null;
-										fileDto = fileService.upload(file);
+										FileDto fileDto = fileService.upload(file);
 										File mappedFile = modelMapper.map(fileDto, File.class);
 										mappedFile.setPost(post);
 										return mappedFile;

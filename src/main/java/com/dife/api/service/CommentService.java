@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,10 +32,6 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final LikeCommentRepository likeCommentRepository;
 	private final PostService postService;
-
-	@Autowired
-	@Qualifier("memberModelMapper")
-	private ModelMapper memberModelMapper;
 
 	private final NotificationService notificationService;
 
@@ -155,9 +149,7 @@ public class CommentService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Comment comment = commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
 
-		if (!comment.getWriter().equals(member)) {
-			throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
-		}
+		if (!comment.getWriter().equals(member)) throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
 
 		if (!comment.getChildrenComments().isEmpty()) {
 			for (Comment childComment : comment.getChildrenComments()) {
