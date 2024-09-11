@@ -103,7 +103,6 @@ public class BookmarkService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Post post =
 				postRepository.findById(requestDto.getPostId()).orElseThrow(PostNotFoundException::new);
-		if (!post.getIsPublic()) throw new PostUnauthorizedException();
 
 		if (bookmarkRepository.existsBookmarkByPostAndMember(post, member))
 			throw new DuplicateBookmarkException();
