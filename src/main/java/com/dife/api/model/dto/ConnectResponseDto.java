@@ -1,7 +1,6 @@
 package com.dife.api.model.dto;
 
 import com.dife.api.model.ConnectStatus;
-import com.dife.api.model.Member;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.EnumType;
@@ -21,12 +20,12 @@ public class ConnectResponseDto {
 	@NotNull
 	@JsonProperty("from_member")
 	@Schema(description = "커넥트 요청 받는 회원의 회원정보", example = "Member엔티티 참고")
-	private Member fromMember;
+	private MemberRestrictedResponseDto fromMember;
 
 	@NotNull
 	@JsonProperty("to_member")
 	@Schema(description = "커넥트 요청 보내는 회원의 회원정보", example = "Member엔티티 참고")
-	private Member toMember;
+	private MemberRestrictedResponseDto toMember;
 
 	@NotNull
 	@Enumerated(EnumType.STRING)

@@ -7,7 +7,7 @@ import com.dife.api.exception.PostNotFoundException;
 import com.dife.api.model.*;
 import com.dife.api.model.dto.CommentCreateRequestDto;
 import com.dife.api.model.dto.CommentResponseDto;
-import com.dife.api.model.dto.MemberResponseDto;
+import com.dife.api.model.dto.MemberRestrictedResponseDto;
 import com.dife.api.repository.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,10 +32,6 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final LikeCommentRepository likeCommentRepository;
 	private final PostService postService;
-
-	@Autowired
-	@Qualifier("memberModelMapper")
-	private ModelMapper memberModelMapper;
 
 	private final NotificationService notificationService;
 
@@ -77,7 +71,8 @@ public class CommentService {
 		commentRepository.save(comment);
 
 		CommentResponseDto responseDto = modelMapper.map(comment, CommentResponseDto.class);
-		MemberResponseDto memberDto = memberModelMapper.map(writer, MemberResponseDto.class);
+		MemberRestrictedResponseDto memberDto =
+				modelMapper.map(writer, MemberRestrictedResponseDto.class);
 		responseDto.setPost(postService.getPost(comment.getPost().getId(), memberEmail));
 		responseDto.setWriter(memberDto);
 
@@ -132,7 +127,7 @@ public class CommentService {
 	public CommentResponseDto getComment(Comment comment, Member member) {
 		CommentResponseDto dto = modelMapper.map(comment, CommentResponseDto.class);
 
-		dto.setWriter(memberModelMapper.map(comment.getWriter(), MemberResponseDto.class));
+		dto.setWriter(modelMapper.map(comment.getWriter(), MemberRestrictedResponseDto.class));
 		dto.setPost(postService.getPost(comment.getPost().getId(), member.getEmail()));
 		dto.setLikesCount(comment.getCommentLikes().size());
 
@@ -154,9 +149,7 @@ public class CommentService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		Comment comment = commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
 
-		if (!comment.getWriter().equals(member)) {
-			throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
-		}
+		if (!comment.getWriter().equals(member)) throw new MemberException("작성자만이 삭제를 진행할 수 있습니다!");
 
 		if (!comment.getChildrenComments().isEmpty()) {
 			for (Comment childComment : comment.getChildrenComments()) {

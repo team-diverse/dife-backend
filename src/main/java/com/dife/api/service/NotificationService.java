@@ -9,6 +9,7 @@ import com.dife.api.model.Member;
 import com.dife.api.model.Notification;
 import com.dife.api.model.NotificationToken;
 import com.dife.api.model.NotificationType;
+import com.dife.api.model.dto.MemberRestrictedResponseDto;
 import com.dife.api.model.dto.NotificationResponseDto;
 import com.dife.api.model.dto.NotificationTokenRequestDto;
 import com.dife.api.model.dto.NotificationTokenResponseDto;
@@ -55,7 +56,7 @@ public class NotificationService {
 			member.getNotificationTokens().add(notificationToken);
 
 			notificationTokenRepository.save(notificationToken);
-			return modelMapper.map(notificationToken, NotificationTokenResponseDto.class);
+			return getNotificationResponseDto(notificationToken, member);
 		}
 		return modelMapper.map(
 				notificationTokenRepository.findByDeviceId(requestDto.getDeviceId()),
@@ -67,9 +68,7 @@ public class NotificationService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		List<NotificationToken> notifications = notificationTokenRepository.findAllByMember(member);
 
-		return notifications.stream()
-				.map(n -> modelMapper.map(n, NotificationTokenResponseDto.class))
-				.collect(toList());
+		return notifications.stream().map(n -> getNotificationResponseDto(n, member)).collect(toList());
 	}
 
 	public List<NotificationResponseDto> getNotifications(String deviceId, String memberEmail) {
@@ -84,6 +83,14 @@ public class NotificationService {
 		return notificationToken.getNotifications().stream()
 				.map(notification -> modelMapper.map(notification, NotificationResponseDto.class))
 				.collect(toList());
+	}
+
+	public NotificationTokenResponseDto getNotificationResponseDto(
+			NotificationToken notificationToken, Member member) {
+		NotificationTokenResponseDto responseDto =
+				modelMapper.map(notificationToken, NotificationTokenResponseDto.class);
+		responseDto.setMember(modelMapper.map(member, MemberRestrictedResponseDto.class));
+		return responseDto;
 	}
 
 	public void sendPushNotification(String expoToken, LocalDateTime created, String message) {

@@ -2,6 +2,7 @@ package com.dife.api.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "comment")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Comment extends BaseTimeEntity implements TranslateTable {
 
 	@Id

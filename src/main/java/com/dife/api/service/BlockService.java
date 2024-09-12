@@ -36,9 +36,7 @@ public class BlockService {
 						.findById(requestDto.getMemberId())
 						.orElseThrow(MemberNotFoundException::new);
 
-		if (member.getId().equals(requestDto.getMemberId())) {
-			throw new MemberSendingSelfException();
-		}
+		if (member.getId().equals(requestDto.getMemberId())) throw new MemberSendingSelfException();
 
 		boolean isAlreadyBlacklisted = false;
 
@@ -50,9 +48,7 @@ public class BlockService {
 							.anyMatch(bl -> bl.getBlacklistedMember().getId().equals(blackMember.getId()));
 		}
 
-		if (isAlreadyBlacklisted) {
-			throw new DuplicateMemberException("이미 블랙리스트에 존재하는 회원입니다!");
-		}
+		if (isAlreadyBlacklisted) throw new DuplicateMemberException("이미 블랙리스트에 존재하는 회원입니다!");
 
 		MemberBlock memberBlock = new MemberBlock();
 		memberBlock.setMember(member);
