@@ -80,10 +80,10 @@ public class CommentService {
 			responseDto.setParentComment(
 					modelMapper.map(comment.getParentComment(), CommentResponseDto.class));
 			translationAddChildrenComment(
-					comment.getParentComment().getWriter().getSettingLanguage(), comment, post);
+					comment.getParentComment().getWriter().getSettingLanguage(), comment, post, writer);
 		}
 
-		translationAddComment(post.getWriter().getSettingLanguage(), comment, post);
+		translationAddComment(post.getWriter().getSettingLanguage(), comment, post, writer);
 
 		return responseDto;
 	}
@@ -105,23 +105,29 @@ public class CommentService {
 		return baseMessage + messageSuffix;
 	}
 
-	public void translationAddChildrenComment(String settingLanguage, Comment comment, Post post) {
+	public void translationAddChildrenComment(
+			String settingLanguage, Comment comment, Post post, Member writer) {
 
-		List<NotificationToken> parentCommentTokens =
-				comment.getParentComment().getWriter().getNotificationTokens();
+		if (!post.getWriter().equals(writer)) {
+			List<NotificationToken> parentCommentTokens =
+					comment.getParentComment().getWriter().getNotificationTokens();
 
-		String parentMessage = translationDivide(comment, settingLanguage, true);
+			String parentMessage = translationDivide(comment, settingLanguage, true);
 
-		addNotifications(parentCommentTokens, parentMessage, NotificationType.POST, post.getId());
+			addNotifications(parentCommentTokens, parentMessage, NotificationType.POST, post.getId());
+		}
 	}
 
-	public void translationAddComment(String settingLanguage, Comment comment, Post post) {
+	public void translationAddComment(
+			String settingLanguage, Comment comment, Post post, Member writer) {
 
-		List<NotificationToken> postTokens = post.getWriter().getNotificationTokens();
+		if (!post.getWriter().equals(writer)) {
+			List<NotificationToken> postTokens = post.getWriter().getNotificationTokens();
 
-		String postMessage = translationDivide(comment, settingLanguage, false);
+			String postMessage = translationDivide(comment, settingLanguage, false);
 
-		addNotifications(postTokens, postMessage, NotificationType.POST, post.getId());
+			addNotifications(postTokens, postMessage, NotificationType.POST, post.getId());
+		}
 	}
 
 	public CommentResponseDto getComment(Comment comment, Member member) {

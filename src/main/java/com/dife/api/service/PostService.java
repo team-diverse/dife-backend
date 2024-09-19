@@ -111,6 +111,7 @@ public class PostService {
 		responseDto.setWriter(modelMapper.map(post.getWriter(), MemberRestrictedResponseDto.class));
 		responseDto.setCommentCount(post.getComments().size());
 		responseDto.setLikesCount(post.getPostLikes().size());
+		responseDto.setFiles(post.getFiles());
 		responseDto.setBookmarkCount(post.getBookmarks().size());
 		responseDto.setIsBookmarked(bookmarkRepository.existsBookmarkByPostAndMember(post, member));
 		responseDto.setIsLiked(likePostRepository.existsByPostAndMember(post, member));

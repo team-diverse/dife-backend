@@ -402,7 +402,7 @@ public class ChatroomService {
 		else responseDto.setSingleChatroom(modelMapper.map(chatroom, SingleChatroomResponseDto.class));
 
 		if (chat.getImgCode() != null) responseDto.setImgCode(chat.getImgCode());
-		responseDto.setMember(modelMapper.map(member, MemberRestrictedResponseDto.class));
+		responseDto.setMember(modelMapper.map(chat.getMember(), MemberRestrictedResponseDto.class));
 		return responseDto;
 	}
 
