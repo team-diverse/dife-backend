@@ -166,25 +166,25 @@ public class MemberService {
 								Collectors.toMap(
 										Hobby::getName, Function.identity(), (existing, replacement) -> existing));
 
-			Set<Hobby> updatedHobbies = new HashSet<>();
+		Set<Hobby> updatedHobbies = new HashSet<>();
 
-			for (String hobbyName : safeHobbies) {
-				if (nameToHobbyMap.containsKey(hobbyName)) {
-					updatedHobbies.add(nameToHobbyMap.get(hobbyName));
-				} else {
-					Hobby nHobby = new Hobby();
-					nHobby.setName(hobbyName);
-					nHobby.setMember(member);
-					hobbyRepository.save(nHobby);
-					updatedHobbies.add(nHobby);
-				}
+		for (String hobbyName : safeHobbies) {
+			if (nameToHobbyMap.containsKey(hobbyName)) {
+				updatedHobbies.add(nameToHobbyMap.get(hobbyName));
+			} else {
+				Hobby nHobby = new Hobby();
+				nHobby.setName(hobbyName);
+				nHobby.setMember(member);
+				hobbyRepository.save(nHobby);
+				updatedHobbies.add(nHobby);
 			}
-			existingHobbies.stream()
-					.filter(hobby -> !hobbies.contains(hobby.getName()))
-					.forEach(hobbyRepository::delete);
-
-			member.setHobbies(updatedHobbies);
 		}
+		existingHobbies.stream()
+				.filter(hobby -> !hobbies.contains(hobby.getName()))
+				.forEach(hobbyRepository::delete);
+
+		member.setHobbies(updatedHobbies);
+	}
 
 	private void updateLanguages(Member member, Set<String> languages) {
 		Set<String> safeLanguages = languages;
@@ -196,22 +196,22 @@ public class MemberService {
 								Collectors.toMap(
 										Language::getName, Function.identity(), (existing, replacement) -> existing));
 
-			Set<Language> updatedLanguages = new HashSet<>();
+		Set<Language> updatedLanguages = new HashSet<>();
 
-			for (String languageName : safeLanguages) {
-				if (nameToLanguageMap.containsKey(languageName)) {
-					updatedLanguages.add(nameToLanguageMap.get(languageName));
-				} else {
-					Language nLanguage = new Language();
-					nLanguage.setName(languageName);
-					nLanguage.setMember(member);
-					languageRepository.save(nLanguage);
-					updatedLanguages.add(nLanguage);
-				}
+		for (String languageName : safeLanguages) {
+			if (nameToLanguageMap.containsKey(languageName)) {
+				updatedLanguages.add(nameToLanguageMap.get(languageName));
+			} else {
+				Language nLanguage = new Language();
+				nLanguage.setName(languageName);
+				nLanguage.setMember(member);
+				languageRepository.save(nLanguage);
+				updatedLanguages.add(nLanguage);
 			}
-			existingLanguages.stream()
-					.filter(language -> !languages.contains(language.getName()))
-					.forEach(languageRepository::delete);
+		}
+		existingLanguages.stream()
+				.filter(language -> !languages.contains(language.getName()))
+				.forEach(languageRepository::delete);
 
 		member.setLanguages(updatedLanguages);
 	}
