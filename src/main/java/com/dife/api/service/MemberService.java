@@ -241,10 +241,8 @@ public class MemberService {
 
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
-
-		if (responseDto.getProfileImg() != null)
-			responseDto.setProfilePresignUrl(
-					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+		if (member.getProfileImg() != null)
+			responseDto.setProfileImg(modelMapper.map(member.getProfileImg(), File.class));
 		return responseDto;
 	}
 
@@ -260,9 +258,8 @@ public class MemberService {
 
 		responseDto.setIsLiked(likeService.isLikeListMember(member, findMember));
 
-		if (responseDto.getProfileImg() != null)
-			responseDto.setProfilePresignUrl(
-					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
+		if (member.getProfileImg() != null)
+			responseDto.setProfileImg(modelMapper.map(member.getProfileImg(), File.class));
 		return responseDto;
 	}
 
@@ -601,10 +598,8 @@ public class MemberService {
 	private MemberResponseDto getMemberResponseDto(Member member, Member currentMember) {
 		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
 		responseDto.setIsLiked(likeService.isLikeListMember(currentMember, member));
-		if (responseDto.getProfileImg() != null) {
-			responseDto.setProfilePresignUrl(
-					fileService.getPresignUrl(member.getProfileImg().getOriginalName()));
-		}
+		if (member.getProfileImg() != null)
+			responseDto.setProfileImg(modelMapper.map(member.getProfileImg(), File.class));
 		return responseDto;
 	}
 
