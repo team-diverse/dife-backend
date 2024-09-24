@@ -160,5 +160,5 @@ public interface SwaggerMemberController {
 
 	@Operation(summary = "회원이 좋아요 누른 회원 목록 조회 API")
 	@ApiResponse(responseCode = "200")
-	ResponseEntity<List<MemberResponseDto>> getLikeMembers(Authentication auth);
+	ResponseEntity<List<MemberRestrictedResponseDto>> getLikeMembers(Authentication auth);
 }

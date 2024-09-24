@@ -241,8 +241,7 @@ public class MemberService {
 	public MemberResponseDto getMember(String email) {
 
 		Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
-		MemberResponseDto responseDto = memberModelMapper.map(member, MemberResponseDto.class);
-		return responseDto;
+		return memberModelMapper.map(member, MemberResponseDto.class);
 	}
 
 	public MemberResponseDto getMemberById(Long id, String memberEmail) {
@@ -625,13 +624,13 @@ public class MemberService {
 				.collect(toList());
 	}
 
-	public List<MemberResponseDto> getLikeMembers(String memberEmail) {
+	public List<MemberRestrictedResponseDto> getLikeMembers(String memberEmail) {
 
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		return member.getLikeList().stream()
-				.map(ll -> modelMapper.map(ll, MemberResponseDto.class))
+				.map(ll -> modelMapper.map(ll, MemberRestrictedResponseDto.class))
 				.collect(Collectors.toList());
 	}
 }
