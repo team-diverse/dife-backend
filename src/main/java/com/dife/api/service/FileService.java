@@ -89,7 +89,7 @@ public class FileService {
 		File file = fileRepository.findById(fileId).orElseThrow(S3FileNotFoundException::new);
 		if (file.getIsSecret() && !fileId.equals(member.getVerificationFile().getId()))
 			throw new MemberException("회원만이 본인 인증 파일에 접근할 수 있습니다.");
-		return generatePresignedUrl(file.getName());
+		return generatePresignedUrl(file.getOriginalName());
 	}
 
 	public String generatePresignedUrl(String fileName) {
