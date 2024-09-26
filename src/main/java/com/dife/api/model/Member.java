@@ -108,7 +108,7 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private Set<PostBlock> postBlocks = new HashSet<>();
 
-	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
 	private Set<MemberBlock> blackList = new HashSet<>();
 

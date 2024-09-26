@@ -130,17 +130,16 @@ public class ChatService {
 	public void chat(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
 			throws JsonProcessingException {
 
-		Chatroom chatroom =
-				chatroomRepository
-						.findById(dto.getChatroomId())
-						.orElseThrow(ChatroomNotFoundException::new);
+		Chatroom chatroom = chatroomRepository.getReferenceById(dto.getChatroomId());
 
 		String sessionId = headerAccessor.getSessionId();
 		String memberEmail = headerAccessor.getFirstNativeHeader("memberEmail");
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		Set<Member> blockedMembers = blockService.getBlackSet(member);
+		Set<Member> blockedMembers = new HashSet<>();
+		if (!blockService.getBlackSet(member).isEmpty())
+			blockedMembers = blockService.getBlackSet(member);
 
 		if (!chatroom.getMembers().contains(member)) {
 			disconnectHandler.disconnect(chatroom.getId(), sessionId);
