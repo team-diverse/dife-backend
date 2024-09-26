@@ -54,9 +54,6 @@ public class MemberResponseDto {
 	@Schema(description = "S3에 저장되는 프로필 이미지", example = "cookie.jpeg")
 	private File profileImg;
 
-	@Schema(description = "Presigned S3경로")
-	private String profilePresignUrl;
-
 	@Schema(description = "한줄 소개", example = "hello")
 	private String bio;
 
