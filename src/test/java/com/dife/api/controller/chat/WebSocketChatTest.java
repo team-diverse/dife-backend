@@ -163,8 +163,10 @@ public class WebSocketChatTest {
 									}
 								})
 						.get(60, TimeUnit.SECONDS);
-		stompSession1.subscribe("/sub/chatroom/" + chatroom.getId(), new StompSessionHandlerAdapter() {});
-		stompSession2.subscribe("/sub/chatroom/" + chatroom.getId(), new StompSessionHandlerAdapter() {});
+		stompSession1.subscribe(
+				"/sub/chatroom/" + chatroom.getId(), new StompSessionHandlerAdapter() {});
+		stompSession2.subscribe(
+				"/sub/chatroom/" + chatroom.getId(), new StompSessionHandlerAdapter() {});
 
 		for (int i = 0; i < 100; i++) {
 			ChatRequestDto chatMessage = createChatDto(chatroom, member1);
