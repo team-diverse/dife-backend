@@ -36,4 +36,12 @@ translation:
 
 logging:
   level:
+    org:
+      springframework:
+        web:
+          socket:
+            messaging: TRACE
+        messaging:
+          simp:
+            stomp: TRACE
     org.hibernate.SQL: OFF
