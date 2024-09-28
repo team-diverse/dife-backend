@@ -1,5 +1,8 @@
 package com.dife.api.service;
 
+import static com.dife.api.model.ChatroomType.GROUP;
+import static com.dife.api.model.ChatroomType.SINGLE;
+
 import com.dife.api.exception.ChatroomException;
 import com.dife.api.exception.ChatroomNotFoundException;
 import com.dife.api.exception.MemberNotFoundException;
@@ -192,35 +195,49 @@ public class ChatService {
 				chatroomRepository
 						.findById(dto.getChatroomId())
 						.orElseThrow(ChatroomNotFoundException::new);
-		ChatroomSetting setting = chatroom.getChatroomSetting();
+
 		Member member = memberService.getMemberEntityById(dto.getMemberId());
+
+		if (chatroom.getChatroomType() == SINGLE) {
+			handleExit(dto, headerAccessor, chatroom, member);
+			return;
+		}
+
+		ChatroomSetting originalSetting = chatroom.getChatroomSetting();
+
+		handleExit(dto, headerAccessor, chatroom, member);
+
+		chatroom.setChatroomSetting(originalSetting);
+		chatroomRepository.save(chatroom);
+	}
+
+	private void handleExit(
+			ChatRequestDto dto,
+			SimpMessageHeaderAccessor headerAccessor,
+			Chatroom chatroom,
+			Member member)
+			throws JsonProcessingException {
 
 		Long chatroomId = dto.getChatroomId();
 		String sessionId = headerAccessor.getSessionId();
 
 		if (!chatroom.getMembers().contains(member)) {
-			disconnectHandler.disconnect(chatroom.getId(), sessionId);
+			disconnectHandler.disconnect(chatroomId, sessionId);
 			return;
 		}
 
-		String username = (String) headerAccessor.getSessionAttributes().get("username");
-		dto.setUsername(username);
-
 		if (!disconnectHandler.isExitDisconnectChecked(chatroom, sessionId)) return;
 
-		chatServiceFacade.decrease(chatroomId);
+		if (chatroom.getChatroomType() == GROUP) chatServiceFacade.decrease(chatroomId);
 
 		chatroom.getMembers().remove(member);
 		disconnectHandler.disconnect(chatroomId, sessionId);
 
-		String exitMessage = username + "님이 퇴장하셨습니다!";
+		String exitMessage = member.getUsername() + "님이 퇴장하셨습니다!";
 		Chat chat = saveChat(member, chatroom, exitMessage);
 
 		redisPublisher.publish(dealDto(chat, member, chatroom));
-		notificationHandler.isAlone(chatroom, sessionId);
-
-		chatroom.setChatroomSetting(setting);
-		chatroomRepository.save(chatroom);
+		notificationHandler.isAlone(chatroom, member);
 	}
 
 	public Chat saveChat(Member member, Chatroom chatroom, String message) {
