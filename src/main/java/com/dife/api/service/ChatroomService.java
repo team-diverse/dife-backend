@@ -387,13 +387,14 @@ public class ChatroomService {
 
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
-
 		if (!chatroom.getMembers().contains(member)) throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
 
 		Chat chat =
 				chatRepository
 						.findByChatroomIdAndId(chatroomId, chatId)
 						.orElseThrow(ChatNotFoundException::new);
+
+		if (!chat.getMember().equals(member) && !chat.getIsOtherRead()) chat.setIsOtherRead(true);
 
 		ChatResponseDto responseDto = modelMapper.map(chat, ChatResponseDto.class);
 
