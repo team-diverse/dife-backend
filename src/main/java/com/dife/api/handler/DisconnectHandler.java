@@ -65,8 +65,7 @@ public class DisconnectHandler {
 	}
 
 	public boolean isEmpty(Chatroom chatroom) {
-		ChatroomSetting setting = chatroom.getChatroomSetting();
-		return setting.getCount() < 1;
+		return chatroom.getMembers().isEmpty();
 	}
 
 	public void disconnect(Long chatroomId, String sessionId) {
