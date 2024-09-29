@@ -41,6 +41,8 @@ public class Chat implements TranslateTable {
 
 	private LocalDateTime created;
 
+	private Boolean isOtherRead = false;
+
 	@Override
 	public String getTextToTranslate() {
 		return message;

@@ -8,6 +8,7 @@ import com.dife.api.model.dto.BookmarkCreateRequestDto;
 import com.dife.api.model.dto.BookmarkResponseDto;
 import com.dife.api.repository.*;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -53,16 +54,16 @@ public class BookmarkService {
 
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
-
-		if (chatroom.getMembers().contains(member)) {
-			List<Bookmark> bookmarks =
-					bookmarkRepository.findBookmarksByMemberAndChatroomId(chatroomId, member);
-
-			return bookmarks.stream()
-					.map(b -> modelMapper.map(b, BookmarkResponseDto.class))
-					.collect(toList());
+		if (!chatroom.getMembers().contains(member)) {
+			throw new BookmarkNotFoundException();
 		}
-		throw new BookmarkNotFoundException();
+
+		List<Bookmark> bookmarks =
+				bookmarkRepository.findBookmarksByMemberAndChatroom(member, chatroomId);
+
+		return bookmarks.stream()
+				.map(b -> modelMapper.map(b, BookmarkResponseDto.class))
+				.collect(Collectors.toList());
 	}
 
 	public BookmarkResponseDto createBookmark(
