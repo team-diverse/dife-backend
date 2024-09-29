@@ -14,9 +14,13 @@ import org.springframework.stereotype.Repository;
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
 	@Query(
-			"SELECT b FROM Bookmark b JOIN b.member m JOIN m.chatrooms c WHERE m = :member AND c.id = :chatroomId")
-	List<Bookmark> findBookmarksByMemberAndChatroomId(
-			@Param("chatroomId") Long chatroomId, @Param("member") Member member);
+			"SELECT b FROM Bookmark b "
+					+ "JOIN b.member m "
+					+ "JOIN Chatroom cr ON cr.id = :chatroomId "
+					+ "JOIN cr.chats c "
+					+ "WHERE m = :member AND b.message = c.message")
+	List<Bookmark> findBookmarksByMemberAndChatroom(
+			@Param("member") Member member, @Param("chatroomId") Long chatroomId);
 
 	List<Bookmark> findAllByMember(Member member);
 

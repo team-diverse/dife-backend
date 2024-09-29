@@ -14,28 +14,20 @@ public class NotificationHandler {
 	private final NotificationService notificationService;
 
 	public void isAlone(Chatroom chatroom, Member exitMember) {
-		if (chatroom.getMembers().size() < 2) notificate(chatroom, exitMember);
+		if (chatroom.getMembers().size() < 2 && chatroom.getChatroomType() == ChatroomType.GROUP)
+			notificate(chatroom, exitMember);
 	}
 
 	private String translationDivide(Chatroom chatroom, String settingLanguage, Member exitMember) {
 
 		String baseMessage = "📢 ";
 		ResourceBundle resourceBundle;
-		if (chatroom.getChatroomType() == ChatroomType.SINGLE) {
-			String username = exitMember.getUsername();
-
-			resourceBundle =
-					ResourceBundle.getBundle("notification.whenSingleChatroomAlone", Locale.getDefault());
-			String messageSuffix = resourceBundle.getString(settingLanguage.toUpperCase());
-			baseMessage += messageSuffix + " (WITH " + username + ")";
-		} else {
-			String chatroomName = chatroom.getName();
-			baseMessage += "(IN CHATROOM, " + chatroomName + ")";
-			resourceBundle =
-					ResourceBundle.getBundle("notification.whenGroupChatroomAlone", Locale.getDefault());
-			String messageSuffix = resourceBundle.getString(settingLanguage.toUpperCase());
-			baseMessage += messageSuffix;
-		}
+		String chatroomName = chatroom.getName();
+		baseMessage += "(IN CHATROOM, " + chatroomName + ")";
+		resourceBundle =
+				ResourceBundle.getBundle("notification.whenGroupChatroomAlone", Locale.getDefault());
+		String messageSuffix = resourceBundle.getString(settingLanguage.toUpperCase());
+		baseMessage += messageSuffix;
 		return baseMessage;
 	}
 

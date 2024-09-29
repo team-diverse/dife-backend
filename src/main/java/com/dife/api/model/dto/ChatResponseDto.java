@@ -25,4 +25,6 @@ public class ChatResponseDto {
 
 	private List<String> imgCode;
 	private LocalDateTime created;
+
+	private Boolean isOtherRead;
 }
