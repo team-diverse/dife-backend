@@ -1,31 +1,59 @@
 package com.dife.api.handler;
 
-import com.dife.api.model.Chatroom;
-import com.dife.api.model.ChatroomSetting;
+import com.dife.api.model.*;
+import com.dife.api.service.NotificationService;
+import java.time.LocalDateTime;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 
 @Configuration
 @RequiredArgsConstructor
 public class NotificationHandler {
 
-	private final SimpMessageSendingOperations messagingTemplate;
+	private final NotificationService notificationService;
 
-	public void isAlone(Chatroom chatroom, String sessionId) {
-		ChatroomSetting setting = chatroom.getChatroomSetting();
-		if (setting.getCount() < 2) {
-			notificate(chatroom.getId(), sessionId);
-		}
+	public void isAlone(Chatroom chatroom, Member exitMember) {
+		if (chatroom.getMembers().size() < 2 && chatroom.getChatroomType() == ChatroomType.GROUP)
+			notificate(chatroom, exitMember);
 	}
 
-	public void notificate(Long chatroomId, String sessionId) {
-		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
-		accessor.setSessionId(sessionId);
-		accessor.setDestination("/sub/chatroom/" + chatroomId);
-		messagingTemplate.convertAndSend(
-				"/sub/chatroom/" + chatroomId, "해당 채팅방은 한 명만 남은 채팅방입니다!", accessor.getMessageHeaders());
+	private String translationDivide(Chatroom chatroom, String settingLanguage, Member exitMember) {
+
+		String baseMessage = "📢 ";
+		ResourceBundle resourceBundle;
+		String chatroomName = chatroom.getName();
+		baseMessage += "(IN CHATROOM, " + chatroomName + ")";
+		resourceBundle =
+				ResourceBundle.getBundle("notification.whenGroupChatroomAlone", Locale.getDefault());
+		String messageSuffix = resourceBundle.getString(settingLanguage.toUpperCase());
+		baseMessage += messageSuffix;
+		return baseMessage;
+	}
+
+	public void notificate(Chatroom chatroom, Member exitMember) {
+
+		Set<Member> members = chatroom.getMembers();
+		Member member =
+				members.stream()
+						.findFirst()
+						.orElseThrow(() -> new NoSuchElementException("Member not found"));
+
+		String settingLanguage = member.getSettingLanguage();
+		List<NotificationToken> notificationTokens = member.getNotificationTokens();
+
+		String notificationMessage = translationDivide(chatroom, settingLanguage, exitMember);
+
+		for (NotificationToken notificationToken : notificationTokens) {
+			Notification notification = new Notification();
+			notification.setNotificationToken(notificationToken);
+			notification.setType(NotificationType.CHATROOM);
+			notification.setCreated(LocalDateTime.now());
+			notification.setMessage(notificationMessage);
+			notificationToken.getNotifications().add(notification);
+
+			notificationService.sendPushNotification(
+					notificationToken.getPushToken(), notification.getCreated(), notificationMessage);
+		}
 	}
 }

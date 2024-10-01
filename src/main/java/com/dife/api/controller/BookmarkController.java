@@ -35,9 +35,9 @@ public class BookmarkController implements SwaggerBookmarkController {
 		return ResponseEntity.status(CREATED).body(responseDto);
 	}
 
-	@GetMapping("/{chatroomId}")
+	@GetMapping("/")
 	public ResponseEntity<List<BookmarkResponseDto>> getBookmarkChats(
-			@PathVariable(name = "chatroomId") Long chatroomId, Authentication authentication) {
+			@RequestParam(name = "chatroomId") Long chatroomId, Authentication authentication) {
 		List<BookmarkResponseDto> bookmarks =
 				bookmarkService.getChatroomBookmarks(chatroomId, authentication.getName());
 		return ResponseEntity.ok(bookmarks);
