@@ -235,7 +235,7 @@ public class ChatService {
 		if (chatroom.getChatroomType() == GROUP) chatServiceFacade.decrease(chatroomId);
 
 		chatroom.getMembers().remove(member);
-		disconnectHandler.disconnect(chatroomId, sessionId);
+		disconnectHandler.unsubscribe(chatroomId, sessionId);
 
 		String exitMessage = member.getUsername() + "님이 퇴장하셨습니다!";
 		Chat chat = saveChat(member, chatroom, exitMessage);
