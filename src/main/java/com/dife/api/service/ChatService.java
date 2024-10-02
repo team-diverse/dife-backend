@@ -81,8 +81,10 @@ public class ChatService {
 						.orElseThrow(ChatroomNotFoundException::new);
 		Long chatroomId = chatroom.getId();
 		String sessionId = headerAccessor.getSessionId();
+		String memberEmail = headerAccessor.getFirstNativeHeader("memberEmail");
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		Member member = memberService.getMemberEntityById(dto.getMemberId());
 		if (!disconnectHandler.canEnterChatroom(chatroom, member, sessionId, dto.getPassword())) {
 			disconnectHandler.disconnect(chatroom.getId(), sessionId);
 			return;
@@ -137,7 +139,9 @@ public class ChatService {
 						.orElseThrow(ChatroomNotFoundException::new);
 
 		String sessionId = headerAccessor.getSessionId();
-		Member member = memberService.getMemberEntityById(dto.getMemberId());
+		String memberEmail = headerAccessor.getFirstNativeHeader("memberEmail");
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		Set<Member> blockedMembers = blockService.getBlackSet(member);
 
