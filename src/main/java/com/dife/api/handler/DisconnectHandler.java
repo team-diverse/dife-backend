@@ -75,4 +75,12 @@ public class DisconnectHandler {
 		messagingTemplate.convertAndSend(
 				"/sub/chatroom/" + chatroomId, "Disconnect", accessor.getMessageHeaders());
 	}
+
+	public void unsubscribe(Long chatroomId, String sessionId) {
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.UNSUBSCRIBE);
+		accessor.setSessionId(sessionId);
+		accessor.setDestination("/sub/chatroom/" + chatroomId);
+		messagingTemplate.convertAndSend(
+				"/sub/chatroom/" + chatroomId, "UNSUBSCRIBE", accessor.getMessageHeaders());
+	}
 }
