@@ -1,11 +1,16 @@
 package com.dife.api.config;
 
+import static org.springframework.messaging.simp.stomp.StompCommand.*;
+
 import com.dife.api.jwt.JWTUtil;
+import com.dife.api.model.Chatroom;
 import com.dife.api.model.Member;
 import com.dife.api.model.dto.CustomUserDetails;
 import com.dife.api.repository.MemberRepository;
+import com.dife.api.service.ChatroomService;
 import com.dife.api.service.MemberService;
 import jakarta.security.auth.message.AuthException;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.core.Ordered;
@@ -29,6 +34,7 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 	private final JWTUtil jwtUtil;
 	private final MemberRepository memberRepository;
 	private final MemberService memberService;
+	private final ChatroomService chatroomService;
 
 	@SneakyThrows
 	@Override
@@ -36,7 +42,10 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 		StompHeaderAccessor accessor =
 				MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-		if (accessor.getCommand().equals(StompCommand.CONNECT)) {
+		Set<StompCommand> jwtExpiredCheckCommands = Set.of(CONNECT, SEND, MESSAGE, SUBSCRIBE);
+		StompCommand currentCommand = accessor.getCommand();
+
+		if (jwtExpiredCheckCommands.contains(currentCommand)) {
 			String authToken = accessor.getFirstNativeHeader("authorization");
 			String jwtToken = extractJwtToken(authToken);
 
@@ -49,9 +58,37 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 			if (!memberService.isValidMember(member)) {
 				throw new AuthException("인증이 필요한 회원입니다!");
 			}
-			setAuthentication(member, accessor);
+			if (currentCommand.equals(CONNECT)) {
+				setAuthentication(member, accessor);
+			}
+
+			String destination = accessor.getDestination();
+
+			if (currentCommand.equals(SUBSCRIBE)) {
+				if (!isValidSubscriptionDestination(destination)) {
+					throw new AuthException(
+							"Unauthorized subscription to " + destination + ". Only chatrooms are allowed.");
+				}
+				Long chatroomId = parseChatroomIdFromDestination(destination);
+				Chatroom chatroom = chatroomService.getChatroomById(chatroomId);
+				if (!isMemberAllowedToSubscribe(member, chatroom)) {
+					throw new AuthException("채팅방 메시지 Subscribe 권한이 없습니다.!");
+				}
+			}
 		}
 		return message;
+	}
+
+	private boolean isValidSubscriptionDestination(String destination) {
+		return destination != null && destination.startsWith("/sub/chatroom/");
+	}
+
+	private boolean isMemberAllowedToSubscribe(Member member, Chatroom chatroom) {
+		return chatroomService.isMemberInChatroom(member, chatroom);
+	}
+
+	private Long parseChatroomIdFromDestination(String destination) {
+		return Long.parseLong(destination.split("/")[3]);
 	}
 
 	private String extractJwtToken(String authToken) {

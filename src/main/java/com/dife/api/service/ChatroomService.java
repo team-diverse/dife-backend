@@ -544,4 +544,12 @@ public class ChatroomService {
 		member.getChatrooms().remove(chatroom);
 		chatroom.getMembers().remove(member);
 	}
+
+	public Chatroom getChatroomById(Long id) {
+		return chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
+	}
+
+	public boolean isMemberInChatroom(Member member, Chatroom chatroom) {
+		return chatroom.getMembers().contains(member);
+	}
 }

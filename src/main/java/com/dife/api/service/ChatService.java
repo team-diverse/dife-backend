@@ -50,6 +50,7 @@ public class ChatService {
 	private final BlockService blockService;
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
+	private final ChatroomService chatroomService;
 
 	public void sendMessage(
 			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
@@ -135,11 +136,7 @@ public class ChatService {
 	public void chat(
 			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
 			throws JsonProcessingException {
-
-		Chatroom chatroom =
-				chatroomRepository
-						.findById(dto.getChatroomId())
-						.orElseThrow(ChatroomNotFoundException::new);
+		Chatroom chatroom = chatroomService.getChatroomById(dto.getChatroomId());
 
 		String sessionId = headerAccessor.getSessionId();
 		String memberEmail = userDetails.getUsername();
