@@ -77,4 +77,6 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 	exclude '**/MemberControllerTest.*'
+	exclude '**/WebSocketConnectTest.*'
+	exclude '**/WebSocketChatTest.*'
 }

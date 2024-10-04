@@ -1,4 +1,7 @@
 spring:
+  profiles:
+    activate:
+      on-profile: test
 
   liquibase:
     enabled: false
@@ -9,12 +12,16 @@ spring:
     username: root
     password: password
   jpa:
-    show-sql: true
+    hibernate:
+      ddl-auto: update
+    show-sql: false
     defer-datasource-initialization: true
 
   sql:
     init:
       mode: always
+      data-locations: classpath:import.sql
+
 
   main:
     allow-bean-definition-overriding: true
@@ -26,3 +33,15 @@ jwt:
 
 translation:
   api-key: test
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          socket:
+            messaging: TRACE
+        messaging:
+          simp:
+            stomp: TRACE
+    org.hibernate.SQL: OFF

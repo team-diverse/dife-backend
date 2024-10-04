@@ -171,8 +171,8 @@ public class MemberController implements SwaggerMemberController {
 	}
 
 	@GetMapping("/likes")
-	public ResponseEntity<List<MemberResponseDto>> getLikeMembers(Authentication auth) {
-		List<MemberResponseDto> responseDto = memberService.getLikeMembers(auth.getName());
+	public ResponseEntity<List<MemberRestrictedResponseDto>> getLikeMembers(Authentication auth) {
+		List<MemberRestrictedResponseDto> responseDto = memberService.getLikeMembers(auth.getName());
 		return ResponseEntity.ok(responseDto);
 	}
 }
