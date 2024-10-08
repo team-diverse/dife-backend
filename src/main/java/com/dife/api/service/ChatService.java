@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,14 +51,15 @@ public class ChatService {
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
 
-	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void sendMessage(
+			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
 			throws JsonProcessingException {
 		switch (dto.getChatType()) {
 			case ENTER:
-				enter(dto, headerAccessor);
+				enter(dto, headerAccessor, userDetails);
 				break;
 			case CHAT:
-				chat(dto, headerAccessor);
+				chat(dto, headerAccessor, userDetails);
 				break;
 			case FILE:
 				try {
@@ -65,14 +67,14 @@ public class ChatService {
 				} catch (Exception e) {
 					log.error("Error Message : {}", e.getMessage());
 				}
-
 				break;
 			case EXIT:
 				exit(dto, headerAccessor);
 		}
 	}
 
-	public void enter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void enter(
+			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
 			throws JsonProcessingException {
 
 		Chatroom chatroom =
@@ -81,7 +83,7 @@ public class ChatService {
 						.orElseThrow(ChatroomNotFoundException::new);
 		Long chatroomId = chatroom.getId();
 		String sessionId = headerAccessor.getSessionId();
-		String memberEmail = headerAccessor.getFirstNativeHeader("memberEmail");
+		String memberEmail = userDetails.getUsername();
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
@@ -130,7 +132,8 @@ public class ChatService {
 				member, member, message, NotificationType.CHATROOM, chatroom.getId());
 	}
 
-	public void chat(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void chat(
+			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
 			throws JsonProcessingException {
 
 		Chatroom chatroom =
@@ -139,7 +142,7 @@ public class ChatService {
 						.orElseThrow(ChatroomNotFoundException::new);
 
 		String sessionId = headerAccessor.getSessionId();
-		String memberEmail = headerAccessor.getFirstNativeHeader("memberEmail");
+		String memberEmail = userDetails.getUsername();
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
