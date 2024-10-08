@@ -10,6 +10,7 @@ import com.dife.api.repository.MemberRepository;
 import com.dife.api.service.ChatroomService;
 import com.dife.api.service.MemberService;
 import jakarta.security.auth.message.AuthException;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.core.Ordered;
@@ -41,19 +42,40 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 		StompHeaderAccessor accessor =
 				MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		if (accessor.getCommand().equals(StompCommand.CONNECT)) {
-			String authToken = accessor.getFirstNativeHeader("authorization");
-			String jwtToken = extractJwtToken(authToken);
+			Set<StompCommand> jwtExpiredCheckCommands = Set.of(CONNECT, SEND, MESSAGE, SUBSCRIBE);
+			StompCommand currentCommand = accessor.getCommand();
 
-			if (!isValidJwtToken(jwtToken)) {
-				throw new AuthException("손상된 토큰입니다! 다시 로그인 하세요!");
-			}
+			if (jwtExpiredCheckCommands.contains(currentCommand)) {
+				String authToken = accessor.getFirstNativeHeader("authorization");
+				String jwtToken = extractJwtToken(authToken);
 
-			Long memberId = jwtUtil.getId(jwtToken);
-			Member member = memberService.getMemberEntityById(memberId);
-			if (!memberService.isValidMember(member)) {
-				throw new AuthException("인증이 필요한 회원입니다!");
+				if (!isValidJwtToken(jwtToken)) {
+					throw new AuthException("손상된 토큰입니다! 다시 로그인 하세요!");
+				}
+
+				Long memberId = jwtUtil.getId(jwtToken);
+				Member member = memberService.getMemberEntityById(memberId);
+				if (!memberService.isValidMember(member)) {
+					throw new AuthException("인증이 필요한 회원입니다!");
+				}
+				if (currentCommand.equals(CONNECT)) {
+					setAuthentication(member, accessor);
+				}
+
+				String destination = accessor.getDestination();
+
+				if (currentCommand.equals(SUBSCRIBE)) {
+					if (!isValidSubscriptionDestination(destination)) {
+						throw new AuthException(
+								"Unauthorized subscription to " + destination + ". Only chatrooms are allowed.");
+					}
+					Long chatroomId = parseChatroomIdFromDestination(destination);
+					Chatroom chatroom = chatroomService.getChatroomById(chatroomId);
+					if (!isMemberAllowedToSubscribe(member, chatroom)) {
+						throw new AuthException("채팅방 메시지 Subscribe 권한이 없습니다.!");
+					}
+				}
 			}
-			setAuthentication(member, accessor);
 		}
 		return message;
 	}

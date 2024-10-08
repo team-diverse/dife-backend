@@ -54,7 +54,6 @@ public class ChatService {
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
 	private final ChatroomService chatroomService;
-
 	@Autowired private SimpMessageSendingOperations messagingTemplate;
 
 	public void sendMessage(
@@ -137,7 +136,6 @@ public class ChatService {
 			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
 			throws JsonProcessingException {
 		Chatroom chatroom = chatroomService.getChatroomById(dto.getChatroomId());
-
 		String memberEmail = userDetails.getUsername();
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
