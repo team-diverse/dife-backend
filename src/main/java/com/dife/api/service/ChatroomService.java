@@ -387,8 +387,18 @@ public class ChatroomService {
 	public ChatroomResponseDto getChatroomById(Long id, String memberEmail) {
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
 
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		dealAuthChatroomMember(member, chatroom);
 		if (chatroom.getChatroomType() == ChatroomType.GROUP) return getGroupChatroom(id, memberEmail);
 		else return getSingleChatroom(id, memberEmail);
+	}
+
+	private void dealAuthChatroomMember(Member member, Chatroom chatroom) {
+		if (chatroom.getExitedMembers().contains(member))
+			throw new ChatroomException("소속회원만이 채팅방 접근이 불러올 수 있음");
+		if (!chatroom.getMembers().contains(member)) throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
 	}
 
 	public List<ChatResponseDto> getChats(Long chatroomId, String memberEmail) {
@@ -398,7 +408,7 @@ public class ChatroomService {
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 
-		if (!chatroom.getMembers().contains(member)) throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
+		dealAuthChatroomMember(member, chatroom);
 
 		List<Chat> chats = chatRepository.findChatsByChatroomId(chatroomId);
 
@@ -412,7 +422,6 @@ public class ChatroomService {
 
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
-		if (!chatroom.getMembers().contains(member)) throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
 
 		Chat chat =
 				chatRepository
@@ -575,6 +584,9 @@ public class ChatroomService {
 	}
 
 	public boolean isMemberInChatroom(Member member, Chatroom chatroom) {
+
+		if (chatroom.getExitedMembers().contains(member))
+			throw new ChatroomException("소속회원만이 채팅방 접근이 불러올 수 있음");
 		return chatroom.getMembers().contains(member);
 	}
 }
