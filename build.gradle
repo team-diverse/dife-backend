@@ -58,6 +58,7 @@ dependencies {
 	testImplementation 'org.testcontainers:localstack'
 	testImplementation 'org.testcontainers:junit-jupiter'
 	implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.19.0'
+	implementation 'org.springframework.security:spring-security-messaging'
 
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
@@ -75,5 +76,6 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	jvmArgs '-Xmx2048m'
 	exclude '**/MemberControllerTest.*'
 }

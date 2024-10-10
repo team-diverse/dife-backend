@@ -25,6 +25,8 @@ public class GroupChatroomResponseDto implements ChatroomResponseDto {
 
 	private Set<MemberRestrictedResponseDto> members = new HashSet<>();
 
+	private Set<MemberRestrictedResponseDto> exitedMembers = new HashSet<>();
+
 	private MemberRestrictedResponseDto manager;
 
 	private String name;

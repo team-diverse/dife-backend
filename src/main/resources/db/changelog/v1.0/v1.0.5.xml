@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-exitedMembers-chatroom-relation-20241010-1900" author="suyeon">
+        <createTable tableName="chatroom_exited_members">
+            <column name="chatroom_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="member_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="chatroom_exited_members"
+                                 baseColumnNames="chatroom_id"
+                                 constraintName="FK_CHATROOM_EXITED_CHATROOM"
+                                 referencedTableName="chatroom"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="chatroom_exited_members"
+                                 baseColumnNames="member_id"
+                                 constraintName="FK_CHATROOM_EXITED_MEMBER"
+                                 referencedTableName="member"
+                                 referencedColumnNames="id"/>
+
+        <addPrimaryKey tableName="chatroom_exited_members" columnNames="chatroom_id, member_id" constraintName="PK_CHATROOM_EXITED"/>
+    </changeSet>
+
+</databaseChangeLog>

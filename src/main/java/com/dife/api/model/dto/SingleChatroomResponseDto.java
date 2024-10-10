@@ -23,5 +23,7 @@ public class SingleChatroomResponseDto implements ChatroomResponseDto {
 	@JsonProperty("chatroom_type")
 	private ChatroomType chatroomType;
 
+	private Set<MemberRestrictedResponseDto> exitedMembers = new HashSet<>();
+
 	private Set<MemberRestrictedResponseDto> members = new HashSet<>();
 }

@@ -84,7 +84,7 @@ public interface SwaggerChatroomController {
 	@Operation(
 			summary = "채팅방 전체 조회 API",
 			description =
-					"조회하고자 하는 채팅방 타입(그룹/싱글)을 입력해 속한 채팅방들을 조회하는 API입니다. 그룹의 경우 그냥 GROUP만 입력값으로 넣고 싱글의 경우 SINGLE과 더불어 조회하고자 하는 상대방의 id를 입력값으로 넣어야 합니다.")
+					"조회하고자 하는 채팅방 타입(GROUP/SINGLE/EXITED/MANAGER)을 입력해 속한 채팅방들을 조회하는 API입니다. 그룹의 경우 그냥 GROUP만 입력값으로 넣고 싱글의 경우 SINGLE과 더불어 조회하고자 하는 상대방의 id를 입력값으로 넣어야 합니다.")
 	@ApiResponse(
 			responseCode = "200",
 			description = "채팅방 조회 성공 예시",

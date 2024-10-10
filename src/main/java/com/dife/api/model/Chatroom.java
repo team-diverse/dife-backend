@@ -47,6 +47,13 @@ public class Chatroom extends BaseTimeEntity {
 	@JsonIgnore
 	private Set<Member> members = new HashSet<>();
 
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(
+			name = "chatroom_exited_members",
+			joinColumns = @JoinColumn(name = "chatroom_id"),
+			inverseJoinColumns = @JoinColumn(name = "member_id"))
+	private Set<Member> exitedMembers = new HashSet<>();
+
 	@OneToMany(mappedBy = "chatroom", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
 	private Set<Chat> chats = new HashSet<>();
