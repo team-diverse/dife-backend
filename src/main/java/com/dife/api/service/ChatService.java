@@ -93,7 +93,6 @@ public class ChatService {
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 		if (!disconnectHandler.canEnterChatroom(chatroom, member, sessionId, dto.getPassword()))
 			throw new AccessDeniedException("해당 채팅방에 접근 권한이 없습니다.");
-
 		if (!chatroom.getMembers().contains(member))
 			throw new AccessDeniedException("해당 채팅방에 접근 권한이 없습니다.");
 
