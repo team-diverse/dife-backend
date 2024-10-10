@@ -57,12 +57,27 @@ public class ChatroomService {
 			chatrooms =
 					chatroomRepository.findAllByChatroomTypeAndMembersContains(ChatroomType.SINGLE, member);
 			return chatrooms.stream()
+					.filter(chatroom -> !chatroom.getExitedMembers().contains(member))
 					.map(chatroom -> getSingleChatroom(chatroom.getId(), memberEmail))
 					.collect(Collectors.toList());
 		} else if (type == ChatroomType.GROUP) {
 			chatrooms = chatroomRepository.findAllByChatroomType(ChatroomType.GROUP);
 			return chatrooms.stream()
+					.filter(chatroom -> !chatroom.getExitedMembers().contains(member))
 					.map(chatroom -> getGroupChatroom(chatroom.getId(), memberEmail))
+					.collect(Collectors.toList());
+		} else if (type == ChatroomType.EXITED) {
+			Set<Chatroom> exitedChatrooms = member.getExitedChatrooms();
+
+			return exitedChatrooms.stream()
+					.map(
+							chatroom -> {
+								if (chatroom.getChatroomType().equals(ChatroomType.GROUP)) {
+									return getGroupChatroom(chatroom.getId(), memberEmail);
+								} else {
+									return getSingleChatroom(chatroom.getId(), memberEmail);
+								}
+							})
 					.collect(Collectors.toList());
 		}
 		chatrooms = chatroomRepository.findAllByChatroomTypeAndManager(ChatroomType.GROUP, member);
@@ -327,6 +342,11 @@ public class ChatroomService {
 		SingleChatroomResponseDto responseDto =
 				chatroomModelMapper.map(chatroom, SingleChatroomResponseDto.class);
 
+		responseDto.setExitedMembers(
+				chatroom.getExitedMembers().stream()
+						.map(m -> modelMapper.map(m, MemberRestrictedResponseDto.class))
+						.collect(Collectors.toSet()));
+
 		return responseDto;
 	}
 
@@ -350,6 +370,11 @@ public class ChatroomService {
 						.map(m -> modelMapper.map(m, MemberRestrictedResponseDto.class))
 						.collect(Collectors.toSet()));
 
+		responseDto.setExitedMembers(
+				chatroom.getExitedMembers().stream()
+						.map(m -> modelMapper.map(m, MemberRestrictedResponseDto.class))
+						.collect(Collectors.toSet()));
+
 		responseDto.setCreated(setting.getCreated());
 		responseDto.setModified(setting.getModified());
 		responseDto.setChatroomType(chatroom.getChatroomType());
@@ -362,8 +387,18 @@ public class ChatroomService {
 	public ChatroomResponseDto getChatroomById(Long id, String memberEmail) {
 		Chatroom chatroom = chatroomRepository.findById(id).orElseThrow(ChatroomNotFoundException::new);
 
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		dealAuthChatroomMember(member, chatroom);
 		if (chatroom.getChatroomType() == ChatroomType.GROUP) return getGroupChatroom(id, memberEmail);
 		else return getSingleChatroom(id, memberEmail);
+	}
+
+	private void dealAuthChatroomMember(Member member, Chatroom chatroom) {
+		if (chatroom.getExitedMembers().contains(member))
+			throw new ChatroomException("소속회원만이 채팅방 접근이 불러올 수 있음");
+		if (!chatroom.getMembers().contains(member)) throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
 	}
 
 	public List<ChatResponseDto> getChats(Long chatroomId, String memberEmail) {
@@ -373,7 +408,7 @@ public class ChatroomService {
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
 
-		if (!chatroom.getMembers().contains(member)) throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
+		dealAuthChatroomMember(member, chatroom);
 
 		List<Chat> chats = chatRepository.findChatsByChatroomId(chatroomId);
 
@@ -387,7 +422,6 @@ public class ChatroomService {
 
 		Chatroom chatroom =
 				chatroomRepository.findById(chatroomId).orElseThrow(ChatroomNotFoundException::new);
-		if (!chatroom.getMembers().contains(member)) throw new ChatroomException("소속회원만이 채팅 불러올 수 있음");
 
 		Chat chat =
 				chatRepository
@@ -550,6 +584,9 @@ public class ChatroomService {
 	}
 
 	public boolean isMemberInChatroom(Member member, Chatroom chatroom) {
+
+		if (chatroom.getExitedMembers().contains(member))
+			throw new ChatroomException("소속회원만이 채팅방 접근이 불러올 수 있음");
 		return chatroom.getMembers().contains(member);
 	}
 }
