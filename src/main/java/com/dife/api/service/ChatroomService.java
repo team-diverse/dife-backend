@@ -57,12 +57,27 @@ public class ChatroomService {
 			chatrooms =
 					chatroomRepository.findAllByChatroomTypeAndMembersContains(ChatroomType.SINGLE, member);
 			return chatrooms.stream()
+					.filter(chatroom -> !chatroom.getExitedMembers().contains(member))
 					.map(chatroom -> getSingleChatroom(chatroom.getId(), memberEmail))
 					.collect(Collectors.toList());
 		} else if (type == ChatroomType.GROUP) {
 			chatrooms = chatroomRepository.findAllByChatroomType(ChatroomType.GROUP);
 			return chatrooms.stream()
+					.filter(chatroom -> !chatroom.getExitedMembers().contains(member))
 					.map(chatroom -> getGroupChatroom(chatroom.getId(), memberEmail))
+					.collect(Collectors.toList());
+		} else if (type == ChatroomType.EXITED) {
+			Set<Chatroom> exitedChatrooms = member.getExitedChatrooms();
+
+			return exitedChatrooms.stream()
+					.map(
+							chatroom -> {
+								if (chatroom.getChatroomType().equals(ChatroomType.GROUP)) {
+									return getGroupChatroom(chatroom.getId(), memberEmail);
+								} else {
+									return getSingleChatroom(chatroom.getId(), memberEmail);
+								}
+							})
 					.collect(Collectors.toList());
 		}
 		chatrooms = chatroomRepository.findAllByChatroomTypeAndManager(ChatroomType.GROUP, member);
@@ -327,6 +342,11 @@ public class ChatroomService {
 		SingleChatroomResponseDto responseDto =
 				chatroomModelMapper.map(chatroom, SingleChatroomResponseDto.class);
 
+		responseDto.setExitedMembers(
+				chatroom.getExitedMembers().stream()
+						.map(m -> modelMapper.map(m, MemberRestrictedResponseDto.class))
+						.collect(Collectors.toSet()));
+
 		return responseDto;
 	}
 
@@ -347,6 +367,11 @@ public class ChatroomService {
 
 		responseDto.setMembers(
 				chatroom.getMembers().stream()
+						.map(m -> modelMapper.map(m, MemberRestrictedResponseDto.class))
+						.collect(Collectors.toSet()));
+
+		responseDto.setExitedMembers(
+				chatroom.getExitedMembers().stream()
 						.map(m -> modelMapper.map(m, MemberRestrictedResponseDto.class))
 						.collect(Collectors.toSet()));
 

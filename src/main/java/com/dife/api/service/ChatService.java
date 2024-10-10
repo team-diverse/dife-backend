@@ -48,7 +48,6 @@ public class ChatService {
 
 	private final DisconnectHandler disconnectHandler;
 	private final NotificationHandler notificationHandler;
-	private final MemberService memberService;
 	private final FileService fileService;
 	private final BlockService blockService;
 	private final NotificationService notificationService;
@@ -91,6 +90,12 @@ public class ChatService {
 		String memberEmail = userDetails.getUsername();
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
+
+		if (chatroom.getChatroomType() == SINGLE) {
+			reEnter(member, chatroom);
+			return;
+		}
+
 		if (!disconnectHandler.canEnterChatroom(chatroom, member, sessionId, dto.getPassword()))
 			throw new AccessDeniedException("해당 채팅방에 접근 권한이 없습니다.");
 		if (!chatroom.getMembers().contains(member))
@@ -118,6 +123,19 @@ public class ChatService {
 		chatroomRepository.save(chatroom);
 	}
 
+	private void reEnter(Member member, Chatroom chatroom) throws JsonProcessingException {
+		if (chatroom.getExitedMembers().contains(member)) chatroom.getExitedMembers().remove(member);
+
+		String enterMessage = member.getUsername() + "님이 입장하셨습니다!";
+		Chat chat = saveChat(member, chatroom, enterMessage);
+
+		for (Member chatroomMember : chatroom.getMembers())
+			translateChatroomEnter(chatroomMember.getSettingLanguage(), member, chatroom);
+
+		redisPublisher.publish(dealDto(chat, member, chatroom));
+		chatroomRepository.save(chatroom);
+	}
+
 	private void translateChatroomEnter(String settingLanguage, Member member, Chatroom chatroom) {
 		String message =
 				"WELCOME! 😊 In Room " + chatroom.getName() + ", " + member.getUsername() + " ";
@@ -139,6 +157,7 @@ public class ChatService {
 		Member member =
 				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
+		if (chatroom.getExitedMembers().contains(member)) return;
 		Set<Member> blockedMembers = blockService.getBlackSet(member);
 
 		if (!chatroom.getMembers().contains(member)) return;
@@ -149,9 +168,11 @@ public class ChatService {
 		Set<Member> chatroomMembers = chatroom.getMembers();
 
 		for (Member chatroomMember : chatroomMembers) {
-			if (blockedMembers.contains(chatroomMember)) return;
+			if (blockedMembers.contains(chatroomMember)
+					|| chatroom.getExitedMembers().contains(chatroomMember)) continue;
 
-			if (!Objects.equals(chatroomMember.getId(), member.getId())) {
+			if (!Objects.equals(chatroomMember.getId(), member.getId())
+					|| chatroom.getExitedMembers().contains(chatroomMember)) {
 				List<NotificationToken> notificationTokens = chatroomMember.getNotificationTokens();
 
 				for (NotificationToken notificationToken : notificationTokens) {
@@ -226,7 +247,8 @@ public class ChatService {
 
 		if (chatroom.getChatroomType() == GROUP) chatServiceFacade.decrease(chatroomId);
 
-		chatroom.getMembers().remove(member);
+		chatroom.getExitedMembers().add(member);
+		member.getExitedChatrooms().add(chatroom);
 
 		String exitMessage = member.getUsername() + "님이 퇴장하셨습니다!";
 		Chat chat = saveChat(member, chatroom, exitMessage);
