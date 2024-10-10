@@ -76,6 +76,10 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private Set<Chatroom> chatrooms = new HashSet<>();
 
+	@ManyToMany(mappedBy = "exitedMembers") // Chatroom 엔티티의 exitedMembers와 일치시킴
+	@JsonIgnore
+	private Set<Chatroom> exitedChatrooms = new HashSet<>();
+
 	@OneToMany(mappedBy = "manager")
 	@JsonIgnore
 	private Set<Chatroom> managingChatrooms = new HashSet<>();

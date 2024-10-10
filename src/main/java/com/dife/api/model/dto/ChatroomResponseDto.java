@@ -14,4 +14,6 @@ public interface ChatroomResponseDto {
 	ChatroomType getChatroomType();
 
 	Set<MemberRestrictedResponseDto> getMembers();
+
+	Set<MemberRestrictedResponseDto> getExitedMembers();
 }
