@@ -27,15 +27,6 @@ public class DisconnectHandler {
 		return true;
 	}
 
-	public boolean isExitDisconnectChecked(Chatroom chatroom, String sessionId) {
-
-		if (isEmpty(chatroom)) {
-			disconnect(chatroom.getId(), sessionId);
-			return false;
-		}
-		return true;
-	}
-
 	private boolean isValidGroupChatroom(Chatroom chatroom, String password) {
 		return isGroupChatroom(chatroom) && !isRestrictedGroupChatroom(chatroom, password);
 	}
@@ -74,13 +65,5 @@ public class DisconnectHandler {
 		accessor.setDestination("/sub/chatroom/" + chatroomId);
 		messagingTemplate.convertAndSend(
 				"/sub/chatroom/" + chatroomId, "Disconnect", accessor.getMessageHeaders());
-	}
-
-	public void unsubscribe(Long chatroomId, String sessionId) {
-		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.UNSUBSCRIBE);
-		accessor.setSessionId(sessionId);
-		accessor.setDestination("/sub/chatroom/" + chatroomId);
-		messagingTemplate.convertAndSend(
-				"/sub/chatroom/" + chatroomId, "UNSUBSCRIBE", accessor.getMessageHeaders());
 	}
 }
