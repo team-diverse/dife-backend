@@ -23,7 +23,11 @@ import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,20 +48,23 @@ public class ChatService {
 
 	private final DisconnectHandler disconnectHandler;
 	private final NotificationHandler notificationHandler;
-	private final MemberService memberService;
 	private final FileService fileService;
 	private final BlockService blockService;
 	private final NotificationService notificationService;
 	private final ModelMapper modelMapper;
+	private final ChatroomService chatroomService;
 
-	public void sendMessage(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+	@Autowired private SimpMessageSendingOperations messagingTemplate;
+
+	public void sendMessage(
+			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
 			throws JsonProcessingException {
 		switch (dto.getChatType()) {
 			case ENTER:
-				enter(dto, headerAccessor);
+				enter(dto, headerAccessor, userDetails);
 				break;
 			case CHAT:
-				chat(dto, headerAccessor);
+				chat(dto, headerAccessor, userDetails);
 				break;
 			case FILE:
 				try {
@@ -65,14 +72,14 @@ public class ChatService {
 				} catch (Exception e) {
 					log.error("Error Message : {}", e.getMessage());
 				}
-
 				break;
 			case EXIT:
-				exit(dto, headerAccessor);
+				exit(dto, headerAccessor, userDetails);
 		}
 	}
 
-	public void enter(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void enter(
+			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
 			throws JsonProcessingException {
 
 		Chatroom chatroom =
@@ -81,17 +88,19 @@ public class ChatService {
 						.orElseThrow(ChatroomNotFoundException::new);
 		Long chatroomId = chatroom.getId();
 		String sessionId = headerAccessor.getSessionId();
+		String memberEmail = userDetails.getUsername();
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		Member member = memberService.getMemberEntityById(dto.getMemberId());
-		if (!disconnectHandler.canEnterChatroom(chatroom, member, sessionId, dto.getPassword())) {
-			disconnectHandler.disconnect(chatroom.getId(), sessionId);
+		if (chatroom.getChatroomType() == SINGLE) {
+			reEnter(member, chatroom);
 			return;
 		}
+		if (!disconnectHandler.canEnterChatroom(chatroom, member, sessionId, dto.getPassword()))
+			throw new AccessDeniedException("해당 채팅방에 접근 권한이 없습니다.");
 
-		if (!chatroom.getMembers().contains(member)) {
-			disconnectHandler.disconnect(chatroom.getId(), sessionId);
-			return;
-		}
+		if (!chatroom.getMembers().contains(member))
+			throw new AccessDeniedException("해당 채팅방에 접근 권한이 없습니다.");
 
 		String username = member.getUsername();
 
@@ -115,6 +124,19 @@ public class ChatService {
 		chatroomRepository.save(chatroom);
 	}
 
+	private void reEnter(Member member, Chatroom chatroom) throws JsonProcessingException {
+		if (chatroom.getExitedMembers().contains(member)) chatroom.getExitedMembers().remove(member);
+
+		String enterMessage = member.getUsername() + "님이 입장하셨습니다!";
+		Chat chat = saveChat(member, chatroom, enterMessage);
+
+		for (Member chatroomMember : chatroom.getMembers())
+			translateChatroomEnter(chatroomMember.getSettingLanguage(), member, chatroom);
+
+		redisPublisher.publish(dealDto(chat, member, chatroom));
+		chatroomRepository.save(chatroom);
+	}
+
 	private void translateChatroomEnter(String settingLanguage, Member member, Chatroom chatroom) {
 		String message =
 				"WELCOME! 😊 In Room " + chatroom.getName() + ", " + member.getUsername() + " ";
@@ -128,23 +150,19 @@ public class ChatService {
 				member, member, message, NotificationType.CHATROOM, chatroom.getId());
 	}
 
-	public void chat(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void chat(
+			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
 			throws JsonProcessingException {
+		Chatroom chatroom = chatroomService.getChatroomById(dto.getChatroomId());
 
-		Chatroom chatroom =
-				chatroomRepository
-						.findById(dto.getChatroomId())
-						.orElseThrow(ChatroomNotFoundException::new);
+		String memberEmail = userDetails.getUsername();
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
-		String sessionId = headerAccessor.getSessionId();
-		Member member = memberService.getMemberEntityById(dto.getMemberId());
-
+		if (chatroom.getExitedMembers().contains(member)) return;
 		Set<Member> blockedMembers = blockService.getBlackSet(member);
 
-		if (!chatroom.getMembers().contains(member)) {
-			disconnectHandler.disconnect(chatroom.getId(), sessionId);
-			return;
-		}
+		if (!chatroom.getMembers().contains(member)) return;
 
 		if (dto.getMessage().length() >= 300) throw new ChatroomException("채팅 메시지는 300자 이하로 입력해주세요!");
 
@@ -152,9 +170,11 @@ public class ChatService {
 		Set<Member> chatroomMembers = chatroom.getMembers();
 
 		for (Member chatroomMember : chatroomMembers) {
-			if (blockedMembers.contains(chatroomMember)) return;
+			if (blockedMembers.contains(chatroomMember)
+					|| chatroom.getExitedMembers().contains(chatroomMember)) continue;
 
-			if (!Objects.equals(chatroomMember.getId(), member.getId())) {
+			if (!Objects.equals(chatroomMember.getId(), member.getId())
+					|| chatroom.getExitedMembers().contains(chatroomMember)) {
 				List<NotificationToken> notificationTokens = chatroomMember.getNotificationTokens();
 
 				for (NotificationToken notificationToken : notificationTokens) {
@@ -188,7 +208,8 @@ public class ChatService {
 		redisPublisher.publish(redisDto);
 	}
 
-	public void exit(ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor)
+	public void exit(
+			ChatRequestDto dto, SimpMessageHeaderAccessor headerAccessor, UserDetails userDetails)
 			throws JsonProcessingException {
 
 		Chatroom chatroom =
@@ -196,7 +217,9 @@ public class ChatService {
 						.findById(dto.getChatroomId())
 						.orElseThrow(ChatroomNotFoundException::new);
 
-		Member member = memberService.getMemberEntityById(dto.getMemberId());
+		String memberEmail = userDetails.getUsername();
+		Member member =
+				memberRepository.findByEmail(memberEmail).orElseThrow(MemberNotFoundException::new);
 
 		if (chatroom.getChatroomType() == SINGLE) {
 			handleExit(dto, headerAccessor, chatroom, member);
@@ -221,22 +244,21 @@ public class ChatService {
 		Long chatroomId = dto.getChatroomId();
 		String sessionId = headerAccessor.getSessionId();
 
-		if (!chatroom.getMembers().contains(member)) {
-			disconnectHandler.disconnect(chatroomId, sessionId);
-			return;
-		}
-
-		if (!disconnectHandler.isExitDisconnectChecked(chatroom, sessionId)) return;
+		if (!chatroom.getMembers().contains(member))
+			throw new AccessDeniedException("해당 채팅방에 접근 권한이 없습니다.");
 
 		if (chatroom.getChatroomType() == GROUP) chatServiceFacade.decrease(chatroomId);
 
-		chatroom.getMembers().remove(member);
-		disconnectHandler.disconnect(chatroomId, sessionId);
+		chatroom.getExitedMembers().add(member);
+		member.getExitedChatrooms().add(chatroom);
 
 		String exitMessage = member.getUsername() + "님이 퇴장하셨습니다!";
 		Chat chat = saveChat(member, chatroom, exitMessage);
 
 		redisPublisher.publish(dealDto(chat, member, chatroom));
+
+		String unsubscribeDestination = "/sub/chatroom/" + chatroomId;
+		messagingTemplate.convertAndSendToUser(sessionId, unsubscribeDestination, exitMessage);
 		notificationHandler.isAlone(chatroom, member);
 	}
 

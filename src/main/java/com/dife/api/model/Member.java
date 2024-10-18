@@ -76,6 +76,10 @@ public class Member extends BaseTimeEntity {
 	@JsonIgnore
 	private Set<Chatroom> chatrooms = new HashSet<>();
 
+	@ManyToMany(mappedBy = "exitedMembers") // Chatroom 엔티티의 exitedMembers와 일치시킴
+	@JsonIgnore
+	private Set<Chatroom> exitedChatrooms = new HashSet<>();
+
 	@OneToMany(mappedBy = "manager")
 	@JsonIgnore
 	private Set<Chatroom> managingChatrooms = new HashSet<>();
@@ -119,4 +123,17 @@ public class Member extends BaseTimeEntity {
 			inverseJoinColumns = @JoinColumn(name = "likelisted_member_id"))
 	@JsonIgnore
 	private List<Member> likeList = new ArrayList<>();
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Member member = (Member) o;
+		return Objects.equals(id, member.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id); // Use ID for hashing
+	}
 }

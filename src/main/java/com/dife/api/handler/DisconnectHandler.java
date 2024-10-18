@@ -27,15 +27,6 @@ public class DisconnectHandler {
 		return true;
 	}
 
-	public boolean isExitDisconnectChecked(Chatroom chatroom, String sessionId) {
-
-		if (isEmpty(chatroom)) {
-			disconnect(chatroom.getId(), sessionId);
-			return false;
-		}
-		return true;
-	}
-
 	private boolean isValidGroupChatroom(Chatroom chatroom, String password) {
 		return isGroupChatroom(chatroom) && !isRestrictedGroupChatroom(chatroom, password);
 	}
